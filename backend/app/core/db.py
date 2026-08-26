@@ -1,6 +1,7 @@
 """SQLAlchemy engine/session wiring for SQLite (WAL mode, FK enforcement)."""
 
 from collections.abc import Iterator
+from pathlib import Path
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
@@ -28,12 +29,24 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False
 
 
 def init_db() -> None:
-    """Create tables from ORM metadata (Alembic owns migrations from M2 onward)."""
+    """Create tables directly from metadata (dev/test fallback; startup uses Alembic)."""
     # Importing app.models pulls in every model module (see app/models/__init__.py),
     # which is what populates Base.metadata.
     from app.models import Base
 
     Base.metadata.create_all(engine)
+
+
+def upgrade_db() -> None:
+    """Apply Alembic migrations programmatically (startup and test path)."""
+    from alembic.config import Config
+
+    from alembic import command
+
+    backend_dir = Path(__file__).resolve().parents[2]
+    cfg = Config(str(backend_dir / "alembic.ini"))
+    cfg.set_main_option("script_location", str(backend_dir / "alembic"))
+    command.upgrade(cfg, "head")
 
 
 def get_db() -> Iterator[Session]:

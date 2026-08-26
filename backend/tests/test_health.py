@@ -6,8 +6,9 @@ from app.main import create_app
 
 
 def test_health_reports_status_and_version() -> None:
-    client = TestClient(create_app())
-    resp = client.get("/api/health")
+    # Context manager form so lifespan runs (storage mkdir + Alembic upgrade).
+    with TestClient(create_app()) as client:
+        resp = client.get("/api/health")
 
     assert resp.status_code == 200
     body = resp.json()

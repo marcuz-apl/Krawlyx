@@ -6,14 +6,14 @@ from fastapi import FastAPI
 
 from app.api import health
 from app.core.config import get_settings
-from app.core.db import init_db
+from app.core.db import upgrade_db
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     settings = get_settings()
     settings.db_path.parent.mkdir(parents=True, exist_ok=True)
-    init_db()
+    upgrade_db()
     # TODO(M1-auth): bootstrap admin from ZENCRAWL_ADMIN_USER/PASSWORD here.
     yield
 
