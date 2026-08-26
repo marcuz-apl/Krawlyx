@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# SQLite transient sidecars (lock/WAL state — never committable)
+*.db-wal
+*.db-shm
+*.sqlite3-wal
+*.sqlite3-shm
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
