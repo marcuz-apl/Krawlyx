@@ -1,0 +1,13 @@
+The Quiet Power of Local-First Software
+
+A reflection on software that runs at home.
+
+Local-first applications keep the data under the user's roof. They work without a constant network connection, and they give the user a durable copy of their own work.
+
+But the choice comes with trade-offs. Collaboration is harder, and the on-call burden shifts from the vendor to the operator.
+
+What we lose
+Convenience. Auto-scaling. The team that you can page at 3 a.m.
+
+What we gain
+Resilience. Predictable cost. A clear audit trail owned by the operator.

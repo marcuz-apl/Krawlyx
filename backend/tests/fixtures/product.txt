@@ -1,0 +1,8 @@
+Acme Widget — Buy Now
+
+Acme Widget
+$19.99
+
+A small widget for everyday tasks. Available in red, blue, or green.
+
+Add to cart

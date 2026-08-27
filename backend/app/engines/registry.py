@@ -16,7 +16,9 @@ _REGISTRY: dict[str, EngineFactory] = {}
 _CAPABILITIES: dict[str, Capabilities] = {}
 
 
-def register_engine(type_id: str, capabilities: Capabilities) -> Callable[[EngineFactory], EngineFactory]:
+def register_engine(
+    type_id: str, capabilities: Capabilities
+) -> Callable[[EngineFactory], EngineFactory]:
     """Class decorator / function decorator: @register_engine("crawl4ai", Capabilities(...))"""
 
     def decorator(factory: EngineFactory) -> EngineFactory:
@@ -47,8 +49,13 @@ def build(type_id: str, config: dict | None = None) -> CrawlEngine:
 # even if a concrete adapter is not yet implemented (e.g. the v1 Firecrawl
 # deferral, PRD §4.7). The UI reads capabilities_for() to render form fields.
 _DEFAULT_CAPABILITIES: dict[str, Capabilities] = {
-    "crawl4ai": Capabilities(deep_crawl=True, max_depth=5, max_pages_per_target=200,
-                             supports_wait_for=True, supports_render=True),
+    "crawl4ai": Capabilities(
+        deep_crawl=True,
+        max_depth=5,
+        max_pages_per_target=200,
+        supports_wait_for=True,
+        supports_render=True,
+    ),
     "scrapy": Capabilities(deep_crawl=True, max_depth=10, max_pages_per_target=1000),
 }
 for _type_id, _caps in _DEFAULT_CAPABILITIES.items():
