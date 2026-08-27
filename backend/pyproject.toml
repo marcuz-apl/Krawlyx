@@ -32,5 +32,11 @@ include = ["app*"]
 [tool.ruff]
 line-length = 100
 
+[tool.ruff.lint]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency-injection pattern calls Depends() in argument defaults.
+extend-immutable-calls = ["fastapi.Depends"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

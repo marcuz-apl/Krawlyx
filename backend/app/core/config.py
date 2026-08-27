@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     secret_key: str = "dev-insecure-secret-key"
     db_path: Path = ROOT_DIR / "data" / "zencrawl.db"
     session_ttl_s: int = 60 * 60 * 12
+    cookie_secure: bool = False
     admin_user: str | None = None
     admin_password: str | None = None
 
