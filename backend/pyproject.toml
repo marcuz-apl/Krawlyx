@@ -15,6 +15,10 @@ dependencies = [
     "itsdangerous>=2.2,<3",
 ]
 
+# Static files are served from ../frontend/dist (built by `npm run build`).
+[tool.setuptools.package-data]
+app = []
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3",
