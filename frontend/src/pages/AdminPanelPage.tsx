@@ -1,19 +1,22 @@
 import { useState } from 'react';
 
+import { AdminEnginesTable } from '@/components/AdminEnginesTable';
 import { ExportTargetsTable } from '@/components/ExportTargetsTable';
+import { SettingsReadOnlyCard } from '@/components/SettingsReadOnlyCard';
+import { UsersTable } from '@/components/UsersTable';
 
 type Tab = 'engines' | 'exports' | 'settings' | 'users';
 
 export function AdminPanelPage() {
-  const [tab, setTab] = useState<Tab>('exports');
+  const [tab, setTab] = useState<Tab>('engines');
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <h1 className="mb-4 text-2xl font-semibold text-slate-900">Admin panel</h1>
       <nav className="mb-4 flex gap-1 border-b border-slate-200">
         {(
           [
-            ['exports', 'Export targets'],
             ['engines', 'Engines'],
+            ['exports', 'Export targets'],
             ['settings', 'Settings'],
             ['users', 'Users'],
           ] as Array<[Tab, string]>
@@ -31,21 +34,10 @@ export function AdminPanelPage() {
           </button>
         ))}
       </nav>
+      {tab === 'engines' && <AdminEnginesTable />}
       {tab === 'exports' && <ExportTargetsTable />}
-      {tab === 'engines' && (
-        <p className="text-slate-600">
-          Engine CRUD lives in the API. A richer UI ships in M5.
-        </p>
-      )}
-      {tab === 'settings' && (
-        <p className="text-slate-600">
-          Global settings (rate limits, robots toggle, SSRF guard) are
-          scheduled for M5.
-        </p>
-      )}
-      {tab === 'users' && (
-        <p className="text-slate-600">User management is scheduled for M5.</p>
-      )}
+      {tab === 'settings' && <SettingsReadOnlyCard />}
+      {tab === 'users' && <UsersTable />}
     </div>
   );
 }

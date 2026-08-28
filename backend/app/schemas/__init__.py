@@ -25,6 +25,14 @@ from app.schemas.jobs import (
     JobSubmitAck,
     TargetOut,
 )
+from app.schemas.schedules import (
+    NextFiresOut,
+    ScheduleCreate,
+    ScheduleOut,
+    ScheduleUpdate,
+)
+from app.schemas.settings import SettingsOut
+from app.schemas.users import UserCreate, UserUpdate
 
 __all__ = [
     "CapabilityList",
@@ -46,6 +54,13 @@ __all__ = [
     "JobSubmitAck",
     "LoginRequest",
     "LoginResponse",
+    "NextFiresOut",
+    "ScheduleCreate",
+    "ScheduleOut",
+    "ScheduleUpdate",
+    "SettingsOut",
     "TargetOut",
+    "UserCreate",
     "UserOut",
+    "UserUpdate",
 ]

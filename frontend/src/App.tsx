@@ -10,6 +10,7 @@ import { JobResultDetailPage } from '@/pages/JobResultDetailPage';
 import { JobResultsPage } from '@/pages/JobResultsPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { RunnerPage } from '@/pages/RunnerPage';
+import { SchedulesPage } from '@/pages/SchedulesPage';
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
         children: [
           { path: '/', element: <RunnerPage /> },
           { path: '/history', element: <JobHistoryPage /> },
+          { path: '/schedules', element: <SchedulesPage /> },
           { path: '/admin', element: <AdminPanelPage /> },
           { path: '/jobs/:id', element: <JobProgressPage /> },
           { path: '/jobs/:id/results', element: <JobResultsPage /> },

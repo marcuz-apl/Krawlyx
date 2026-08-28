@@ -56,6 +56,26 @@ export interface EngineOut {
   disabled_at: string | null;
 }
 
+export interface EngineCreateBody {
+  name: string;
+  type: string;
+  config?: Record<string, unknown>;
+  pooled?: boolean;
+}
+
+export interface EngineUpdateBody {
+  name?: string;
+  config?: Record<string, unknown>;
+  pooled?: boolean;
+  disabled?: boolean;
+}
+
+export interface EngineTestResult {
+  ok: boolean;
+  detail: string;
+  latency_ms: number;
+}
+
 // ---- jobs ----
 
 export interface UrlError {
@@ -177,6 +197,83 @@ export interface ExportTargetTestResult {
   detail: string;
 }
 
+// ---- schedules ----
+
+export interface ScheduleOut {
+  id: number;
+  name: string;
+  cron: string;
+  timezone: string;
+  enabled: boolean;
+  running: boolean;
+  last_run_at: string | null;
+  next_run_at: string | null;
+  created_at: string;
+  engine_id: number;
+  export_target_id: number | null;
+  options: Record<string, unknown>;
+  urls: string[];
+  notes: string | null;
+  human: string;
+}
+
+export interface ScheduleCreateBody {
+  name: string;
+  cron: string;
+  timezone?: string;
+  enabled?: boolean;
+  engine_id: number;
+  export_target_id?: number | null;
+  urls: string[];
+  options?: Record<string, unknown>;
+  notes?: string | null;
+}
+
+export interface ScheduleUpdateBody {
+  name?: string;
+  cron?: string;
+  timezone?: string;
+  enabled?: boolean;
+  engine_id?: number;
+  export_target_id?: number | null;
+  urls?: string[];
+  options?: Record<string, unknown>;
+  notes?: string | null;
+}
+
+export interface NextFiresOut {
+  schedule_id: number;
+  cron: string;
+  timezone: string;
+  next_runs: string[];
+  human: string;
+}
+
+// ---- users ----
+
+export interface UserCreateBody {
+  username: string;
+  password: string;
+  role?: 'runner' | 'admin';
+}
+
+export interface UserUpdateBody {
+  password?: string;
+  role?: 'runner' | 'admin';
+}
+
+// ---- settings ----
+
+export interface SettingsOut {
+  max_concurrent_jobs: number;
+  max_parallel_targets_per_job: number;
+  default_split_size_mb: number;
+  robots_txt_enabled: boolean;
+  per_domain_interval_s: number;
+  ssrf_guard_enabled: boolean;
+  content_size_cap_bytes: number;
+}
+
 const BASE = '';
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -215,6 +312,13 @@ export const api = {
       const q = params?.pooled_only ? '?pooled_only=true' : '';
       return request<EngineOut[]>(`/api/engines${q}`);
     },
+    create: (body: EngineCreateBody) =>
+      request<EngineOut>('/api/engines', { method: 'POST', body: JSON.stringify(body) }),
+    patch: (id: number, body: EngineUpdateBody) =>
+      request<EngineOut>(`/api/engines/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+    delete: (id: number) => request<void>(`/api/engines/${id}`, { method: 'DELETE' }),
+    test: (id: number) =>
+      request<EngineTestResult>(`/api/engines/${id}/test`, { method: 'POST' }),
   },
 
   jobs: {
@@ -262,5 +366,39 @@ export const api = {
       request<ExportTargetTestResult>(`/api/export-targets/${id}/test`, {
         method: 'POST',
       }),
+  },
+
+  schedules: {
+    list: () => request<ScheduleOut[]>('/api/schedules'),
+    create: (body: ScheduleCreateBody) =>
+      request<ScheduleOut>('/api/schedules', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    get: (id: number) => request<ScheduleOut>(`/api/schedules/${id}`),
+    patch: (id: number, body: ScheduleUpdateBody) =>
+      request<ScheduleOut>(`/api/schedules/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      }),
+    delete: (id: number) =>
+      request<void>(`/api/schedules/${id}`, { method: 'DELETE' }),
+    runNow: (id: number) =>
+      request<JobOut>(`/api/schedules/${id}/run-now`, { method: 'POST' }),
+    nextFires: (id: number) =>
+      request<NextFiresOut>(`/api/schedules/${id}/next-fires`),
+  },
+
+  users: {
+    list: () => request<UserOut[]>('/api/users'),
+    create: (body: UserCreateBody) =>
+      request<UserOut>('/api/users', { method: 'POST', body: JSON.stringify(body) }),
+    patch: (id: number, body: UserUpdateBody) =>
+      request<UserOut>(`/api/users/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+    delete: (id: number) => request<void>(`/api/users/${id}`, { method: 'DELETE' }),
+  },
+
+  settings: {
+    get: () => request<SettingsOut>('/api/settings'),
   },
 };

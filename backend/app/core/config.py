@@ -27,6 +27,12 @@ class Settings(BaseSettings):
     max_parallel_targets_per_job: int = 10
     # FR-EXP-05 default; consumed by the M4 export pipeline.
     default_split_size_mb: int = 40
+    # FR-SET-02..04: read-only in M5; consumed by the M6 engine adapters
+    # (robots.txt compliance, per-domain interval, SSRF guard, content cap).
+    robots_txt_enabled: bool = True
+    per_domain_interval_s: float = 1.0
+    ssrf_guard_enabled: bool = True
+    content_size_cap_bytes: int = 5 * 1024 * 1024
 
     @property
     def db_url(self) -> str:
