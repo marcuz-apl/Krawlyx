@@ -9,6 +9,16 @@ from app.schemas.engines import (
     EngineTestResult,
     EngineUpdate,
 )
+from app.schemas.jobs import (
+    JobCounts,
+    JobCreate,
+    JobDetailOut,
+    JobOut,
+    JobResultOut,
+    JobResultsPage,
+    JobSubmitAck,
+    TargetOut,
+)
 
 __all__ = [
     "CapabilityList",
@@ -17,7 +27,15 @@ __all__ = [
     "EngineOut",
     "EngineTestResult",
     "EngineUpdate",
+    "JobCounts",
+    "JobCreate",
+    "JobDetailOut",
+    "JobOut",
+    "JobResultOut",
+    "JobResultsPage",
+    "JobSubmitAck",
     "LoginRequest",
     "LoginResponse",
+    "TargetOut",
     "UserOut",
 ]

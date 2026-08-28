@@ -47,3 +47,21 @@ def db():
         yield session
     finally:
         session.close()
+
+
+@pytest.fixture()
+def isolated_engine_registry():
+    """Snapshot the engine registry and restore it after the test.
+
+    Lets job tests register fake adapters (`fake-ok`, `fake-slow`,
+    `fake-error`) without leaking them into other tests. The default
+    `crawl4ai` / `scrapy` types are preserved.
+    """
+    from app.engines import registry as _reg
+
+    saved = set(_reg.available_types())
+    yield _reg
+    for t in list(_reg.available_types()):
+        if t not in saved:
+            _reg._REGISTRY.pop(t, None)
+            _reg._CAPABILITIES.pop(t, None)

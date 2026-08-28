@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     admin_user: str | None = None
     admin_password: str | None = None
 
+    # M3 worker pool (NFR-01: ≥ 2 concurrent jobs, ≥ 10 concurrent targets).
+    max_concurrent_jobs: int = 2
+    max_parallel_targets_per_job: int = 10
+    # FR-EXP-05 default; consumed by the M4 export pipeline.
+    default_split_size_mb: int = 40
+
     @property
     def db_url(self) -> str:
         return f"sqlite:///{self.db_path.as_posix()}"

@@ -27,6 +27,114 @@ export interface HealthResponse {
   version: string;
 }
 
+// ---- engines ----
+
+export interface Capabilities {
+  deep_crawl: boolean;
+  max_depth: number;
+  max_pages_per_target: number;
+  supports_wait_for: boolean;
+  supports_render: boolean;
+}
+
+export interface EngineCapabilities {
+  type: string;
+  capabilities: Capabilities;
+}
+
+export interface CapabilityList {
+  types: EngineCapabilities[];
+}
+
+export interface EngineOut {
+  id: number;
+  name: string;
+  type: string;
+  pooled: boolean;
+  config_redacted: Record<string, unknown>;
+  has_secret: boolean;
+  disabled_at: string | null;
+}
+
+// ---- jobs ----
+
+export interface UrlError {
+  line: number;
+  text: string;
+  reason: string;
+}
+
+export interface JobCounts {
+  pending: number;
+  fetching: number;
+  done: number;
+  error: number;
+  skipped: number;
+}
+
+export interface JobOut {
+  id: number;
+  engine_id: number;
+  status: string;
+  counts: JobCounts;
+  started_at: string | null;
+  finished_at: string | null;
+  elapsed_s: number;
+  notes: string | null;
+  options: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface TargetOut {
+  id: number;
+  url: string;
+  status: string;
+  attempts: number;
+  error: string | null;
+}
+
+export interface JobDetailOut extends JobOut {
+  targets: TargetOut[];
+}
+
+export interface JobResultOut {
+  id: number;
+  target_id: number;
+  source_url: string;
+  final_url: string | null;
+  http_status: number | null;
+  title: string | null;
+  content_markdown: string | null;
+  content_text: string | null;
+  links: Array<{ url: string; text: string }>;
+  metadata: Record<string, unknown>;
+  error: string | null;
+  duration_ms: number | null;
+  fetched_at: string;
+}
+
+export interface JobResultsPage {
+  job_id: number;
+  page: number;
+  page_size: number;
+  total: number;
+  items: JobResultOut[];
+}
+
+export interface JobSubmitAck {
+  job_id: number;
+  accepted: number;
+  duplicates: Array<[number, string]>;
+  errors: UrlError[];
+}
+
+export interface JobCreateBody {
+  engine_id: number;
+  urls: string[];
+  options?: Record<string, unknown>;
+  notes?: string | null;
+}
+
 const BASE = '';
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -58,4 +166,39 @@ export const api = {
     request<LoginResponse>('/api/auth/login', { method: 'POST', body: JSON.stringify(body) }),
   logout: () => request<void>('/api/auth/logout', { method: 'POST' }),
   me: () => request<UserOut>('/api/auth/me'),
+
+  engines: {
+    capabilities: () => request<CapabilityList>('/api/engines/capabilities'),
+    list: (params?: { pooled_only?: boolean }) => {
+      const q = params?.pooled_only ? '?pooled_only=true' : '';
+      return request<EngineOut[]>(`/api/engines${q}`);
+    },
+  },
+
+  jobs: {
+    list: (params?: { status?: string; limit?: number }) => {
+      const sp = new URLSearchParams();
+      if (params?.status) sp.set('status', params.status);
+      if (params?.limit) sp.set('limit', String(params.limit));
+      const q = sp.toString() ? `?${sp.toString()}` : '';
+      return request<JobOut[]>(`/api/jobs${q}`);
+    },
+    create: (body: JobCreateBody) =>
+      request<JobSubmitAck>('/api/jobs', { method: 'POST', body: JSON.stringify(body) }),
+    get: (id: number) => request<JobDetailOut>(`/api/jobs/${id}`),
+    cancel: (id: number) =>
+      request<void>(`/api/jobs/${id}/cancel`, { method: 'POST' }),
+    results: (id: number, page = 1, pageSize = 50) =>
+      request<JobResultsPage>(
+        `/api/jobs/${id}/results?page=${page}&page_size=${pageSize}`,
+      ),
+    result: (id: number, rid: number) =>
+      request<JobResultOut>(`/api/jobs/${id}/results/${rid}`),
+    rerun: (id: number) =>
+      request<JobOut>(`/api/jobs/${id}/rerun`, { method: 'POST' }),
+    /** Same-origin browser download URLs (cookie auth is automatic). */
+    resultDownloadUrl: (id: number, rid: number, kind: 'md' | 'json') =>
+      `/api/jobs/${id}/results/${rid}/download.${kind}`,
+    exportUrl: (id: number) => `/api/jobs/${id}/export.json`,
+  },
 };
