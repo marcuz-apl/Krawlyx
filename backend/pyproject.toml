@@ -13,6 +13,7 @@ dependencies = [
     "apscheduler>=3.11,<4",
     "bcrypt>=4.2,<5",
     "itsdangerous>=2.2,<3",
+    "cryptography>=43,<46",
 ]
 
 # Static files are served from ../frontend/dist (built by `npm run build`).

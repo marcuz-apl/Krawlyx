@@ -1,0 +1,162 @@
+"""Engine instance service layer (PRD §6.1).
+
+All access to the `engines` table goes through this module so the encryption
+boundary (FR-ENG-03) is enforced in one place. The service layer never
+imports a concrete engine module — it talks to the registry through the
+CrawlEngine protocol.
+"""
+
+import base64
+import hashlib
+import json
+import logging
+from datetime import UTC, datetime
+from typing import Any
+
+from cryptography.fernet import Fernet
+from pydantic import ValidationError
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
+from app.core.config import get_settings
+from app.engines import registry
+from app.engines.schemas import config_model_for
+from app.models import EngineInstance
+
+logger = logging.getLogger("zencrawl.engines.service")
+
+# Per PRD FR-ENG-02, certain config keys hold secrets. This set is the
+# single source of truth for which keys are redacted in API responses.
+_SECRET_KEYS = {
+    "api_key",
+    "password",
+    "token",
+    "secret",
+}
+
+
+def _fernet() -> Fernet:
+    """Derive a Fernet instance from the app secret.
+
+    Fernet requires a 32-byte url-safe base64 key. We deterministically
+    derive it from the existing app secret by SHA-256 + base64. This keeps
+    the env-var surface small while still giving per-install isolation.
+    """
+    secret = get_settings().secret_key.encode("utf-8")
+    digest = hashlib.sha256(secret).digest()
+    return Fernet(base64.urlsafe_b64encode(digest))
+
+
+def encrypt_config(config: dict[str, Any]) -> str:
+    return _fernet().encrypt(json.dumps(config).encode("utf-8")).decode("utf-8")
+
+
+def decrypt_config(blob: str | None) -> dict[str, Any]:
+    if not blob:
+        return {}
+    try:
+        return json.loads(_fernet().decrypt(blob.encode("utf-8")))
+    except (ValueError, OSError) as exc:
+        logger.warning("failed to decrypt engine config: %s", exc)
+        return {}
+
+
+def redact(config: dict[str, Any]) -> tuple[dict[str, Any], bool]:
+    """Strip secret keys; return (redacted_dict, has_secret)."""
+    redacted = {k: v for k, v in config.items() if k not in _SECRET_KEYS}
+    has_secret = any(k in _SECRET_KEYS for k in config)
+    return redacted, has_secret
+
+
+def validate_config(engine_type: str, config: dict[str, Any]) -> dict[str, Any]:
+    """Run the type-specific Pydantic schema; raises ValidationError on bad config."""
+    return config_model_for(engine_type).model_validate(config).model_dump()
+
+
+# ---- CRUD ----
+
+
+def list_engines(db: Session) -> list[EngineInstance]:
+    return list(db.scalars(select(EngineInstance).order_by(EngineInstance.name)))
+
+
+def list_pooled(db: Session) -> list[EngineInstance]:
+    return list(
+        db.scalars(
+            select(EngineInstance).where(
+                EngineInstance.pooled.is_(True), EngineInstance.disabled_at.is_(None)
+            )
+        )
+    )
+
+
+def get(db: Session, engine_id: int) -> EngineInstance | None:
+    return db.get(EngineInstance, engine_id)
+
+
+def create(
+    db: Session, *, name: str, type: str, config: dict[str, Any], pooled: bool
+) -> EngineInstance:
+    if type not in registry.available_types():
+        raise ValueError(f"unknown engine type {type!r}")
+    config = validate_config(type, config)
+    row = EngineInstance(
+        name=name,
+        type=type,
+        config_encrypted=encrypt_config(config) if config else None,
+        pooled=pooled,
+    )
+    db.add(row)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise ValueError(f"engine name {name!r} is already taken") from exc
+    db.refresh(row)
+    return row
+
+
+def update(db: Session, engine: EngineInstance, *, patch: dict[str, Any]) -> EngineInstance:
+    if "name" in patch and patch["name"] is not None:
+        engine.name = patch["name"]
+    if "config" in patch and patch["config"] is not None:
+        engine.config_encrypted = encrypt_config(validate_config(engine.type, patch["config"]))
+    if "pooled" in patch and patch["pooled"] is not None:
+        engine.pooled = bool(patch["pooled"])
+    if "disabled" in patch and patch["disabled"] is not None:
+        engine.disabled_at = datetime.now(UTC) if patch["disabled"] else None
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise ValueError("engine name conflict") from exc
+    db.refresh(engine)
+    return engine
+
+
+def delete(db: Session, engine: EngineInstance) -> None:
+    """Delete only when the engine is unreferenced (FR-ENG-06)."""
+    from app.models import Job, Schedule
+
+    job_ref = db.scalar(select(Job.id).where(Job.engine_id == engine.id).limit(1))
+    # Schedules carry engine_id inside their JSON payload; use json_extract for
+    # a portable lookup until we add a typed FK column.
+    schedule_ref = db.scalar(
+        select(Schedule.id).where(Schedule.payload["engine_id"].as_integer() == engine.id).limit(1)
+    )
+    if job_ref or schedule_ref:
+        raise ValueError("engine is referenced by a job or schedule; disable it instead")
+    db.delete(engine)
+    db.commit()
+
+
+def test_engine(engine: EngineInstance) -> tuple[bool, str, int]:
+    """Construct a fresh engine from the stored config and ask its health()."""
+    config = decrypt_config(engine.config_encrypted)
+    try:
+        instance = registry.build(engine.type, config)
+    except (KeyError, ValidationError, ValueError) as exc:
+        return False, f"build failed: {exc}", 0
+    report = instance.health()
+    return report.ok, report.detail, report.latency_ms
