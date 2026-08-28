@@ -19,6 +19,9 @@ class JobCreate(BaseModel):
     urls: list[str] = Field(default_factory=list)
     options: dict[str, Any] = Field(default_factory=dict)
     notes: str | None = Field(default=None, max_length=2000)
+    # M4: when set, results are streamed to a folder export target in
+    # addition to the DB. Must be a runner-selectable folder target.
+    export_target_id: int | None = None
 
 
 class JobSubmitAck(BaseModel):

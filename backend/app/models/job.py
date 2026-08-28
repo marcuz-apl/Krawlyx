@@ -36,6 +36,9 @@ class Job(Base):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="queued", nullable=False)
     schedule_id: Mapped[int | None] = mapped_column(ForeignKey("schedules.id"), nullable=True)
+    export_target_id: Mapped[int | None] = mapped_column(
+        ForeignKey("export_targets.id"), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
     started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

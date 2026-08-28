@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.api import auth, engines, health, jobs
+from app.api import auth, engines, export_targets, health, jobs
 from app.core.config import get_settings
 from app.core.db import SessionLocal, upgrade_db
 from app.services import jobs as jobs_svc
@@ -36,6 +36,7 @@ def create_app() -> FastAPI:
     app.include_router(auth.router, prefix="/api/auth")
     app.include_router(engines.router)
     app.include_router(jobs.router)
+    app.include_router(export_targets.router)
     # Serve the built SPA in production. The Vite dev server handles this in dev mode.
     if FRONTEND_DIST.is_dir():
         app.mount("/", StaticFiles(directory=str(FRONTEND_DIST), html=True), name="spa")

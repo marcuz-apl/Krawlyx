@@ -3,12 +3,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
 import { EngineSelector } from '@/components/EngineSelector';
+import { ExportTargetSelector } from '@/components/ExportTargetSelector';
 import { PerEngineOptions } from '@/components/PerEngineOptions';
 import { UrlTextarea } from '@/components/UrlTextarea';
 import { api, type JobSubmitAck } from '@/lib/api/client';
 
 export function RunnerPage() {
   const [engineId, setEngineId] = useState<number | null>(null);
+  const [exportTargetId, setExportTargetId] = useState<number | null>(null);
   const [urls, setUrls] = useState('');
   const [options, setOptions] = useState<Record<string, unknown>>({});
   const [notes, setNotes] = useState('');
@@ -36,6 +38,7 @@ export function RunnerPage() {
         urls: lines.filter((l) => l.length > 0),
         options,
         notes: notes || null,
+        export_target_id: exportTargetId,
       });
     },
     onSuccess: (ack) => {
@@ -98,9 +101,13 @@ export function RunnerPage() {
           />
         </label>
 
-        <div className="rounded border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-          <strong className="text-slate-700">Save results to:</strong> database
-          (folder export arrives in M4).
+        <div>
+          <span className="text-sm font-medium text-slate-700">
+            Save results to
+          </span>
+          <div className="mt-1">
+            <ExportTargetSelector value={exportTargetId} onChange={setExportTargetId} />
+          </div>
         </div>
 
         {errorMessages.length > 0 && (

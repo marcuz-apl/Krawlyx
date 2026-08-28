@@ -9,6 +9,12 @@ from app.schemas.engines import (
     EngineTestResult,
     EngineUpdate,
 )
+from app.schemas.export_targets import (
+    ExportTargetCreate,
+    ExportTargetOut,
+    ExportTargetTestResult,
+    ExportTargetUpdate,
+)
 from app.schemas.jobs import (
     JobCounts,
     JobCreate,
@@ -27,6 +33,10 @@ __all__ = [
     "EngineOut",
     "EngineTestResult",
     "EngineUpdate",
+    "ExportTargetCreate",
+    "ExportTargetOut",
+    "ExportTargetTestResult",
+    "ExportTargetUpdate",
     "JobCounts",
     "JobCreate",
     "JobDetailOut",

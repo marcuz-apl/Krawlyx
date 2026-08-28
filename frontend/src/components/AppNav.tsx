@@ -28,6 +28,7 @@ export function AppNav() {
         <nav className="flex items-center gap-1">
           {link('/', 'New job')}
           {link('/history', 'History')}
+          {me.data?.role === 'admin' && link('/admin', 'Admin')}
         </nav>
       </div>
       <div className="flex items-center gap-3 text-sm text-slate-600">

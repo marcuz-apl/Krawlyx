@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, verify_csrf
 from app.core.db import get_db
-from app.models import EngineInstance, Job, JobResult, Target
+from app.models import EngineInstance, ExportTarget, Job, JobResult, Target
 from app.models.user import User
 from app.schemas import (
     JobCounts,
@@ -143,12 +143,32 @@ async def create_job(
     if engine.disabled_at is not None:
         raise HTTPException(status_code=400, detail="engine is disabled")
 
+    # M4: optional folder export target. The target must be enabled,
+    # folder-mode, and marked runner-selectable so admins control what
+    # runners can see (FR-EXP-03). database-only jobs skip this branch.
+    export_target_id: int | None = None
+    if body.export_target_id is not None:
+        target = db.get(ExportTarget, body.export_target_id)
+        if target is None:
+            raise HTTPException(status_code=400, detail="unknown export target")
+        if not target.enabled:
+            raise HTTPException(status_code=400, detail="export target is disabled")
+        if target.mode != "folder":
+            raise HTTPException(status_code=400, detail="export target is not a folder target")
+        if not target.runner_selectable:
+            raise HTTPException(
+                status_code=403,
+                detail="export target is not available to runners",
+            )
+        export_target_id = target.id
+
     job = Job(
         created_by_id=user.id,
         engine_id=engine.id,
         options=dict(body.options or {}),
         notes=body.notes,
         status="queued",
+        export_target_id=export_target_id,
     )
     db.add(job)
     db.flush()  # assigns job.id

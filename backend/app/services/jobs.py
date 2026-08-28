@@ -57,6 +57,10 @@ class JobHandle:
     cancel_event: asyncio.Event = field(default_factory=asyncio.Event)
     target_tasks: set[asyncio.Task] = field(default_factory=set)
     started_at: float = field(default_factory=time.monotonic)
+    # Set by `_run_job` after the engine is validated. `_run_target`
+    # uses it to stream rows; the worker closes it before releasing the
+    # pool slot. `None` when the job has no folder export target.
+    exporter: object = None
 
 
 # ---- lifecycle ----
@@ -200,13 +204,19 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
 
             assert isinstance(engine, CrawlEngine)  # for type-checkers
 
+            # M4: if the job references a folder export target, build
+            # the streaming Exporter now and put it on the handle. The
+            # target must exist, be enabled, and have a path + format.
+            exporter = _build_exporter(db, job)
+            handle.exporter = exporter
+
             targets = list(
                 db.scalars(
                     select(TargetRow).where(TargetRow.job_id == job_id).order_by(TargetRow.id)
                 )
             )
             if not targets:
-                _mark_job_complete(db, job, handle)
+                _mark_job_complete(db, job, handle, exporter=exporter)
                 return
 
             per_job_parallel = min(get_settings().max_parallel_targets_per_job, len(targets))
@@ -224,9 +234,9 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
             await asyncio.gather(*tasks, return_exceptions=True)
 
             if handle.cancel_event.is_set():
-                _mark_job_cancelled(db, job)
+                _mark_job_cancelled(db, job, exporter=exporter)
             else:
-                _mark_job_complete(db, job, handle)
+                _mark_job_complete(db, job, handle, exporter=exporter)
         finally:
             _active.pop(job_id, None)
     except Exception as exc:  # broad catch so the pool survives
@@ -310,6 +320,7 @@ async def _run_target(
                 row.status = "error"
                 row.error = str(exc)[:1000]
                 db.commit()
+                _export_skipped(handle, row)
                 return
 
             elapsed_ms = int((time.monotonic() - started) * 1000)
@@ -318,12 +329,14 @@ async def _run_target(
                 row.status = "skipped"
                 row.error = "no record yielded"
                 db.commit()
+                _export_skipped(handle, row)
                 return
 
             if primary.status == "skipped":
                 row.status = "skipped"
                 row.error = primary.error
                 db.commit()
+                _export_skipped(handle, row)
                 return
 
             metadata = dict(primary.metadata or {})
@@ -349,6 +362,10 @@ async def _run_target(
             if primary.status == "error":
                 row.error = primary.error
             db.commit()
+
+            # M4: stream the just-persisted result to the export file
+            # (no-op when the job has no folder target).
+            _export_result(handle, row, db)
         finally:
             db.close()
 
@@ -356,7 +373,9 @@ async def _run_target(
 # ---- status transitions ----
 
 
-def _mark_job_complete(db: Session, job: Job, handle: JobHandle) -> None:
+def _mark_job_complete(
+    db: Session, job: Job, handle: JobHandle, *, exporter: object | None = None
+) -> None:
     from app.models.base import utcnow
 
     has_error = db.scalar(
@@ -364,14 +383,16 @@ def _mark_job_complete(db: Session, job: Job, handle: JobHandle) -> None:
     )
     job.status = "failed" if has_error else "completed"
     job.finished_at = utcnow()
+    _finalize_export(db, job, exporter)
     db.commit()
 
 
-def _mark_job_cancelled(db: Session, job: Job) -> None:
+def _mark_job_cancelled(db: Session, job: Job, *, exporter: object | None = None) -> None:
     from app.models.base import utcnow
 
     job.status = "cancelled"
     job.finished_at = utcnow()
+    _finalize_export(db, job, exporter)
     db.commit()
 
 
@@ -382,6 +403,73 @@ def _mark_job_failed(db: Session, job: Job, reason: str) -> None:
     job.finished_at = utcnow()
     job.options = dict(job.options or {}) | {"_error": reason}
     db.commit()
+
+
+# ---- M4: export hook helpers ----
+
+
+def _build_exporter(db: Session, job: Job) -> object | None:
+    """Construct an `Exporter` if the job has a folder export target.
+
+    Returns `None` when the job has no `export_target_id`, when the
+    target is missing, or when it's not a folder-mode target. Returning
+    `None` is the M3 default — DB-only — and `_run_target` treats it
+    as a no-op.
+    """
+    if job.export_target_id is None:
+        return None
+    from app.models import ExportTarget as ExportTargetRow
+
+    target = db.get(ExportTargetRow, job.export_target_id)
+    if (
+        target is None
+        or not target.enabled
+        or target.mode != "folder"
+        or target.path is None
+        or target.format is None
+    ):
+        return None
+    # Lazy import — `app.exporters` pulls in `openpyxl` which the tests
+    # may not need for non-export code paths.
+    from app.exporters import Exporter
+
+    return Exporter(job, target)
+
+
+def _export_result(handle: JobHandle, target_row: TargetRow, db: Session) -> None:
+    """Stream a just-persisted `JobResult` to the export file."""
+    exporter = handle.exporter
+    if exporter is None:
+        return
+    from app.models import JobResult as JobResultRow
+
+    result = db.scalar(select(JobResultRow).where(JobResultRow.target_id == target_row.id))
+    if result is not None:
+        exporter.write_result(result, source_url=target_row.url)
+
+
+def _export_skipped(handle: JobHandle, target_row: TargetRow) -> None:
+    """Stream an error/skipped target so the file reflects the real picture."""
+    exporter = handle.exporter
+    if exporter is None:
+        return
+    exporter.write_skipped(target_row)
+
+
+def _finalize_export(db: Session, job: Job, exporter: object | None) -> None:
+    """Close the exporter and, if it degraded, set the job's status accordingly.
+
+    FR-EXP-08: an unwritable target flags the job `export_degraded` but
+    the DB persists. The DB write has already happened upstream; we
+    only adjust the job's final status now.
+    """
+    if exporter is None:
+        return
+    exporter.close()
+    if getattr(exporter, "is_degraded", False):
+        reason = getattr(exporter, "degrade_reason", "export failed")
+        job.status = "export_degraded"
+        job.options = dict(job.options or {}) | {"_export_error": reason}
 
 
 # ---- recovery ----

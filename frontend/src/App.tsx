@@ -1,8 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { Outlet, createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import { AppNav } from '@/components/AppNav';
 import { RequireAuth } from '@/components/RequireAuth';
+import { AdminPanelPage } from '@/pages/AdminPanelPage';
 import { JobHistoryPage } from '@/pages/JobHistoryPage';
 import { JobProgressPage } from '@/pages/JobProgressPage';
 import { JobResultDetailPage } from '@/pages/JobResultDetailPage';
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
         children: [
           { path: '/', element: <RunnerPage /> },
           { path: '/history', element: <JobHistoryPage /> },
+          { path: '/admin', element: <AdminPanelPage /> },
           { path: '/jobs/:id', element: <JobProgressPage /> },
           { path: '/jobs/:id/results', element: <JobResultsPage /> },
           { path: '/jobs/:id/results/:rid', element: <JobResultDetailPage /> },
@@ -37,8 +39,6 @@ const router = createBrowserRouter([
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },
 });
-
-import { Outlet } from 'react-router-dom';
 
 export function App() {
   return (

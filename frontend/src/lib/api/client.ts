@@ -133,6 +133,48 @@ export interface JobCreateBody {
   urls: string[];
   options?: Record<string, unknown>;
   notes?: string | null;
+  export_target_id?: number | null;
+}
+
+// ---- export targets ----
+
+export type ExportFormat = 'csv' | 'xlsx';
+export type ExportMode = 'database' | 'folder';
+
+export interface ExportTargetOut {
+  id: number;
+  name: string;
+  mode: ExportMode;
+  path: string | null;
+  format: ExportFormat | null;
+  split_size_mb: number;
+  runner_selectable: boolean;
+  enabled: boolean;
+  created_at: string;
+}
+
+export interface ExportTargetCreateBody {
+  name: string;
+  mode: ExportMode;
+  path?: string | null;
+  format?: ExportFormat | null;
+  split_size_mb?: number;
+  runner_selectable?: boolean;
+  enabled?: boolean;
+}
+
+export interface ExportTargetUpdateBody {
+  name?: string;
+  path?: string | null;
+  format?: ExportFormat | null;
+  split_size_mb?: number;
+  runner_selectable?: boolean;
+  enabled?: boolean;
+}
+
+export interface ExportTargetTestResult {
+  ok: boolean;
+  detail: string;
 }
 
 const BASE = '';
@@ -200,5 +242,25 @@ export const api = {
     resultDownloadUrl: (id: number, rid: number, kind: 'md' | 'json') =>
       `/api/jobs/${id}/results/${rid}/download.${kind}`,
     exportUrl: (id: number) => `/api/jobs/${id}/export.json`,
+  },
+
+  exportTargets: {
+    list: () => request<ExportTargetOut[]>('/api/export-targets'),
+    create: (body: ExportTargetCreateBody) =>
+      request<ExportTargetOut>('/api/export-targets', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    patch: (id: number, body: ExportTargetUpdateBody) =>
+      request<ExportTargetOut>(`/api/export-targets/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      }),
+    delete: (id: number) =>
+      request<void>(`/api/export-targets/${id}`, { method: 'DELETE' }),
+    test: (id: number) =>
+      request<ExportTargetTestResult>(`/api/export-targets/${id}/test`, {
+        method: 'POST',
+      }),
   },
 };
