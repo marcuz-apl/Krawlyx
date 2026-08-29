@@ -90,6 +90,60 @@ export function RunnerPage() {
     },
   });
 
+  // Pagination helper state
+  const [showHelper, setShowHelper] = useState(false);
+  const [helperBaseUrl, setHelperBaseUrl] = useState('');
+  const [helperPages, setHelperPages] = useState<number>(5);
+  const [helperStep, setHelperStep] = useState<number>(20);
+  const [helperType, setHelperType] = useState<'autotrader' | 'page_num' | 'offset'>('autotrader');
+
+  const generateUrls = () => {
+    let base = helperBaseUrl.trim();
+    if (!base) {
+      const first = urls.split('\n').map((l) => l.trim()).find((l) => l.length > 0);
+      if (first) base = first;
+    }
+    if (!base) return;
+
+    try {
+      const urlObj = new URL(base);
+      const generated: string[] = [];
+
+      if (helperType === 'autotrader') {
+        // AutoTrader uses rcs for offset and rcp for page size
+        const step = helperStep > 0 ? helperStep : 20;
+        urlObj.searchParams.set('rcp', String(step));
+        for (let i = 0; i < helperPages; i++) {
+          const currentOffset = i * step;
+          const u = new URL(urlObj.toString());
+          u.searchParams.set('rcs', String(currentOffset));
+          generated.push(u.toString());
+        }
+      } else if (helperType === 'page_num') {
+        for (let i = 1; i <= helperPages; i++) {
+          const u = new URL(urlObj.toString());
+          u.searchParams.set('page', String(i));
+          generated.push(u.toString());
+        }
+      } else if (helperType === 'offset') {
+        const step = helperStep > 0 ? helperStep : 20;
+        for (let i = 0; i < helperPages; i++) {
+          const currentOffset = i * step;
+          const u = new URL(urlObj.toString());
+          u.searchParams.set('offset', String(currentOffset));
+          generated.push(u.toString());
+        }
+      }
+
+      if (generated.length > 0) {
+        setUrls(generated.join('\n'));
+        setShowHelper(false);
+      }
+    } catch {
+      alert('Please enter a valid URL');
+    }
+  };
+
   return (
     <div>
       <h1 className="mb-4 text-2xl font-semibold text-slate-900">New job</h1>
@@ -231,14 +285,95 @@ export function RunnerPage() {
           </div>
         </div>
 
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">
-            URLs (one per line)
-          </span>
-          <div className="mt-1">
-            <UrlTextarea value={urls} onChange={setUrls} />
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm font-medium text-slate-700">
+              URLs (one per line)
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowHelper(!showHelper)}
+              className="text-xs font-semibold text-brand-600 hover:text-brand-800 hover:underline"
+            >
+              ⚡ Auto-Generate Multi-Page URLs {showHelper ? '▲' : '▼'}
+            </button>
           </div>
-        </label>
+
+          {showHelper && (
+            <div className="mb-3 rounded-xl border border-brand-200 bg-brand-50/60 p-4 space-y-3 text-xs">
+              <div className="font-semibold text-slate-900">
+                Multi-Page URL Generator & AutoTrader Pagination
+              </div>
+              <div>
+                <label className="block text-slate-600 mb-1">Base Search URL (leave empty to use current URL):</label>
+                <input
+                  type="text"
+                  value={helperBaseUrl}
+                  onChange={(e) => setHelperBaseUrl(e.target.value)}
+                  placeholder="https://www.autotrader.ca/cars/... or https://example.com/search?page=1"
+                  className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs focus:border-brand-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div>
+                  <label className="block text-slate-600 mb-1">Pagination Mode:</label>
+                  <select
+                    value={helperType}
+                    onChange={(e: any) => setHelperType(e.target.value)}
+                    className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
+                  >
+                    <option value="autotrader">AutoTrader (rcs=0, 20, 40... / rcp)</option>
+                    <option value="page_num">Page Number (page=1, 2, 3...)</option>
+                    <option value="offset">Offset (offset=0, 20, 40...)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-600 mb-1">Total Pages to Scrape:</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={helperPages}
+                    onChange={(e) => setHelperPages(Math.max(1, Number(e.target.value)))}
+                    className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-600 mb-1">Step / Items Per Page:</label>
+                  <select
+                    value={helperStep}
+                    onChange={(e) => setHelperStep(Number(e.target.value))}
+                    className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
+                  >
+                    <option value={20}>20 items / page (standard)</option>
+                    <option value={100}>100 items / page (AutoTrader max)</option>
+                    <option value={50}>50 items / page</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowHelper(false)}
+                  className="rounded-md border border-slate-300 bg-white px-3 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={generateUrls}
+                  className="rounded-md bg-brand-600 px-3.5 py-1 text-xs font-semibold text-white shadow-sm hover:bg-brand-700"
+                >
+                  Generate {helperPages} Page URLs →
+                </button>
+              </div>
+            </div>
+          )}
+
+          <UrlTextarea value={urls} onChange={setUrls} />
+        </div>
 
         <label className="block">
           <span className="text-sm font-medium text-slate-700">Notes</span>

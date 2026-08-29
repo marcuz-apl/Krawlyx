@@ -160,3 +160,32 @@ def test_engine(engine: EngineInstance) -> tuple[bool, str, int]:
         return False, f"build failed: {exc}", 0
     report = instance.health()
     return report.ok, report.detail, report.latency_ms
+
+
+def bootstrap_default_engines(db: Session) -> None:
+    """Ensure default engine instances exist and have descriptive, clean names."""
+    c4ai = db.scalar(select(EngineInstance).where(EngineInstance.type == "crawl4ai"))
+    if not c4ai:
+        c4ai = EngineInstance(
+            name="Crawl4AI (Browser & JS Dynamic)",
+            type="crawl4ai",
+            config_encrypted=encrypt_config({}),
+            pooled=True,
+        )
+        db.add(c4ai)
+    elif c4ai.name in {"e", "crawl4ai", "Crawl4AI"}:
+        c4ai.name = "Crawl4AI (Browser & JS Dynamic)"
+
+    scrapy = db.scalar(select(EngineInstance).where(EngineInstance.type == "scrapy"))
+    if not scrapy:
+        scrapy = EngineInstance(
+            name="Scrapy (High-Speed HTML)",
+            type="scrapy",
+            config_encrypted=encrypt_config({}),
+            pooled=True,
+        )
+        db.add(scrapy)
+    elif scrapy.name in {"scrapy", "Scrapy (Fast)"}:
+        scrapy.name = "Scrapy (High-Speed HTML)"
+
+    db.commit()

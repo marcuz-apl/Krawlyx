@@ -1,4 +1,5 @@
-import { ExternalLink } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 
 interface Props {
   items: Array<Record<string, any>>;
@@ -6,6 +7,9 @@ interface Props {
 
 export function StructuredDatasetTable({ items }: Props) {
   if (!items || items.length === 0) return null;
+
+  const [pageSize, setPageSize] = useState<number>(20);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const isVehicle = items.some((i) => i.type === 'vehicle_listing' || (i.make && i.year));
   const isCustom = items.some((i) => i.type === 'custom_schema');
@@ -23,9 +27,21 @@ export function StructuredDatasetTable({ items }: Props) {
       )
     : [];
 
+  const totalRows = items.length;
+  const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalRows);
+  const paginatedItems = items.slice(startIndex, endIndex);
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/75 px-4 py-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 bg-slate-50/75 px-4 py-3">
         <div>
           <h3 className="text-sm font-semibold text-slate-800">
             {isVehicle
@@ -34,9 +50,51 @@ export function StructuredDatasetTable({ items }: Props) {
               ? '⚙️ Custom Schema Dataset'
               : '📊 Extracted Structured Records'}
           </h3>
-          <p className="text-xs text-slate-500">{items.length} structured rows extracted</p>
+          <p className="text-xs text-slate-500">
+            Showing {totalRows > 0 ? startIndex + 1 : 0}–{endIndex} of {totalRows} records
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 text-xs text-slate-600">
+            <span>Rows:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none"
+            >
+              <option value={10}>10 / page</option>
+              <option value={20}>20 / page</option>
+              <option value={25}>25 / page</option>
+              <option value={50}>50 / page</option>
+              <option value={100}>100 / page</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={activePage <= 1}
+              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white p-1 text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
+              title="Previous Page"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="px-2 text-xs font-medium text-slate-700">
+              {activePage} / {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={activePage >= totalPages}
+              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white p-1 text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
+              title="Next Page"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
+
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead className="border-b border-slate-200 bg-slate-100/75 text-slate-600 font-semibold uppercase tracking-wider">
@@ -77,7 +135,7 @@ export function StructuredDatasetTable({ items }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {items.map((row, idx) => (
+            {paginatedItems.map((row, idx) => (
               <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
                 {isVehicle ? (
                   <>
@@ -204,6 +262,47 @@ export function StructuredDatasetTable({ items }: Props) {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-600">
+          <div>
+            Showing <span className="font-semibold">{startIndex + 1}</span> to <span className="font-semibold">{endIndex}</span> of <span className="font-semibold">{totalRows}</span> rows
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={activePage <= 1}
+              className="rounded px-2 py-1 border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            >
+              First
+            </button>
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={activePage <= 1}
+              className="inline-flex items-center rounded px-2 py-1 border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            >
+              <ChevronLeft className="h-3.5 w-3.5 mr-0.5" /> Prev
+            </button>
+            <span className="px-2 font-semibold text-slate-800">
+              Page {activePage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={activePage >= totalPages}
+              className="inline-flex items-center rounded px-2 py-1 border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            >
+              Next <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
+            </button>
+            <button
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={activePage >= totalPages}
+              className="rounded px-2 py-1 border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            >
+              Last
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

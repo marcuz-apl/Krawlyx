@@ -36,6 +36,9 @@ async def lifespan(_app: FastAPI):
     upgrade_db()
     with SessionLocal() as db:
         bootstrap_admin(db)
+        from app.services.engines import bootstrap_default_engines
+
+        bootstrap_default_engines(db)
     jobs_svc.start_dispatcher()
     scheduler_svc.start_scheduler()
     try:
