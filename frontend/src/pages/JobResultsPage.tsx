@@ -13,6 +13,10 @@ export function JobResultsPage() {
   const id = Number(params.id);
   const [page, setPage] = useState(1);
   const [viewTab, setViewTab] = useState<'dataset' | 'pages'>('dataset');
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [datasetName, setDatasetName] = useState('');
+  const [description, setDescription] = useState('');
+  const [savedSuccess, setSavedSuccess] = useState(false);
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -28,19 +32,6 @@ export function JobResultsPage() {
     },
   });
 
-  if (isLoading || !data) {
-    return (
-      <div>
-        <p className="text-slate-500">Loading results…</p>
-      </div>
-    );
-  }
-
-  const [saveOpen, setSaveOpen] = useState(false);
-  const [datasetName, setDatasetName] = useState('');
-  const [description, setDescription] = useState('');
-  const [savedSuccess, setSavedSuccess] = useState(false);
-
   const saveMutation = useMutation({
     mutationFn: () =>
       api.datasets.create({
@@ -54,6 +45,14 @@ export function JobResultsPage() {
       setSaveOpen(false);
     },
   });
+
+  if (isLoading || !data) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="text-sm text-slate-500 animate-pulse">Loading results…</p>
+      </div>
+    );
+  }
 
   const structuredItems = data.items.flatMap(
     (it) => ((it.metadata as Record<string, any>)?.items as Array<Record<string, any>>) || []

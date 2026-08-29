@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Layers, Square } from 'lucide-react';
+import { Layers, Square, Trash2 } from 'lucide-react';
 
 import type { JobOut } from '@/lib/api/client';
 import { api } from '@/lib/api/client';
@@ -34,6 +34,22 @@ export function JobHistoryList({ jobs }: Props) {
     },
   });
 
+  const deleteSingle = useMutation({
+    mutationFn: (id: number) => api.jobs.delete(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['jobs'] });
+      setSelectedIds((prev) => prev.filter((x) => !jobs.some((j) => j.id === x)));
+    },
+  });
+
+  const deleteBulk = useMutation({
+    mutationFn: (ids: number[]) => api.jobs.bulkDelete(ids),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['jobs'] });
+      setSelectedIds([]);
+    },
+  });
+
   const toggleSelect = (id: number) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -54,17 +70,23 @@ export function JobHistoryList({ jobs }: Props) {
   return (
     <div className="space-y-3">
       {selectedIds.length > 0 && (
-        <div className="flex items-center justify-between rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 shadow-sm">
           <div className="flex items-center gap-2 text-xs font-semibold text-brand-900">
             <Layers className="h-4 w-4 text-brand-600" />
             <span>{selectedIds.length} job(s) selected</span>
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setSelectedIds([])}
-              className="text-xs text-brand-700 hover:underline px-2 py-1"
+              onClick={() => {
+                if (window.confirm(`Are you sure you want to delete ${selectedIds.length} selected job(s)?`)) {
+                  deleteBulk.mutate(selectedIds);
+                }
+              }}
+              disabled={deleteBulk.isPending}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:opacity-50 transition-colors"
             >
-              Clear
+              <Trash2 className="h-3.5 w-3.5 text-red-600" />
+              {deleteBulk.isPending ? 'Deleting…' : `Delete Selected (${selectedIds.length})`}
             </button>
             <button
               onClick={() => navigate(`/jobs/merge?ids=${selectedIds.join(',')}`)}
@@ -72,6 +94,12 @@ export function JobHistoryList({ jobs }: Props) {
             >
               <Layers className="h-3.5 w-3.5" />
               Merge Selected Datasets →
+            </button>
+            <button
+              onClick={() => setSelectedIds([])}
+              className="text-xs text-slate-500 hover:underline px-2 py-1"
+            >
+              Clear
             </button>
           </div>
         </div>
@@ -94,7 +122,7 @@ export function JobHistoryList({ jobs }: Props) {
               <th className="px-4 py-3">Counts</th>
               <th className="px-4 py-3">Started</th>
               <th className="px-4 py-3 text-right">Elapsed</th>
-              <th className="px-4 py-3 text-right w-24">Actions</th>
+              <th className="px-4 py-3 text-right w-28">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -135,40 +163,56 @@ export function JobHistoryList({ jobs }: Props) {
                     {j.counts.pending > 0 && <span className="text-slate-500"> · {j.counts.pending} pending</span>}
                     {j.counts.fetching > 0 && <span className="text-amber-600"> · {j.counts.fetching} fetching</span>}
                   </td>
-                <td className="px-4 py-3 text-xs text-slate-500">
-                  {j.started_at ? new Date(j.started_at).toLocaleString() : '—'}
-                </td>
-                <td className="px-4 py-3 text-right text-xs font-mono text-slate-500">{j.elapsed_s}s</td>
-                <td className="px-4 py-3 text-right">
-                  {isRunning ? (
-                    <button
-                      onClick={() => {
-                        if (window.confirm(`Stop Job #${j.id}?`)) {
-                          cancel.mutate(j.id);
-                        }
-                      }}
-                      disabled={cancel.isPending}
-                      className="inline-flex items-center gap-1 rounded border border-red-200 bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 hover:bg-red-100 disabled:opacity-50 transition-colors"
-                      title="Stop this crawl immediately"
-                    >
-                      <Square className="h-2.5 w-2.5 fill-red-600 text-red-600" />
-                      Stop
-                    </button>
-                  ) : (
-                    <Link
-                      to={`/jobs/${j.id}/results`}
-                      className="text-xs font-medium text-brand-600 hover:text-brand-800 hover:underline"
-                    >
-                      Results →
-                    </Link>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+                  <td className="px-4 py-3 text-xs text-slate-500">
+                    {j.started_at ? new Date(j.started_at).toLocaleString() : '—'}
+                  </td>
+                  <td className="px-4 py-3 text-right text-xs font-mono text-slate-500">{j.elapsed_s}s</td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {isRunning ? (
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Stop Job #${j.id}?`)) {
+                              cancel.mutate(j.id);
+                            }
+                          }}
+                          disabled={cancel.isPending}
+                          className="inline-flex items-center gap-1 rounded border border-red-200 bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 hover:bg-red-100 disabled:opacity-50 transition-colors"
+                          title="Stop this crawl immediately"
+                        >
+                          <Square className="h-2.5 w-2.5 fill-red-600 text-red-600" />
+                          Stop
+                        </button>
+                      ) : (
+                        <>
+                          <Link
+                            to={`/jobs/${j.id}/results`}
+                            className="text-xs font-medium text-brand-600 hover:text-brand-800 hover:underline mr-1"
+                          >
+                            Results →
+                          </Link>
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`Delete Job #${j.id}?`)) {
+                                deleteSingle.mutate(j.id);
+                              }
+                            }}
+                            disabled={deleteSingle.isPending}
+                            className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                            title="Delete job history record"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

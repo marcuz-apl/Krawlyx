@@ -712,3 +712,39 @@ def export_merged_jobs_csv(
         headers={"Content-Disposition": f'attachment; filename="merged-jobs-{job_str}.csv"'},
     )
 
+
+class BulkDeleteJobsIn(BaseModel):
+    job_ids: list[int] = Field(..., min_length=1)
+
+
+@router.delete("/{job_id}", status_code=204)
+def delete_job(
+    job_id: int,
+    user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> None:
+    """Delete a single job and its targets and results."""
+    job = db.get(Job, job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="job not found")
+    if user.role != "admin" and job.created_by_id != user.id:
+        raise HTTPException(status_code=403, detail="forbidden")
+
+    db.delete(job)
+    db.commit()
+
+
+@router.post("/bulk-delete", status_code=204)
+def bulk_delete_jobs(
+    payload: BulkDeleteJobsIn,
+    user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> None:
+    """Delete multiple jobs and their associated targets and results."""
+    for jid in payload.job_ids:
+        job = db.get(Job, jid)
+        if job and (user.role == "admin" or job.created_by_id == user.id):
+            db.delete(job)
+    db.commit()
+
+

@@ -377,6 +377,12 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ job_ids }),
       }),
+    delete: (id: number) => request<void>(`/api/jobs/${id}`, { method: 'DELETE' }),
+    bulkDelete: (job_ids: number[]) =>
+      request<void>('/api/jobs/bulk-delete', {
+        method: 'POST',
+        body: JSON.stringify({ job_ids }),
+      }),
     /** Same-origin browser download URLs (cookie auth is automatic). */
     resultDownloadUrl: (id: number, rid: number, kind: 'md' | 'json') =>
       `/api/jobs/${id}/results/${rid}/download.${kind}`,
