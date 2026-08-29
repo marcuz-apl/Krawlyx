@@ -428,6 +428,18 @@ export const api = {
         `/api/datasets/${id}/deduplicate`,
         { method: 'POST' }
       ),
+    executeSql: (id: number, query: string) =>
+      request<{
+        type: 'select' | 'mutation';
+        columns?: string[];
+        rows?: Array<Record<string, any>>;
+        rows_affected?: number;
+        remaining_count?: number;
+        total_returned?: number;
+      }>(`/api/datasets/${id}/sql`, {
+        method: 'POST',
+        body: JSON.stringify({ query }),
+      }),
   },
 
   exportTargets: {

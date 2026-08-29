@@ -427,3 +427,119 @@ def deduplicate_dataset(
         "remaining_count": count,
     }
 
+
+class SqlQueryIn(BaseModel):
+    query: str = Field(..., min_length=1, max_length=10000)
+
+
+@router.post("/{dataset_id}/sql")
+def execute_dataset_sql(
+    dataset_id: int,
+    payload: SqlQueryIn,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> dict:
+    """Execute arbitrary SQL queries (SELECT, UPDATE, DELETE, ALTER) against a dynamic table representing the dataset."""
+    import sqlite3
+
+    dataset = db.get(Dataset, dataset_id)
+    if dataset is None:
+        raise HTTPException(status_code=404, detail="dataset not found")
+
+    rows = db.scalars(
+        select(DatasetRow)
+        .where(DatasetRow.dataset_id == dataset.id)
+        .order_by(DatasetRow.id)
+    ).all()
+
+    # Discover all column names across all rows
+    all_keys = set(dataset.columns or [])
+    for r in rows:
+        if r.data:
+            all_keys.update(r.data.keys())
+
+    # Build ordered column list
+    cols = sorted(list(all_keys))
+
+    # Create temporary in-memory database
+    mem_conn = sqlite3.connect(":memory:")
+    mem_conn.row_factory = sqlite3.Row
+
+    # Define dynamic table
+    col_defs = ", ".join([f'"{c}" TEXT' for c in cols])
+    mem_conn.execute(f'CREATE TABLE dataset (_row_id INTEGER PRIMARY KEY, {col_defs})')
+
+    row_id_map = {}
+    for idx, r in enumerate(rows, start=1):
+        row_id_map[idx] = r
+        col_names = ", ".join([f'"{c}"' for c in cols])
+        placeholders = ", ".join(["?"] * len(cols))
+        vals = [(r.data or {}).get(c) for c in cols]
+        mem_conn.execute(
+            f'INSERT INTO dataset (_row_id, {col_names}) VALUES (?, {placeholders})',
+            [idx] + vals,
+        )
+
+    clean_sql = payload.query.strip().rstrip(";")
+    first_word = clean_sql.split()[0].upper() if clean_sql else ""
+
+    try:
+        cur = mem_conn.cursor()
+        cur.execute(clean_sql)
+
+        if first_word in {"SELECT", "PRAGMA", "EXPLAIN"}:
+            col_names = [d[0] for d in cur.description] if cur.description else []
+            fetched = cur.fetchmany(1000)
+            result_rows = [dict(zip(col_names, row)) for row in fetched]
+            return {
+                "type": "select",
+                "columns": col_names,
+                "rows": result_rows,
+                "total_returned": len(result_rows),
+            }
+        else:
+            # Mutation (UPDATE, DELETE, ALTER, etc.)
+            rows_affected = cur.rowcount
+
+            # Read back dataset table structure and all remaining rows
+            cur2 = mem_conn.execute("SELECT * FROM dataset")
+            new_cols = [d[0] for d in cur2.description if d[0] != "_row_id"]
+            remaining_data = cur2.fetchall()
+
+            remaining_row_ids = set()
+            for r_row in remaining_data:
+                _rid = r_row["_row_id"]
+                remaining_row_ids.add(_rid)
+                orig_target_row = row_id_map.get(_rid)
+                if orig_target_row:
+                    new_data_dict = {}
+                    for col_name in new_cols:
+                        val = r_row[col_name]
+                        if val is not None:
+                            new_data_dict[col_name] = val
+                    orig_target_row.data = new_data_dict
+
+            # Delete rows dropped by a DELETE query
+            deleted_ids = [r.id for _rid, r in row_id_map.items() if _rid not in remaining_row_ids]
+            if deleted_ids:
+                db.execute(delete(DatasetRow).where(DatasetRow.id.in_(deleted_ids)))
+
+            dataset.columns = new_cols
+            db.commit()
+
+            count = db.scalar(
+                select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == dataset.id)
+            ) or 0
+
+            return {
+                "type": "mutation",
+                "rows_affected": max(rows_affected, 0),
+                "remaining_count": count,
+                "columns": new_cols,
+            }
+
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"SQL Error: {exc}")
+    finally:
+        mem_conn.close()
+
