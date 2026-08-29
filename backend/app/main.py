@@ -10,6 +10,7 @@ from app.api import auth, engines, export_targets, health, jobs, schedules, user
 from app.api import settings as settings_api
 from app.core.config import get_settings
 from app.core.db import SessionLocal, upgrade_db
+from app.core.logging_config import configure_logging
 from app.services import jobs as jobs_svc
 from app.services import scheduler as scheduler_svc
 from app.services.users import bootstrap_admin
@@ -19,6 +20,7 @@ FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    configure_logging()
     cfg = get_settings()
     cfg.db_path.parent.mkdir(parents=True, exist_ok=True)
     upgrade_db()

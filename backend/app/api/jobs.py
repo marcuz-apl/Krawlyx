@@ -464,3 +464,36 @@ def job_events(
         content="SSE not implemented in M3; the SPA polls GET /api/jobs/{id}.",
         media_type="text/plain",
     )
+
+
+@router.get("/{job_id}/log", response_class=Response)
+def job_log(
+    job_id: int,
+    _user: Annotated[User, Depends(get_current_user)],
+    tail: int = Query(default=200, ge=1, le=5000),
+) -> Response:
+    """M6: tail the per-job rotating log file.
+
+    Returns plain text (`text/plain; charset=utf-8`) of the last
+    `tail` lines (default 200, max 5000). 404 when the log file
+    doesn't exist (the job never ran or its log was rotated out).
+    Open to any authenticated user — per-job logs are operational,
+    not sensitive.
+    """
+    from app.core.config import get_settings
+
+    log_path = get_settings().db_path.parent / "logs" / "jobs" / f"{job_id}.log"
+    if not log_path.is_file():
+        raise HTTPException(status_code=404, detail="log not found")
+    try:
+        # Read everything, then trim. Per-job logs are small (1 MB
+        # cap × 5 rotations = ≤ 5 MB worst case); the per-request
+        # cost is fine.
+        text = log_path.read_text(encoding="utf-8", errors="replace")
+    except OSError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    lines = text.splitlines()[-tail:]
+    return Response(
+        content="\n".join(lines) + ("\n" if lines else ""),
+        media_type="text/plain; charset=utf-8",
+    )

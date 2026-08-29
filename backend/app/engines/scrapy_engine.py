@@ -24,6 +24,7 @@ from app.engines.base import (
     HealthReport,
     JobOptions,
     Target,
+    user_agent,
 )
 from app.engines.normalize import normalize_record
 from app.engines.schemas import ScrapyConfig
@@ -66,9 +67,12 @@ class ScrapyEngine:
         return HealthReport(ok=True, detail=f"scrapy ready ({self.config.user_agent})")
 
     async def fetch(self, target: Target, options: JobOptions) -> AsyncIterator[CrawlRecord]:
+        from app.core.config import get_settings
+
+        cfg = get_settings()
         # SSRF guard first.
         try:
-            resolve_safe(target)
+            resolve_safe(target, cfg)
         except ValueError as exc:
             yield CrawlRecord(
                 target_id=target.target_id,
@@ -79,7 +83,7 @@ class ScrapyEngine:
             return
 
         started = time.monotonic()  # noqa: F841 — kept for future duration tracking
-        env = self._build_env(target, options)
+        env = self._build_env(target, options, cfg)
         cmd = [sys.executable, "-u", str(TEMPLATE_PATH)]
 
         try:
@@ -137,15 +141,33 @@ class ScrapyEngine:
                     error=f"scrapy exited {proc.returncode}: {stderr.strip()}",
                 )
 
-    def _build_env(self, target: Target, options: JobOptions) -> dict[str, str]:
-        """Construct the subprocess env, inheriting PATH so `python` works."""
+    def _build_env(
+        self, target: Target, options: JobOptions, cfg=None
+    ) -> dict[str, str]:
+        """Construct the subprocess env, inheriting PATH so `python` works.
+
+        M6: the per-domain interval is now sourced from
+        `Settings.per_domain_interval_s` (FR-SET-02). The engine's
+        own `download_delay_s` is the *minimum* between the two, so
+        the admin's global setting doesn't get overridden by a
+        looser engine config.
+        """
+        from app.core.config import get_settings
+
+        cfg = cfg or get_settings()
+        # FR-SET-02: take the larger of the two (admin floor wins).
+        # This is "no faster than the admin asked" — the engine can
+        # be slower but not faster.
+        effective_delay = max(
+            self.config.download_delay_s, float(cfg.per_domain_interval_s)
+        )
         env = {k: v for k, v in os.environ.items() if k != "ZENCRAWL_TARGET_URL"}
         env.update(
             {
                 "ZENCRAWL_TARGET_URL": target.url,
-                "ZENCRAWL_USER_AGENT": self.config.user_agent,
+                "ZENCRAWL_USER_AGENT": user_agent("scrapy"),
                 "ZENCRAWL_CONCURRENCY": str(self.config.concurrency),
-                "ZENCRAWL_DOWNLOAD_DELAY": str(self.config.download_delay_s),
+                "ZENCRAWL_DOWNLOAD_DELAY": str(effective_delay),
                 "ZENCRAWL_AUTOTHROTTLE": "1" if self.config.autothrottle else "0",
                 "ZENCRAWL_MAX_PAGES": str(
                     min(self.config.max_pages_per_target, options.max_pages_per_target)

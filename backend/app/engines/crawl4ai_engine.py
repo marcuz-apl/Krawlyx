@@ -12,9 +12,12 @@ The adapter:
   - funnels the result through `app.engines.normalize.normalize_record` so the
     shape matches what every other engine emits (PRD §7.1)
   - applies the SSRF guard before handing the URL to the browser (PRD §6.5)
+  - M6: applies the configured per-host throttle (FR-SET-02) and the
+    identifiable User-Agent (NFR-05)
 """
 
 import logging
+import time
 from collections.abc import AsyncIterator
 
 from app.engines.base import (
@@ -23,6 +26,7 @@ from app.engines.base import (
     HealthReport,
     JobOptions,
     Target,
+    user_agent,
 )
 from app.engines.normalize import normalize_record
 from app.engines.schemas import Crawl4AIConfig
@@ -47,6 +51,11 @@ class Crawl4AIEngine:
     type = ENGINE_TYPE
     capabilities = CAPABILITIES
 
+    # Per-instance per-host throttle. The first time the engine fetches a host
+    # it records `time.monotonic()`; subsequent fetches against the same host
+    # sleep until `per_domain_interval_s` has elapsed.
+    _last_fetch: dict[str, float] = {}
+
     def __init__(self, config: dict | None = None) -> None:
         self.config = Crawl4AIConfig.model_validate(config or {})
 
@@ -59,9 +68,12 @@ class Crawl4AIEngine:
         return HealthReport(ok=True, detail=f"crawl4ai ready ({self.config.user_agent})")
 
     async def fetch(self, target: Target, options: JobOptions) -> AsyncIterator[CrawlRecord]:
+        from app.core.config import get_settings
+
+        cfg = get_settings()
         # SSRF guard runs first, before the engine touches the network.
         try:
-            resolve_safe(target)
+            host, _ = resolve_safe(target, cfg)
         except ValueError as exc:
             yield CrawlRecord(
                 target_id=target.target_id,
@@ -70,6 +82,20 @@ class Crawl4AIEngine:
                 error=str(exc),
             )
             return
+
+        # M6: per-host throttle (FR-SET-02). Crawl4AI doesn't ship a
+        # built-in per-domain delay, so we apply it here. The interval is
+        # the smallest allowed spacing between requests to the *same* host.
+        interval = cfg.per_domain_interval_s
+        if interval > 0:
+            now = time.monotonic()
+            last = self._last_fetch.get(host, 0.0)
+            wait = last + interval - now
+            if wait > 0:
+                import asyncio
+
+                await asyncio.sleep(wait)
+            self._last_fetch[host] = time.monotonic()
 
         try:
             from crawl4ai import AsyncWebCrawler  # lazy import — see module doc
@@ -82,6 +108,10 @@ class Crawl4AIEngine:
             )
             return
 
+        # NFR-05: identifiable User-Agent. The engine's per-adapter UA prefix
+        # is `crawl4ai`; the contact comes from Settings.
+        ua = user_agent("crawl4ai")
+
         # NOTE: constructing the crawler in production needs the Playwright
         # browser installed (`crawl4ai-setup`). Tests substitute a fake.
         try:
@@ -90,7 +120,7 @@ class Crawl4AIEngine:
                     url=target.url,
                     headless=self.config.headless,
                     page_timeout=self.config.browser_timeout_s * 1000,
-                    user_agent=self.config.user_agent,
+                    user_agent=ua,
                 )
         except (OSError, RuntimeError, ValueError) as exc:
             yield CrawlRecord(

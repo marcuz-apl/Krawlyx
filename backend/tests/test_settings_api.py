@@ -28,6 +28,9 @@ def test_settings_returns_seven_fields(client: TestClient) -> None:
         "per_domain_interval_s",
         "ssrf_guard_enabled",
         "content_size_cap_bytes",
+        # M6 additions
+        "ssrf_allow_list",
+        "admin_contact_email",
     }
     assert set(body.keys()) == expected
     # Sanity-check the defaults from Settings.

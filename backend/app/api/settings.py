@@ -32,4 +32,6 @@ def get_settings_route(
         per_domain_interval_s=s.per_domain_interval_s,
         ssrf_guard_enabled=s.ssrf_guard_enabled,
         content_size_cap_bytes=s.content_size_cap_bytes,
+        ssrf_allow_list=list(s.ssrf_allow_list),
+        admin_contact_email=s.admin_contact_email,
     )

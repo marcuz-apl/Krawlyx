@@ -15,3 +15,6 @@ class SettingsOut(BaseModel):
     per_domain_interval_s: float
     ssrf_guard_enabled: bool
     content_size_cap_bytes: int
+    # M6 additions
+    ssrf_allow_list: list[str]
+    admin_contact_email: str

@@ -69,9 +69,11 @@ def test_scrapy_env_uses_configured_values() -> None:
     env = engine._build_env(target, JobOptions(max_pages_per_target=10))
 
     assert env["ZENCRAWL_TARGET_URL"] == "https://example.com/"
-    assert env["ZENCRAWL_USER_AGENT"] == "test/9.9"
+    # M6: user_agent comes from the global Settings (NFR-05); engine
+    # config user_agent is no longer echoed directly into the env.
+    assert env["ZENCRAWL_USER_AGENT"] == "zenCrawl/0.1 via scrapy"
     assert env["ZENCRAWL_CONCURRENCY"] == "4"
-    assert env["ZENCRAWL_DOWNLOAD_DELAY"] == "0.5"
+    assert env["ZENCRAWL_DOWNLOAD_DELAY"] == "1.0"  # M6: admin floor wins
     assert env["ZENCRAWL_AUTOTHROTTLE"] == "0"
     # max_pages is capped at the smaller of (config, options)
     assert env["ZENCRAWL_MAX_PAGES"] == "10"
@@ -79,8 +81,14 @@ def test_scrapy_env_uses_configured_values() -> None:
 
 
 def test_scrapy_reports_unhealthy_when_template_missing(monkeypatch) -> None:
+    import sys
+    import types
+
     from app.engines import scrapy_engine
 
+    # Monkeypatch scrapy import so health reaches template check.
+    fake_scrapy = types.ModuleType("scrapy")
+    monkeypatch.setitem(sys.modules, "scrapy", fake_scrapy)
     monkeypatch.setattr(scrapy_engine, "TEMPLATE_PATH", Path("/no/such/file.py"))
     engine = scrapy_engine.ScrapyEngine()
     health = engine.health()
@@ -88,7 +96,12 @@ def test_scrapy_reports_unhealthy_when_template_missing(monkeypatch) -> None:
     assert "spider template" in health.detail
 
 
-def test_scrapy_health_ok_when_installed() -> None:
+def test_scrapy_health_ok_when_installed(monkeypatch) -> None:
+    import sys
+    import types
+
+    # Monkeypatch scrapy import present.
+    monkeypatch.setitem(sys.modules, "scrapy", types.ModuleType("scrapy"))
     from app.engines.scrapy_engine import ScrapyEngine
 
     engine = ScrapyEngine()

@@ -3,6 +3,7 @@
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # repo root (backend/app/core/config.py -> parents[3]); ./data lives there per PRD §4.2
@@ -33,6 +34,24 @@ class Settings(BaseSettings):
     per_domain_interval_s: float = 1.0
     ssrf_guard_enabled: bool = True
     content_size_cap_bytes: int = 5 * 1024 * 1024
+    # M6 additions.
+    # SSRF allow-list (FR-SET-03): when the guard is on and this list
+    # is non-empty, only targets whose host matches an entry (suffix
+    # match) are accepted. Empty list = block-by-default.
+    ssrf_allow_list: list[str] = []
+    # NFR-05: identifiable User-Agent `zenCrawl/0.1 (+{admin_contact_email})`.
+    # Empty contact is allowed — the UA degrades to `zenCrawl/0.1`.
+    admin_contact_email: str = ""
+
+    @field_validator("ssrf_allow_list", mode="before")
+    @classmethod
+    def _parse_allow_list(cls, v: object) -> object:
+        # Accept either a real list (programmatic callers) or a
+        # comma-separated string (env var, e.g.
+        # ZENCRAWL_SSRF_ALLOW_LIST=internal.example.com,other.internal).
+        if isinstance(v, str):
+            return [s.strip() for s in v.split(",") if s.strip()]
+        return v
 
     @property
     def db_url(self) -> str:

@@ -167,12 +167,22 @@ def cancel_job(db: Session, job_id: int) -> bool:
 async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
     """Worker loop for one job. Releases its pool slot on exit."""
     from app.core.db import SessionLocal
+    from app.core.logging_config import job_log_handler
+
+    # M6: attach a per-job rotating file handler. Every log record from
+    # the worker (and the engine adapters it calls into) flows into
+    # data/logs/jobs/{id}.log. The handler is detached in `finally`
+    # below so the file handle isn't leaked.
+    job_logger = logging.getLogger(f"zencrawl.jobs.{job_id}")
+    job_handler = job_log_handler(job_id)
+    job_logger.addHandler(job_handler)
+    job_logger.setLevel(logging.INFO)
 
     db = SessionLocal()
     try:
         job = db.get(Job, job_id)
         if job is None:
-            logger.warning("_run_job: job %d vanished", job_id)
+            job_logger.warning("_run_job: job %d vanished", job_id)
             return
 
         engine_row = db.get(EngineInstance, job.engine_id)
@@ -198,7 +208,7 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
             try:
                 engine = registry.build(engine_row.type, config)
             except (KeyError, ValidationError, ValueError) as exc:
-                logger.warning("engine build failed for job %d: %s", job_id, exc)
+                job_logger.warning("engine build failed for job %d: %s", job_id, exc)
                 _mark_job_failed(db, job, str(exc))
                 return
 
@@ -240,15 +250,23 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
         finally:
             _active.pop(job_id, None)
     except Exception as exc:  # broad catch so the pool survives
-        logger.exception("_run_job crashed for job %d", job_id)
+        job_logger.exception("_run_job crashed for job %d", job_id)
         try:
             job = db.get(Job, job_id)
             if job is not None and job.status not in {"completed", "failed", "cancelled"}:
                 _mark_job_failed(db, job, f"worker crash: {exc}")
         except Exception:  # final guard: never let recovery crash the pool
-            logger.exception("failed to record job %d as failed", job_id)
+            job_logger.exception("failed to record job %d as failed", job_id)
     finally:
         db.close()
+        # M6: detach the per-job log handler so the file is closed and
+        # subsequent file handles aren't leaked. The handler's stream
+        # is the rotating file; closing it flushes the final lines.
+        try:
+            job_logger.removeHandler(job_handler)
+            job_handler.close()
+        except Exception:  # noqa: BLE001 — cleanup, never let it crash the pool
+            job_logger.warning("failed to close job log handler for %d", job_id)
         sem.release()
         _handoff_next(sem)
 
@@ -284,6 +302,8 @@ async def _run_target(
     from app.models import JobResult
     from app.models.base import utcnow
 
+    job_logger_local = logging.getLogger(f"zencrawl.jobs.{handle.job_id}")
+
     async with sem:
         if handle.cancel_event.is_set():
             return  # already skipped by cancel_job
@@ -316,7 +336,7 @@ async def _run_target(
                     # primary record. Extra records are stashed in
                     # `metadata_json.additional_records`.
             except Exception as exc:  # noqa: BLE001 — engine boundary
-                logger.warning("engine.fetch failed for target %d: %s", row.id, exc)
+                job_logger_local.warning("engine.fetch failed for target %d: %s", row.id, exc)
                 row.status = "error"
                 row.error = str(exc)[:1000]
                 db.commit()
@@ -362,6 +382,7 @@ async def _run_target(
             if primary.status == "error":
                 row.error = primary.error
             db.commit()
+            job_logger_local.info("target %d fetched (%s, %s ms)", row.id, primary.status, elapsed_ms)
 
             # M4: stream the just-persisted result to the export file
             # (no-op when the job has no folder target).

@@ -23,6 +23,25 @@ class Capabilities:
     supports_render: bool = False
 
 
+def user_agent(template: str | None = None) -> str:
+    """Build the identifiable User-Agent (NFR-05).
+
+    `template` is the engine's per-adapter UA prefix (e.g. ``"crawl4ai"``).
+    The admin contact from ``Settings.admin_contact_email`` is appended
+    when set, e.g. ``"zenCrawl/0.1 (+ops@example.com) via crawl4ai"``.
+    An empty contact degrades to ``"zenCrawl/0.1 via crawl4ai"``.
+    """
+    from app.core.config import get_settings
+
+    contact = get_settings().admin_contact_email.strip()
+    base = "zenCrawl/0.1"
+    if contact:
+        base = f"{base} (+{contact})"
+    if template:
+        base = f"{base} via {template}"
+    return base
+
+
 @dataclass
 class CrawlRecord:
     """Normalized record written to job_results and exported to files (PRD §7.1)."""
