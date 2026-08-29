@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Database, Download, Search } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, Database, Download, Search, Sparkles } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 
 import { StructuredDatasetTable } from '@/components/StructuredDatasetTable';
@@ -10,10 +10,26 @@ export function DatasetDetailPage() {
   const params = useParams<{ id: string }>();
   const id = Number(params.id);
   const [search, setSearch] = useState('');
+  const [msg, setMsg] = useState<string | null>(null);
+  const qc = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['dataset', id],
     queryFn: () => api.datasets.get(id, 1000),
+  });
+
+  const dedupMutation = useMutation({
+    mutationFn: () => api.datasets.deduplicate(id),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['dataset', id] });
+      qc.invalidateQueries({ queryKey: ['datasets'] });
+      setMsg(
+        res.removed_count > 0
+          ? `Removed ${res.removed_count} duplicate records (${res.remaining_count} unique rows remaining)`
+          : 'No duplicate records found.'
+      );
+      setTimeout(() => setMsg(null), 5000);
+    },
   });
 
   if (isLoading || !data) {
@@ -63,6 +79,15 @@ export function DatasetDetailPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => dedupMutation.mutate()}
+            disabled={dedupMutation.isPending}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-300 bg-indigo-50 px-3.5 py-1.5 text-xs font-semibold text-indigo-800 shadow-sm hover:bg-indigo-100 disabled:opacity-50 transition-colors"
+            title="Scan database and permanently remove duplicate rows"
+          >
+            <Sparkles className="h-4 w-4 text-indigo-600" />
+            {dedupMutation.isPending ? 'Cleaning…' : 'Deduplicate Records'}
+          </button>
           <a
             href={api.datasets.exportCsvUrl(data.id)}
             download
@@ -72,6 +97,21 @@ export function DatasetDetailPage() {
           </a>
         </div>
       </div>
+
+      {msg && (
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-xs font-semibold text-indigo-900 shadow-sm flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-indigo-600 flex-shrink-0" />
+            <span>{msg}</span>
+          </div>
+          <button
+            onClick={() => setMsg(null)}
+            className="text-indigo-500 hover:text-indigo-800 text-xs font-bold"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Filter / Search */}
       <div className="flex items-center gap-2 max-w-md">

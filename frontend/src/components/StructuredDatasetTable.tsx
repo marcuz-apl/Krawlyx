@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight, ExternalLink, Sparkles } from 'lucide-react';
 
 interface Props {
   items: Array<Record<string, any>>;
@@ -10,15 +10,56 @@ export function StructuredDatasetTable({ items }: Props) {
 
   const [pageSize, setPageSize] = useState<number>(20);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [dedupEnabled, setDedupEnabled] = useState<boolean>(false);
 
-  const isVehicle = items.some((i) => i.type === 'vehicle_listing' || (i.make && i.year));
-  const isCustom = items.some((i) => i.type === 'custom_schema');
+  // Compute unique items vs duplicates
+  const { uniqueItems, duplicateCount } = useMemo(() => {
+    const seen = new Set<string>();
+    const uniques: Array<Record<string, any>> = [];
+    let dups = 0;
+
+    for (const item of items) {
+      let key = '';
+      if (item.make && item.year) {
+        key = [
+          item.year,
+          item.make,
+          item.model,
+          item.trim,
+          item.mileage_km ?? item.mileage,
+          item.price,
+          item.listing_url,
+        ]
+          .map((v) => String(v ?? '').trim().toLowerCase())
+          .join('|');
+      } else {
+        key = Object.entries(item)
+          .filter(([k]) => !['_job_id', 'source_url', 'date_observed'].includes(k))
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => `${k}:${String(v ?? '').trim().toLowerCase()}`)
+          .join('|');
+      }
+
+      if (seen.has(key)) {
+        dups++;
+      } else {
+        seen.add(key);
+        uniques.push(item);
+      }
+    }
+    return { uniqueItems: uniques, duplicateCount: dups };
+  }, [items]);
+
+  const activeItems = dedupEnabled ? uniqueItems : items;
+
+  const isVehicle = activeItems.some((i) => i.type === 'vehicle_listing' || (i.make && i.year));
+  const isCustom = activeItems.some((i) => i.type === 'custom_schema');
 
   // For custom schema, extract all user-defined column names (excluding internal keys)
   const customColumns = isCustom
     ? Array.from(
         new Set(
-          items.flatMap((it) =>
+          activeItems.flatMap((it) =>
             Object.keys(it).filter(
               (k) => !['type', 'date_observed', 'source_url', 'listing_url', '_job_id'].includes(k)
             )
@@ -27,15 +68,20 @@ export function StructuredDatasetTable({ items }: Props) {
       )
     : [];
 
-  const totalRows = items.length;
+  const totalRows = activeItems.length;
   const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
   const activePage = Math.min(currentPage, totalPages);
   const startIndex = (activePage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, totalRows);
-  const paginatedItems = items.slice(startIndex, endIndex);
+  const paginatedItems = activeItems.slice(startIndex, endIndex);
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
+    setCurrentPage(1);
+  };
+
+  const toggleDedup = () => {
+    setDedupEnabled((prev) => !prev);
     setCurrentPage(1);
   };
 
@@ -43,19 +89,46 @@ export function StructuredDatasetTable({ items }: Props) {
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 bg-slate-50/75 px-4 py-3">
         <div>
-          <h3 className="text-sm font-semibold text-slate-800">
-            {isVehicle
-              ? '🚗 Extracted Vehicle Dataset'
-              : isCustom
-              ? '⚙️ Custom Schema Dataset'
-              : '📊 Extracted Structured Records'}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-800">
+              {isVehicle
+                ? '🚗 Extracted Vehicle Dataset'
+                : isCustom
+                ? '⚙️ Custom Schema Dataset'
+                : '📊 Extracted Structured Records'}
+            </h3>
+            {dedupEnabled && (
+              <span className="rounded bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-800">
+                Deduplicated
+              </span>
+            )}
+          </div>
           <p className="text-xs text-slate-500">
             Showing {totalRows > 0 ? startIndex + 1 : 0}–{endIndex} of {totalRows} records
+            {duplicateCount > 0 && !dedupEnabled && (
+              <span className="text-amber-600 font-medium ml-1">
+                ({duplicateCount} duplicates detected)
+              </span>
+            )}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
+          {duplicateCount > 0 && (
+            <button
+              onClick={toggleDedup}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold shadow-sm transition-colors ${
+                dedupEnabled
+                  ? 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                  : 'border border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+              }`}
+              title={dedupEnabled ? 'Show full dataset including duplicates' : 'Hide duplicate records'}
+            >
+              <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
+              {dedupEnabled ? `Show All (${items.length})` : `Remove ${duplicateCount} Duplicates`}
+            </button>
+          )}
+
           <div className="flex items-center gap-1.5 text-xs text-slate-600">
             <span>Rows:</span>
             <select

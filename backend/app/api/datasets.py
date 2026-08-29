@@ -8,7 +8,7 @@ import json
 from typing import Annotated, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel, Field
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
@@ -363,4 +363,67 @@ def export_dataset_csv(
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f'attachment; filename="{safe_name}.csv"'},
     )
+
+
+@router.post("/{dataset_id}/deduplicate")
+def deduplicate_dataset(
+    dataset_id: int,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> dict:
+    """Scan the dataset for duplicate records and delete duplicates from the database."""
+    dataset = db.get(Dataset, dataset_id)
+    if dataset is None:
+        raise HTTPException(status_code=404, detail="dataset not found")
+
+    rows = db.scalars(
+        select(DatasetRow)
+        .where(DatasetRow.dataset_id == dataset.id)
+        .order_by(DatasetRow.id)
+    ).all()
+
+    seen = set()
+    to_delete = []
+
+    for r in rows:
+        row_dict = r.data or {}
+        # Composite fingerprint for vehicles
+        if "make" in row_dict and "year" in row_dict:
+            fp = (
+                str(row_dict.get("year", "")).strip().lower(),
+                str(row_dict.get("make", "")).strip().lower(),
+                str(row_dict.get("model", "")).strip().lower(),
+                str(row_dict.get("trim", "")).strip().lower(),
+                str(row_dict.get("mileage_km", row_dict.get("mileage", ""))).strip(),
+                str(row_dict.get("price", "")).strip(),
+                str(row_dict.get("listing_url", "")).strip(),
+            )
+        else:
+            # Generic fingerprint
+            fp = tuple(
+                sorted(
+                    (k, str(v).strip().lower())
+                    for k, v in row_dict.items()
+                    if not k.startswith("_") and k not in {"date_observed", "source_url"}
+                )
+            )
+
+        if fp in seen:
+            to_delete.append(r.id)
+        else:
+            seen.add(fp)
+
+    if to_delete:
+        db.execute(delete(DatasetRow).where(DatasetRow.id.in_(to_delete)))
+        db.commit()
+
+    count = db.scalar(
+        select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == dataset.id)
+    ) or 0
+
+    return {
+        "dataset_id": dataset.id,
+        "removed_count": len(to_delete),
+        "remaining_count": count,
+    }
 

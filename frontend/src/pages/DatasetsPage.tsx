@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Database, Download, Plus, Trash2, Calendar, Layers, Edit2 } from 'lucide-react';
+import { Database, Download, Plus, Trash2, Calendar, Layers, Edit2, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { api } from '@/lib/api/client';
@@ -73,6 +73,21 @@ export function DatasetsPage() {
     },
   });
 
+  const [dedupMsg, setDedupMsg] = useState<string | null>(null);
+
+  const deduplicateMutation = useMutation({
+    mutationFn: (id: number) => api.datasets.deduplicate(id),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['datasets'] });
+      setDedupMsg(
+        res.removed_count > 0
+          ? `Successfully removed ${res.removed_count} duplicate records! (${res.remaining_count} unique records remaining)`
+          : `No duplicate records found in dataset.`
+      );
+      setTimeout(() => setDedupMsg(null), 5000);
+    },
+  });
+
   const toggleSelect = (id: number) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -99,6 +114,22 @@ export function DatasetsPage() {
           Create Empty Dataset
         </button>
       </div>
+
+      {/* Deduplication Notification Alert */}
+      {dedupMsg && (
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-xs font-semibold text-indigo-900 shadow-sm flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-indigo-600 flex-shrink-0" />
+            <span>{dedupMsg}</span>
+          </div>
+          <button
+            onClick={() => setDedupMsg(null)}
+            className="text-indigo-500 hover:text-indigo-800 text-xs font-bold"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Selected Merge Banner */}
       {selectedIds.length > 0 && (
@@ -350,6 +381,14 @@ export function DatasetsPage() {
                     {new Date(d.created_at).toLocaleDateString()}
                   </span>
                   <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => deduplicateMutation.mutate(d.id)}
+                      disabled={deduplicateMutation.isPending}
+                      className="rounded p-1 text-indigo-500 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
+                      title="Scan & remove duplicate records in this dataset"
+                    >
+                      <Sparkles className="h-3.5 w-3.5" />
+                    </button>
                     <button
                       onClick={() =>
                         setEditingDataset({

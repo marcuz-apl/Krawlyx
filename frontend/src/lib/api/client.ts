@@ -423,6 +423,11 @@ export const api = {
       request<DatasetDetailOut>(`/api/datasets/${id}?limit=${limit}&offset=${offset}`),
     delete: (id: number) => request<void>(`/api/datasets/${id}`, { method: 'DELETE' }),
     exportCsvUrl: (id: number) => `/api/datasets/${id}/export.csv`,
+    deduplicate: (id: number) =>
+      request<{ dataset_id: number; removed_count: number; remaining_count: number }>(
+        `/api/datasets/${id}/deduplicate`,
+        { method: 'POST' }
+      ),
   },
 
   exportTargets: {
