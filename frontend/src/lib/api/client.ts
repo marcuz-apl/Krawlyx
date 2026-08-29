@@ -296,6 +296,13 @@ export interface MergeDatasetsBody {
   description?: string;
 }
 
+export interface BatchEditBody {
+  column: string;
+  action: 'clean_numeric' | 'replace' | 'uppercase' | 'titlecase' | 'lowercase' | 'trim';
+  find_text?: string;
+  replace_text?: string;
+}
+
 export interface MergeJobsResult {
   columns: string[];
   total_rows: number;
@@ -427,6 +434,11 @@ export const api = {
       request<{ dataset_id: number; removed_count: number; remaining_count: number }>(
         `/api/datasets/${id}/deduplicate`,
         { method: 'POST' }
+      ),
+    batchEdit: (id: number, body: BatchEditBody) =>
+      request<{ dataset_id: number; updated_rows: number; total_rows: number }>(
+        `/api/datasets/${id}/batch-edit`,
+        { method: 'POST', body: JSON.stringify(body) }
       ),
   },
 

@@ -136,7 +136,7 @@ export function DatasetDetailPage() {
       </div>
 
       {/* Structured Table */}
-      <StructuredDatasetTable items={filteredRows} />
+      <StructuredDatasetTable items={filteredRows} datasetId={data.id} />
     </div>
   );
 }

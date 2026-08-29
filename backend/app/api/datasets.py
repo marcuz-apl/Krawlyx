@@ -427,3 +427,117 @@ def deduplicate_dataset(
         "remaining_count": count,
     }
 
+
+class BatchEditIn(BaseModel):
+    column: str  # e.g. "mileage_km", "price", "trim", "drivetrain", or "all"
+    action: str  # "clean_numeric", "replace", "uppercase", "titlecase", "lowercase", "trim"
+    find_text: str | None = None
+    replace_text: str | None = None
+
+
+@router.post("/{dataset_id}/batch-edit")
+def batch_edit_dataset(
+    dataset_id: int,
+    payload: BatchEditIn,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> dict:
+    """Batch clean and edit field values across rows in a saved dataset."""
+    dataset = db.get(Dataset, dataset_id)
+    if dataset is None:
+        raise HTTPException(status_code=404, detail="dataset not found")
+
+    rows = db.scalars(
+        select(DatasetRow)
+        .where(DatasetRow.dataset_id == dataset.id)
+        .order_by(DatasetRow.id)
+    ).all()
+
+    import re
+
+    def _clean_num(val: Any) -> int | float | None:
+        if val is None:
+            return None
+        if isinstance(val, (int, float)):
+            return val
+        s = str(val).replace(",", "").replace("$", "").replace("km", "").replace("KM", "").replace("Km", "").strip()
+        m = re.search(r"\d+(\.\d+)?", s)
+        if m:
+            num_str = m.group(0)
+            return float(num_str) if "." in num_str else int(num_str)
+        return None
+
+    updated = 0
+    for r in rows:
+        d = dict(r.data or {})
+        changed = False
+        target_cols = [payload.column] if payload.column != "all" else list(d.keys())
+
+        for col in target_cols:
+            actual_col = col
+            if actual_col not in d:
+                if actual_col in {"mileage_km", "mileage"} and ("mileage" in d or "mileage_km" in d):
+                    actual_col = "mileage_km" if "mileage_km" in d else "mileage"
+                else:
+                    continue
+
+            val = d[actual_col]
+            if val is None:
+                continue
+
+            if payload.action == "clean_numeric":
+                new_val = _clean_num(val)
+                if new_val != val:
+                    if actual_col in {"mileage", "mileage_km"}:
+                        d.pop("mileage", None)
+                        d["mileage_km"] = new_val
+                    else:
+                        d[actual_col] = new_val
+                    changed = True
+            elif payload.action == "replace":
+                find_t = payload.find_text or ""
+                repl_t = payload.replace_text or ""
+                s_val = str(val)
+                if find_t in s_val:
+                    new_val = s_val.replace(find_t, repl_t)
+                    # If cleaned column is numeric target, convert to int/float
+                    if actual_col in {"mileage_km", "mileage", "price", "year"}:
+                        cleaned_n = _clean_num(new_val)
+                        d[actual_col] = cleaned_n if cleaned_n is not None else new_val
+                    else:
+                        d[actual_col] = new_val
+                    changed = True
+            elif payload.action == "uppercase":
+                s_val = str(val).strip().upper()
+                if s_val != val:
+                    d[actual_col] = s_val
+                    changed = True
+            elif payload.action == "titlecase":
+                s_val = str(val).strip().title()
+                if s_val != val:
+                    d[actual_col] = s_val
+                    changed = True
+            elif payload.action == "lowercase":
+                s_val = str(val).strip().lower()
+                if s_val != val:
+                    d[actual_col] = s_val
+                    changed = True
+            elif payload.action == "trim":
+                s_val = str(val).strip()
+                if s_val != val:
+                    d[actual_col] = s_val
+                    changed = True
+
+        if changed:
+            r.data = d
+            updated += 1
+
+    if updated > 0:
+        db.commit()
+
+    return {
+        "dataset_id": dataset.id,
+        "updated_rows": updated,
+        "total_rows": len(rows),
+    }
+
