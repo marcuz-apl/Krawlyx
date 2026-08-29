@@ -9,7 +9,23 @@ no paid APIs.
 
 ## Status
 
-📋 Planning phase — see [`PRD.md`](PRD.md) for requirements and
+M6 Hardening complete (`v1.1.8-2608293`). See [`PRD.md`](PRD.md) §12 and commit log. Key M6 additions: SSRF allow-list (`ZENCRAWL_SSRF_ALLOW_LIST`), per-host throttle (`FR-SET-02`), per-job rotating logs (`data/logs/jobs/`), identifiable User-Agent (`NFR-05`), `app/core/doctor.py`, and `app/core/logging_config.py`.
+
+## Quick test (final product)
+
+```bash
+# 1. Verify env and dependencies
+python -m app.core.doctor
+
+# 2. Start the API
+uvicorn app.main:app --reload
+
+# 3. Run the full test suite (no live network required for core tests)
+pytest -m "not integration" -q
+
+# 4. Check M6 features are configured
+curl -H "Cookie: session=..." http://localhost:8000/api/settings | jq '.ssrf_guard_enabled, .ssrf_allow_list, .admin_contact_email'
+```
 [`AGENTS.md`](AGENTS.md) for the engineering contract used by AI agents and humans.
 
 ## Planned stack
