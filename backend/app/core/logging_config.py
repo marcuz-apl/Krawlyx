@@ -54,7 +54,7 @@ class JobLogFilter(logging.Filter):
     only `record.msg` after `record.getMessage()`.
     """
 
-    def filter(self, record: logging.LogRecord) -> bool:  # noqa: A003
+    def filter(self, record: logging.LogRecord) -> bool:
         try:
             msg = record.getMessage()
         except Exception:  # noqa: BLE001
@@ -88,9 +88,7 @@ def configure_logging() -> None:
     fmt = logging.Formatter(_LOG_FORMAT, _DATE_FORMAT)
     scrub = JobLogFilter()
 
-    file_h = RotatingFileHandler(
-        app_log, maxBytes=1_000_000, backupCount=5, encoding="utf-8"
-    )
+    file_h = RotatingFileHandler(app_log, maxBytes=1_000_000, backupCount=5, encoding="utf-8")
     file_h.setLevel(logging.INFO)
     file_h.setFormatter(fmt)
     file_h.addFilter(scrub)
@@ -115,6 +113,14 @@ def configure_logging() -> None:
     logging.getLogger("zencrawl.app").info("logging configured (file=%s)", app_log)
 
 
+class AutoFlushRotatingFileHandler(RotatingFileHandler):
+    """Rotating file handler that flushes after every emit for real-time per-job logs."""
+
+    def emit(self, record: logging.LogRecord) -> None:
+        super().emit(record)
+        self.flush()
+
+
 def job_log_handler(job_id: int) -> RotatingFileHandler:
     """Return a per-job rotating file handler.
 
@@ -125,9 +131,7 @@ def job_log_handler(job_id: int) -> RotatingFileHandler:
     log_dir = _data_dir() / "logs" / "jobs"
     log_dir.mkdir(parents=True, exist_ok=True)
     path = log_dir / f"{job_id}.log"
-    h = RotatingFileHandler(
-        path, maxBytes=1_000_000, backupCount=5, encoding="utf-8"
-    )
+    h = AutoFlushRotatingFileHandler(path, maxBytes=1_000_000, backupCount=5, encoding="utf-8")
     h.setLevel(logging.INFO)
     h.setFormatter(logging.Formatter(_LOG_FORMAT, _DATE_FORMAT))
     h.addFilter(JobLogFilter())

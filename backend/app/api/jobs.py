@@ -7,8 +7,11 @@ re-run a job; non-owner non-admins get 403.
 
 from __future__ import annotations
 
+import csv
+import io
 import json
 import logging
+import zipfile
 from collections.abc import Iterable
 from datetime import UTC, datetime
 from typing import Annotated, Any
@@ -46,7 +49,13 @@ def _elapsed_s(job: Job, now: datetime) -> int:
     if job.started_at is None:
         return 0
     end = job.finished_at or now
-    return max(0, int((end - job.started_at).total_seconds()))
+    start = job.started_at
+    if start.tzinfo is None and end.tzinfo is not None:
+        end = end.replace(tzinfo=None)
+    elif start.tzinfo is not None and end.tzinfo is None:
+        start = start.replace(tzinfo=None)
+    return max(0, int((end - start).total_seconds()))
+
 
 
 def _counts(db: Session, job_id: int) -> JobCounts:
@@ -399,6 +408,109 @@ def get_all_results_export(
         media_type="application/json; charset=utf-8",
         headers={"Content-Disposition": f'attachment; filename="job-{job_id}-results.json"'},
     )
+
+
+@router.get("/{job_id}/export.csv", response_class=Response)
+def get_all_results_export_csv(
+    job_id: int,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> Response:
+    if db.get(Job, job_id) is None:
+        raise HTTPException(status_code=404, detail="job not found")
+    rows: Iterable[tuple[Any, Any]] = db.execute(
+        select(JobResult, Target.url)
+        .join(Target, Target.id == JobResult.target_id)
+        .where(Target.job_id == job_id)
+        .order_by(JobResult.id)
+    ).all()
+    output = io.StringIO()
+    output.write("\ufeff")  # UTF-8 BOM for Excel
+    writer = csv.writer(output)
+
+    # Check if any structured dataset items exist
+    all_structured_items = []
+    for r, url in rows:
+        meta = r.metadata_json or {}
+        items = meta.get("items") or []
+        if isinstance(items, list):
+            for it in items:
+                if isinstance(it, dict):
+                    all_structured_items.append((it, url))
+
+    if all_structured_items:
+        preferred_order = [
+            "year", "make", "model", "trim", "drivetrain", "mileage", "price",
+            "seller_type", "city", "province", "dealer_name", "date_observed",
+            "listing_url", "transmission", "fuel", "name", "brand", "currency"
+        ]
+        all_keys = set()
+        for it, _ in all_structured_items:
+            all_keys.update(k for k in it.keys() if k != "type")
+        headers = [k for k in preferred_order if k in all_keys] + sorted(k for k in all_keys if k not in preferred_order)
+
+        writer.writerow(headers)
+        for it, _ in all_structured_items:
+            writer.writerow([it.get(h, "") for h in headers])
+        filename = f"job-{job_id}-dataset.csv"
+    else:
+        writer.writerow([
+            "id", "target_id", "source_url", "final_url", "http_status",
+            "title", "duration_ms", "fetched_at", "content_markdown", "content_text", "error"
+        ])
+        for r, url in rows:
+            writer.writerow([
+                r.id, r.target_id, url, r.final_url or "", r.http_status or "",
+                r.title or "", r.duration_ms or "", r.fetched_at.isoformat() if r.fetched_at else "",
+                r.content_markdown or "", r.content_text or "", r.error or ""
+            ])
+        filename = f"job-{job_id}-results.csv"
+
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+
+@router.get("/{job_id}/export.zip", response_class=Response)
+def get_all_results_export_zip(
+    job_id: int,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> Response:
+    if db.get(Job, job_id) is None:
+        raise HTTPException(status_code=404, detail="job not found")
+    rows: Iterable[tuple[Any, Any]] = db.execute(
+        select(JobResult, Target.url)
+        .join(Target, Target.id == JobResult.target_id)
+        .where(Target.job_id == job_id)
+        .order_by(JobResult.id)
+    ).all()
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for idx, (r, url) in enumerate(rows, 1):
+            safe_name = _safe_filename_part(url)
+            fname = f"{idx:03d}_{safe_name}.md"
+            content = (
+                f"---\n"
+                f"title: {r.title or ''}\n"
+                f"url: {url}\n"
+                f"final_url: {r.final_url or url}\n"
+                f"http_status: {r.http_status or ''}\n"
+                f"fetched_at: {r.fetched_at.isoformat() if r.fetched_at else ''}\n"
+                f"---\n\n"
+                f"{r.content_markdown or r.content_text or ''}"
+            )
+            zf.writestr(fname, content.encode("utf-8"))
+    buf.seek(0)
+    return Response(
+        content=buf.getvalue(),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="job-{job_id}-markdown.zip"'},
+    )
+
 
 
 @router.post(

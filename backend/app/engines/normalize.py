@@ -116,23 +116,39 @@ def normalize_record(
     *,
     html: str | None = None,
     text: str | None = None,
+    markdown: str | None = None,
     final_url: str | None = None,
     http_status: int | None = None,
     links: list[dict[str, str]] | None = None,
+    metadata: dict[str, Any] | None = None,
+    options: dict[str, Any] | None = None,
     content_size_cap: int = 5 * 1024 * 1024,
 ) -> CrawlRecord:
-    """Re-key engine-specific output to the canonical record (PRD §7.1).
-
-    Either `html` or `text` is required. When HTML is supplied, the title and
-    content_text are derived from it; `text` is the path used by plain-text
-    engines.
-    """
-    if html is None and text is None:
+    """Re-key engine-specific output to the canonical record (PRD §7.1)."""
+    if html is None and text is None and markdown is None:
         raise ValueError("normalize_record requires either html or text")
     title = _extract_title(html) if html is not None else None
-    content_text = (text if text is not None else _strip_tags(html)) or ""
+    content_text = (text if text is not None else _strip_tags(html or "")) or ""
+    content_md = markdown if markdown is not None else content_text
     if links is None and html is not None:
         links = _extract_links(html, source_url)
+
+    meta = dict(metadata or {})
+    meta.setdefault("engine", "normalized")
+
+    # Extract structured dataset items if HTML is available
+    if html:
+        try:
+            from app.engines.extractors import extract_structured_data
+
+            items = extract_structured_data(html, source_url, options)
+            if items:
+                meta["items"] = items
+                meta["item_count"] = len(items)
+                meta["schema"] = items[0].get("type", "dataset")
+        except Exception:
+            pass
+
     return CrawlRecord(
         target_id=target_id,
         source_url=source_url,
@@ -140,11 +156,12 @@ def normalize_record(
         status="ok",
         http_status=http_status,
         title=title,
-        content_markdown=clamp_text(content_text, content_size_cap),
+        content_markdown=clamp_text(content_md, content_size_cap),
         content_text=clamp_text(content_text, content_size_cap),
         links=list(links or []),
-        metadata={"engine": "normalized"},
+        metadata=meta,
     )
+
 
 
 def normalize_many(records: Iterable[dict[str, Any]]) -> list[CrawlRecord]:

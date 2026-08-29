@@ -54,10 +54,10 @@ class Crawl4AIEngine:
     # Per-instance per-host throttle. The first time the engine fetches a host
     # it records `time.monotonic()`; subsequent fetches against the same host
     # sleep until `per_domain_interval_s` has elapsed.
-    _last_fetch: dict[str, float] = {}
 
     def __init__(self, config: dict | None = None) -> None:
         self.config = Crawl4AIConfig.model_validate(config or {})
+        self._last_fetch: dict[str, float] = {}
 
     def health(self) -> HealthReport:
         """Verify the crawl4ai package is importable; ping the browser lazily."""
@@ -122,7 +122,7 @@ class Crawl4AIEngine:
                     page_timeout=self.config.browser_timeout_s * 1000,
                     user_agent=ua,
                 )
-        except (OSError, RuntimeError, ValueError) as exc:
+        except Exception as exc:
             yield CrawlRecord(
                 target_id=target.target_id,
                 source_url=target.url,
@@ -142,10 +142,30 @@ class Crawl4AIEngine:
             )
             return
 
+        # Extract Markdown if available from Crawl4AI
+        md = None
+        raw_md = getattr(result, "markdown", None)
+        if raw_md:
+            if hasattr(raw_md, "raw_markdown"):
+                md = raw_md.raw_markdown
+            elif isinstance(raw_md, str):
+                md = raw_md
+
+        import dataclasses
+
+        options_dict = {}
+        if dataclasses.is_dataclass(options):
+            options_dict = dataclasses.asdict(options)
+        elif hasattr(options, "model_dump"):
+            options_dict = options.model_dump()
+        elif isinstance(options, dict):
+            options_dict = dict(options)
+
         yield normalize_record(
             target_id=target.target_id,
             source_url=target.url,
             html=html,
+            markdown=md,
             final_url=getattr(result, "url", None) or target.url,
             http_status=getattr(result, "status_code", None),
             links=[
@@ -154,6 +174,7 @@ class Crawl4AIEngine:
             ]
             if hasattr(result, "links")
             else None,
+            options=options_dict,
         )
 
 

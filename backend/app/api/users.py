@@ -32,9 +32,7 @@ router = APIRouter(prefix="/api/users", tags=["users"])
 
 
 def _count_admins(db: Session) -> int:
-    return len(
-        list(db.scalars(select(UserRow).where(UserRow.role == "admin")))
-    )
+    return len(list(db.scalars(select(UserRow).where(UserRow.role == "admin"))))
 
 
 @router.get("", response_model=list[UserOut])
@@ -86,9 +84,7 @@ def patch_user_route(
         row.password_hash = hash_password(body.password)
     if body.role is not None and body.role != row.role:
         if row.role == "admin" and _count_admins(db) <= 1:
-            raise HTTPException(
-                status_code=400, detail="cannot demote the last admin"
-            )
+            raise HTTPException(status_code=400, detail="cannot demote the last admin")
         row.role = body.role
     db.commit()
     db.refresh(row)
@@ -109,8 +105,6 @@ def delete_user_route(
     if row is None:
         raise HTTPException(status_code=404, detail="user not found")
     if row.role == "admin" and _count_admins(db) <= 1:
-        raise HTTPException(
-            status_code=400, detail="cannot delete the last admin"
-        )
+        raise HTTPException(status_code=400, detail="cannot delete the last admin")
     db.delete(row)
     db.commit()

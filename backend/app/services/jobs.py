@@ -157,6 +157,9 @@ def cancel_job(db: Session, job_id: int) -> bool:
     handle = _active.get(job_id)
     if handle is not None:
         handle.cancel_event.set()
+        for task in list(handle.target_tasks):
+            if not task.done():
+                task.cancel()
 
     return True
 
@@ -200,6 +203,7 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
 
         job.started_at = utcnow()
         db.commit()
+        job_logger.info("job %d started", job_id)
 
         handle = JobHandle(job_id=job_id)
         _active[job_id] = handle
@@ -382,7 +386,9 @@ async def _run_target(
             if primary.status == "error":
                 row.error = primary.error
             db.commit()
-            job_logger_local.info("target %d fetched (%s, %s ms)", row.id, primary.status, elapsed_ms)
+            job_logger_local.info(
+                "target %d fetched (%s, %s ms)", row.id, primary.status, elapsed_ms
+            )
 
             # M4: stream the just-persisted result to the export file
             # (no-op when the job has no folder target).

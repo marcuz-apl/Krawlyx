@@ -10,7 +10,7 @@ type Tab = 'engines' | 'exports' | 'settings' | 'users';
 export function AdminPanelPage() {
   const [tab, setTab] = useState<Tab>('engines');
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div>
       <h1 className="mb-4 text-2xl font-semibold text-slate-900">Admin panel</h1>
       <nav className="mb-4 flex gap-1 border-b border-slate-200">
         {(

@@ -23,18 +23,14 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     with op.batch_alter_table("jobs") as batch_op:
-        batch_op.add_column(
-            sa.Column("export_target_id", sa.Integer(), nullable=True)
-        )
+        batch_op.add_column(sa.Column("export_target_id", sa.Integer(), nullable=True))
         batch_op.create_foreign_key(
             "fk_jobs_export_target_id",
             "export_targets",
             ["export_target_id"],
             ["id"],
         )
-        batch_op.create_index(
-            "ix_jobs_export_target", ["export_target_id"]
-        )
+        batch_op.create_index("ix_jobs_export_target", ["export_target_id"])
 
 
 def downgrade() -> None:

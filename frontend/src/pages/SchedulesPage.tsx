@@ -28,7 +28,7 @@ export function SchedulesPage() {
   const schedules: ScheduleOut[] = data ?? [];
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-slate-900">Schedules</h1>
         <button

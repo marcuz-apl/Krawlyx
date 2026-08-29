@@ -119,9 +119,7 @@ def list_schedules(
     _user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> list[ScheduleOut]:
-    return [
-        _to_out(s) for s in db.scalars(select(Schedule).order_by(Schedule.name)).all()
-    ]
+    return [_to_out(s) for s in db.scalars(select(Schedule).order_by(Schedule.name)).all()]
 
 
 @router.post(
@@ -149,9 +147,7 @@ def create_schedule(
     try:
         scheduler_svc._make_trigger(body.cron, body.timezone)
     except (ValueError, Exception) as exc:
-        raise HTTPException(
-            status_code=400, detail=f"invalid cron/timezone: {exc}"
-        ) from exc
+        raise HTTPException(status_code=400, detail=f"invalid cron/timezone: {exc}") from exc
 
     row = Schedule(
         name=body.name,
@@ -222,9 +218,7 @@ def patch_schedule(
     if "notes" in patch:
         template["notes"] = patch["notes"]
     try:
-        _validate_template(
-            db, engine_id=int(merged_engine_id), export_target_id=merged_export_id
-        )
+        _validate_template(db, engine_id=int(merged_engine_id), export_target_id=merged_export_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     new_cron = patch.get("cron", row.cron)
@@ -232,9 +226,7 @@ def patch_schedule(
     try:
         scheduler_svc._make_trigger(new_cron, new_tz)
     except (ValueError, Exception) as exc:
-        raise HTTPException(
-            status_code=400, detail=f"invalid cron/timezone: {exc}"
-        ) from exc
+        raise HTTPException(status_code=400, detail=f"invalid cron/timezone: {exc}") from exc
 
     for field in ("name", "cron", "timezone", "enabled"):
         if field in patch:
@@ -312,9 +304,7 @@ async def run_now(
     new_job_id = await scheduler_svc.run_now(schedule_id)
     if new_job_id is None:
         # Race: lock was acquired between our check and the fire.
-        raise HTTPException(
-            status_code=409, detail="schedule is already firing"
-        )
+        raise HTTPException(status_code=409, detail="schedule is already firing")
     new_job = db.get(Job, new_job_id)
     if new_job is None:
         raise HTTPException(status_code=500, detail="run-now produced no job")
@@ -331,9 +321,7 @@ def next_fires(
     if row is None:
         raise HTTPException(status_code=404, detail="schedule not found")
     base = row.last_run_at or datetime.now(UTC)
-    fires = scheduler_svc.compute_next_fires(
-        row.cron, row.timezone, n=3, after=base
-    )
+    fires = scheduler_svc.compute_next_fires(row.cron, row.timezone, n=3, after=base)
     return NextFiresOut(
         schedule_id=schedule_id,
         cron=row.cron,

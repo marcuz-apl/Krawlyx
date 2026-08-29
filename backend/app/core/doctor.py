@@ -27,7 +27,7 @@ def _check_python() -> Check:
     v = sys.version_info
     ok = (v.major, v.minor) >= (3, 11)
     return Check(
-        name=f"Python >= 3.11",
+        name="Python >= 3.11",
         ok=ok,
         detail=f"running {v.major}.{v.minor}.{v.micro}",
     )

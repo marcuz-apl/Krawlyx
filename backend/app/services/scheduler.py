@@ -99,16 +99,12 @@ def recover_schedules() -> None:
     if _scheduler is None:
         return
     with SessionLocal() as db:
-        schedules = list(
-            db.scalars(select(Schedule).where(Schedule.enabled.is_(True)))
-        )
+        schedules = list(db.scalars(select(Schedule).where(Schedule.enabled.is_(True))))
     for s in schedules:
         try:
             add_or_replace_job(s)
         except (ValueError, ZoneInfoNotFoundError) as exc:
-            logger.warning(
-                "schedule %d (%s) failed to install: %s", s.id, s.name, exc
-            )
+            logger.warning("schedule %d (%s) failed to install: %s", s.id, s.name, exc)
 
 
 # ---- trigger management ----
@@ -248,18 +244,12 @@ async def _fire_scheduled(schedule_id: int) -> int | None:
             .values(running=True, last_run_at=utcnow())
         )
         if result.rowcount == 0:
-            logger.info(
-                "schedule %d still running; skipping this fire", schedule_id
-            )
+            logger.info("schedule %d still running; skipping this fire", schedule_id)
             return None
         schedule = db.get(Schedule, schedule_id)
         if schedule is None or not schedule.enabled:
             # Defensive: race between the UPDATE and the SELECT.
-            db.execute(
-                update(Schedule)
-                .where(Schedule.id == schedule_id)
-                .values(running=False)
-            )
+            db.execute(update(Schedule).where(Schedule.id == schedule_id).values(running=False))
             db.commit()
             return None
 
@@ -273,9 +263,7 @@ async def _fire_scheduled(schedule_id: int) -> int | None:
                 "schedule %d fired but had no valid URLs; marking failed",
                 schedule_id,
             )
-            db.execute(
-                update(Schedule).where(Schedule.id == schedule_id).values(running=False)
-            )
+            db.execute(update(Schedule).where(Schedule.id == schedule_id).values(running=False))
             db.commit()
             return None
 
@@ -287,9 +275,7 @@ async def _fire_scheduled(schedule_id: int) -> int | None:
                 schedule_id,
                 engine_id,
             )
-            db.execute(
-                update(Schedule).where(Schedule.id == schedule_id).values(running=False)
-            )
+            db.execute(update(Schedule).where(Schedule.id == schedule_id).values(running=False))
             db.commit()
             return None
 

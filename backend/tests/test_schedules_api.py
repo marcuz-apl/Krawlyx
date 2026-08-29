@@ -39,9 +39,7 @@ def _shadow_with_fake(type_id: str = "crawl4ai") -> None:
         def health(self) -> HealthReport:
             return HealthReport(ok=True, detail="fake")
 
-        async def fetch(
-            self, target: Target, options: JobOptions
-        ) -> AsyncIterator[CrawlRecord]:
+        async def fetch(self, target: Target, options: JobOptions) -> AsyncIterator[CrawlRecord]:
             await asyncio.sleep(0.05)
             yield CrawlRecord(
                 target_id=target.target_id,
@@ -253,9 +251,7 @@ def test_running_lock_blocks_concurrent_run_now(client: TestClient) -> None:
     sid = r.json()["id"]
     # Force the running flag to True so the next run-now is blocked.
     with SessionLocal() as db:
-        db.execute(
-            text("UPDATE schedules SET running=1 WHERE id=:i"), {"i": sid}
-        )
+        db.execute(text("UPDATE schedules SET running=1 WHERE id=:i"), {"i": sid})
         db.commit()
     r = client.post(f"/api/schedules/{sid}/run-now", headers={"X-CSRF-Token": csrf})
     assert r.status_code == 409

@@ -346,6 +346,8 @@ export const api = {
     resultDownloadUrl: (id: number, rid: number, kind: 'md' | 'json') =>
       `/api/jobs/${id}/results/${rid}/download.${kind}`,
     exportUrl: (id: number) => `/api/jobs/${id}/export.json`,
+    exportCsvUrl: (id: number) => `/api/jobs/${id}/export.csv`,
+    exportZipUrl: (id: number) => `/api/jobs/${id}/export.zip`,
   },
 
   exportTargets: {

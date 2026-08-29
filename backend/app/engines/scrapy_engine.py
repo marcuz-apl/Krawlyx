@@ -92,6 +92,7 @@ class ScrapyEngine:
                 env=env,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
+                limit=10 * 1024 * 1024,
             )
         except OSError as exc:
             yield CrawlRecord(
@@ -112,13 +113,25 @@ class ScrapyEngine:
                 except json.JSONDecodeError:
                     logger.warning("scrapy emitted non-JSON: %s", line)
                     continue
+                import dataclasses
+
+                options_dict = {}
+                if dataclasses.is_dataclass(options):
+                    options_dict = dataclasses.asdict(options)
+                elif hasattr(options, "model_dump"):
+                    options_dict = options.model_dump()
+                elif isinstance(options, dict):
+                    options_dict = dict(options)
+
                 yield normalize_record(
                     target_id=target.target_id,
                     source_url=item.get("source_url", target.url),
+                    html=item.get("html"),
                     text=item.get("content_text"),
                     final_url=item.get("final_url"),
                     http_status=item.get("http_status"),
                     links=item.get("links"),
+                    options=options_dict,
                 )
         finally:
             try:
@@ -141,9 +154,7 @@ class ScrapyEngine:
                     error=f"scrapy exited {proc.returncode}: {stderr.strip()}",
                 )
 
-    def _build_env(
-        self, target: Target, options: JobOptions, cfg=None
-    ) -> dict[str, str]:
+    def _build_env(self, target: Target, options: JobOptions, cfg=None) -> dict[str, str]:
         """Construct the subprocess env, inheriting PATH so `python` works.
 
         M6: the per-domain interval is now sourced from
@@ -158,10 +169,11 @@ class ScrapyEngine:
         # FR-SET-02: take the larger of the two (admin floor wins).
         # This is "no faster than the admin asked" — the engine can
         # be slower but not faster.
-        effective_delay = max(
-            self.config.download_delay_s, float(cfg.per_domain_interval_s)
-        )
+        effective_delay = max(self.config.download_delay_s, float(cfg.per_domain_interval_s))
         env = {k: v for k, v in os.environ.items() if k != "ZENCRAWL_TARGET_URL"}
+        backend_dir = str(Path(__file__).resolve().parents[2])
+        pythonpath = os.environ.get("PYTHONPATH", "")
+        env["PYTHONPATH"] = f"{backend_dir}{os.pathsep}{pythonpath}" if pythonpath else backend_dir
         env.update(
             {
                 "ZENCRAWL_TARGET_URL": target.url,
@@ -174,6 +186,7 @@ class ScrapyEngine:
                 ),
                 "ZENCRAWL_FOLLOW_LINKS": "1" if self.config.follow_links else "0",
                 "PYTHONUNBUFFERED": "1",
+                "PYTHONIOENCODING": "utf-8",
             }
         )
         return env

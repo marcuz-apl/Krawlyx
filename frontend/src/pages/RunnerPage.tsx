@@ -53,7 +53,7 @@ export function RunnerPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div>
       <h1 className="mb-4 text-2xl font-semibold text-slate-900">New job</h1>
 
       <form

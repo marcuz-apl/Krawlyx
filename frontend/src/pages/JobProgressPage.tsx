@@ -19,14 +19,14 @@ export function JobProgressPage() {
 
   if (isLoading || !data) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6">
+      <div>
         <p className="text-slate-500">Loading job…</p>
       </div>
     );
   }
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6">
+      <div>
         <p className="text-red-700">Failed to load job: {String(error)}</p>
       </div>
     );
@@ -35,27 +35,34 @@ export function JobProgressPage() {
   const isTerminal = ['completed', 'failed', 'cancelled'].includes(data.status);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-slate-900">
           Job #{data.id}
         </h1>
         <div className="flex items-center gap-2">
+          {!isTerminal && (
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to stop this crawl immediately?')) {
+                  cancel.mutate();
+                }
+              }}
+              disabled={cancel.isPending}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 bg-red-50 px-3.5 py-1.5 text-xs font-semibold text-red-700 shadow-sm hover:bg-red-100 active:bg-red-200 disabled:opacity-50 transition-colors"
+            >
+              <span className="h-2 w-2 rounded-sm bg-red-600 animate-pulse" />
+              {cancel.isPending ? 'Stopping…' : 'Stop Crawl'}
+            </button>
+          )}
           {isTerminal && (
             <Link
               to={`/jobs/${data.id}/results`}
-              className="rounded border border-brand-600 px-3 py-1 text-sm text-brand-700 hover:bg-brand-50"
+              className="inline-flex items-center gap-1 rounded-lg border border-brand-600 bg-brand-50 px-3.5 py-1.5 text-xs font-medium text-brand-700 hover:bg-brand-100 transition-colors"
             >
               View results →
             </Link>
           )}
-          <button
-            onClick={() => cancel.mutate()}
-            disabled={isTerminal || cancel.isPending}
-            className="rounded border border-red-300 px-3 py-1 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
-          >
-            {cancel.isPending ? 'Cancelling…' : 'Cancel'}
-          </button>
         </div>
       </div>
 

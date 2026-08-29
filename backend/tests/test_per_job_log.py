@@ -7,7 +7,6 @@ from collections.abc import AsyncIterator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import text
 
 from app.core.config import get_settings
 from app.core.db import SessionLocal
@@ -21,11 +20,11 @@ from app.engines.base import (
     Target,
 )
 from app.main import create_app
-from app.models import EngineInstance, Job, Target as TargetRow, User
+from app.models import EngineInstance, Job
+from app.models import Target as TargetRow
 from app.services import jobs as jobs_svc
 from app.services.engines import encrypt_config
 from tests._helpers import auth_as, make_user
-
 
 # ---- fake adapter ----
 
@@ -41,9 +40,7 @@ def _shadow_with_fake(type_id: str = "crawl4ai") -> None:
         def health(self) -> HealthReport:
             return HealthReport(ok=True, detail="fake")
 
-        async def fetch(
-            self, target: Target, options: JobOptions
-        ) -> AsyncIterator[CrawlRecord]:
+        async def fetch(self, target: Target, options: JobOptions) -> AsyncIterator[CrawlRecord]:
             await asyncio.sleep(0.05)
             yield CrawlRecord(
                 target_id=target.target_id,
@@ -57,7 +54,7 @@ def _shadow_with_fake(type_id: str = "crawl4ai") -> None:
                 duration_ms=50,
             )
 
-    registry._REGISTRY[type_id] = lambda config=None: _Fake(config)  # noqa: SLF001
+    registry._REGISTRY[type_id] = lambda config=None: _Fake(config)
 
 
 # ---- fixtures ----
@@ -84,16 +81,23 @@ def test_per_job_log_file_is_created_and_populated(client: TestClient) -> None:
     with SessionLocal() as db:
         make_user("u", "admin")
         eid_row = EngineInstance(
-            name="e1", type="crawl4ai",
-            config_encrypted=encrypt_config({}), pooled=True,
+            name="e1",
+            type="crawl4ai",
+            config_encrypted=encrypt_config({}),
+            pooled=True,
         )
-        db.add(eid_row); db.commit(); db.refresh(eid_row)
+        db.add(eid_row)
+        db.commit()
+        db.refresh(eid_row)
         eid = eid_row.id
         from app.models import User as UserModel
+
         u = db.scalar(__import__("sqlalchemy").select(UserModel).where(UserModel.username == "u"))
         assert u is not None
         job = Job(created_by_id=u.id, engine_id=eid, options={}, status="queued")
-        db.add(job); db.commit(); db.refresh(job)
+        db.add(job)
+        db.commit()
+        db.refresh(job)
         db.add(TargetRow(job_id=job.id, url="https://example.com/a", status="pending", attempts=0))
         db.commit()
         jid = job.id
@@ -102,6 +106,7 @@ def test_per_job_log_file_is_created_and_populated(client: TestClient) -> None:
         await jobs_svc.enqueue_job(jid)
         # Wait for terminal.
         import time
+
         deadline = time.monotonic() + 5.0
         while time.monotonic() < deadline:
             with SessionLocal() as db:

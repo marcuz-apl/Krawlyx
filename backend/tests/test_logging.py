@@ -10,9 +10,13 @@ from app.core.logging_config import JobLogFilter, configure_logging
 def test_job_log_filter_scrubs_secrets() -> None:
     f = JobLogFilter()
     rec = logging.LogRecord(
-        name="t", level=logging.INFO, pathname="x.py", lineno=1,
+        name="t",
+        level=logging.INFO,
+        pathname="x.py",
+        lineno=1,
         msg="hello api_key=ZZZTOKEN123 password=secretword token=t0k3n",
-        args=(), exc_info=None,
+        args=(),
+        exc_info=None,
     )
     assert f.filter(rec) is True
     out = rec.getMessage()
@@ -25,9 +29,13 @@ def test_job_log_filter_scrubs_secrets() -> None:
 def test_job_log_filter_masks_fernet_tokens() -> None:
     f = JobLogFilter()
     rec = logging.LogRecord(
-        name="t", level=logging.INFO, pathname="x.py", lineno=1,
+        name="t",
+        level=logging.INFO,
+        pathname="x.py",
+        lineno=1,
         msg="encrypted=gAAAAA_LONG_FERNET_TOKEN_HERE_AND_MORE_CHARS_HERE_FOR_THE_REGEX_XXXX",
-        args=(), exc_info=None,
+        args=(),
+        exc_info=None,
     )
     f.filter(rec)
     out = rec.getMessage()

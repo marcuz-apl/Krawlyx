@@ -13,8 +13,8 @@ admin opts in by adding the literal IP or hostname.
 import ipaddress
 import socket
 
-from app.engines.base import Target
 from app.core.config import Settings, get_settings
+from app.engines.base import Target
 
 # These ranges are unreachable from the public internet and are the canonical
 # SSRF targets: loopback, private (RFC 1918 + ULA), link-local, and the cloud
@@ -58,9 +58,7 @@ def _matches_allow_list(host: str, allow_list: list[str]) -> bool:
     return False
 
 
-def resolve_safe(
-    target: Target, settings: Settings | None = None
-) -> tuple[str, list[str]]:
+def resolve_safe(target: Target, settings: Settings | None = None) -> tuple[str, list[str]]:
     """Return (host, resolved_addresses). Raises ValueError when blocked.
 
     M6: the guard is a no-op when `settings.ssrf_guard_enabled` is False

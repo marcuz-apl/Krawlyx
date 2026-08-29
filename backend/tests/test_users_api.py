@@ -88,14 +88,21 @@ def test_cannot_delete_last_admin(client: TestClient) -> None:
     csrf = auth_as(client, "admin4", "admin")
     cookie_csrf = client.cookies.get("zc_csrf")
     with SessionLocal() as db:
-        admin_ids = [u.id for u in db.scalars(__import__("sqlalchemy").select(UserRow).where(UserRow.role == "admin"))]
+        admin_ids = [
+            u.id
+            for u in db.scalars(
+                __import__("sqlalchemy").select(UserRow).where(UserRow.role == "admin")
+            )
+        ]
     # Delete down to exactly one admin.
     for uid in admin_ids[:-1]:
         r = client.delete(f"/api/users/{uid}", headers={"X-CSRF-Token": cookie_csrf})
         assert r.status_code == 204
     # Now there's exactly one admin. Try to delete that one.
     with SessionLocal() as db:
-        last_admin_id = db.scalar(__import__("sqlalchemy").select(UserRow.id).where(UserRow.role == "admin"))
+        last_admin_id = db.scalar(
+            __import__("sqlalchemy").select(UserRow.id).where(UserRow.role == "admin")
+        )
     r = client.delete(f"/api/users/{last_admin_id}", headers={"X-CSRF-Token": csrf})
     assert r.status_code == 400
     assert "last admin" in r.json()["detail"].lower()

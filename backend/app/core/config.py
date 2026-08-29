@@ -12,7 +12,11 @@ VERSION_FILE = ROOT_DIR / "VERSION"
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="ZENCRAWL_", env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_prefix="ZENCRAWL_",
+        env_file=(str(ROOT_DIR / ".env"), ".env"),
+        extra="ignore",
+    )
 
     app_name: str = "zenCrawl"
     # Required for any real deployment; the default keeps local dev frictionless.

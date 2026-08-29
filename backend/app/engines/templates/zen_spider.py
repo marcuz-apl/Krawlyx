@@ -25,6 +25,14 @@ from scrapy import Spider
 from scrapy.crawler import CrawlerProcess
 
 
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
+
 def _bool(name: str, default: bool = False) -> bool:
     raw = os.environ.get(name)
     if raw is None:
@@ -47,12 +55,11 @@ def _float(name: str, default: float) -> float:
 
 
 def emit(item: dict) -> None:
-    """Write one item as a single JSONL line and flush immediately.
+    """Write one item as a single JSONL line and flush immediately."""
+    data = (json.dumps(item, ensure_ascii=False) + "\n").encode("utf-8")
+    sys.stdout.buffer.write(data)
+    sys.stdout.buffer.flush()
 
-    The parent reads stdout line-by-line, so a buffered write would block
-    progress reporting. `print` is the simplest reliable way to flush.
-    """
-    print(json.dumps(item, ensure_ascii=False), flush=True)
 
 
 class ZenSpider(Spider):
@@ -85,6 +92,7 @@ class ZenSpider(Spider):
                 "final_url": response.url,
                 "http_status": response.status,
                 "title": response.css("title::text").get("").strip() or None,
+                "html": response.text,
                 "content_text": " ".join(response.text.split()),
                 "links": [
                     {
