@@ -38,7 +38,7 @@ export function RunnerPage() {
   ]);
 
   const addField = () => {
-    if (customFields.length >= 10) return;
+    if (customFields.length >= 20) return;
     setCustomFields((prev) => [
       ...prev,
       { name: `Field ${prev.length + 1}`, selector: '', attribute: 'text' },
@@ -132,7 +132,7 @@ export function RunnerPage() {
                   : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
               }`}
             >
-              ⚙️ Custom Dataset Schema (Up to 10 Fields)
+              ⚙️ Custom Dataset Schema (Up to 20 Fields)
             </button>
             <button
               type="button"
@@ -157,10 +157,10 @@ export function RunnerPage() {
                 <button
                   type="button"
                   onClick={addField}
-                  disabled={customFields.length >= 10}
+                  disabled={customFields.length >= 20}
                   className="rounded-md bg-brand-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                 >
-                  + Add Field ({customFields.length}/10)
+                  + Add Field ({customFields.length}/20)
                 </button>
               </div>
 

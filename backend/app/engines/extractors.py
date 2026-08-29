@@ -61,11 +61,29 @@ def extract_structured_data(html: str, source_url: str, options: dict[str, Any] 
     return items
 
 
+def _clean_numeric(val: Any) -> int | None:
+    """Extract clean pure integer from string or numeric value."""
+    if val is None:
+        return None
+    if isinstance(val, bool):
+        return None
+    if isinstance(val, (int, float)):
+        return int(val)
+    import re
+    clean = re.sub(r"[^\d]", "", str(val))
+    if clean:
+        try:
+            return int(clean)
+        except ValueError:
+            return None
+    return None
+
+
 def _extract_custom_schema(soup: BeautifulSoup, source_url: str, schema: dict[str, Any]) -> list[dict[str, Any]]:
-    """Extract rows using user-defined custom fields (up to 10 fields)."""
+    """Extract rows using user-defined custom fields (up to 20 fields)."""
     raw_fields = schema.get("fields") or []
-    # Cap at 10 fields max
-    fields = [f for f in raw_fields if isinstance(f, dict) and f.get("name")][:10]
+    # Cap at 20 fields max
+    fields = [f for f in raw_fields if isinstance(f, dict) and f.get("name")][:20]
     if not fields:
         return []
 
@@ -186,13 +204,14 @@ def _extract_autotrader(soup: BeautifulSoup, source_url: str) -> list[dict[str, 
             if m:
                 year = int(m.group(1))
 
-        # Mileage detection fallback
-        mileage = veh.get("mileageInKm")
-        if not mileage and l.get("vehicleDetails"):
+        # Mileage detection fallback & clean to pure integer
+        raw_mileage = veh.get("mileageInKm")
+        if not raw_mileage and l.get("vehicleDetails"):
             for vd in l.get("vehicleDetails", []):
                 if isinstance(vd, dict) and "mileage" in str(vd.get("ariaLabel", "")).lower():
-                    mileage = vd.get("data")
+                    raw_mileage = vd.get("data")
                     break
+        mileage_km = _clean_numeric(raw_mileage)
 
         # Images
         images = l.get("images") or []
@@ -218,7 +237,7 @@ def _extract_autotrader(soup: BeautifulSoup, source_url: str) -> list[dict[str, 
                 "model": veh.get("modelGroup") or veh.get("model"),
                 "trim": trim or None,
                 "drivetrain": drivetrain,
-                "mileage": mileage,
+                "mileage_km": mileage_km,
                 "price": pr.get("priceRaw") or pr.get("priceFormatted"),
                 "seller_type": seller_type,
                 "city": loc.get("city"),

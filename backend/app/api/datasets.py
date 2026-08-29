@@ -126,7 +126,7 @@ def create_dataset(
 
     # Sort columns cleanly
     preferred_order = [
-        "year", "make", "model", "trim", "drivetrain", "mileage", "price",
+        "year", "make", "model", "trim", "drivetrain", "mileage_km", "mileage", "price",
         "seller_type", "city", "province", "dealer_name", "date_observed",
         "listing_url", "title", "url"
     ]
@@ -149,6 +149,126 @@ def create_dataset(
         row_count=count,
         created_at=dataset.created_at.isoformat(),
         updated_at=dataset.updated_at.isoformat(),
+    )
+
+
+class UpdateDatasetIn(BaseModel):
+    name: str | None = Field(None, min_length=1, max_length=255)
+    description: str | None = None
+
+
+@router.patch("/{dataset_id}", response_model=DatasetOut)
+def patch_dataset(
+    dataset_id: int,
+    payload: UpdateDatasetIn,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> DatasetOut:
+    """Rename or update description of a dataset."""
+    dataset = db.get(Dataset, dataset_id)
+    if not dataset:
+        raise HTTPException(status_code=404, detail="dataset not found")
+
+    if payload.name is not None:
+        dataset.name = payload.name.strip()
+    if payload.description is not None:
+        dataset.description = payload.description.strip() or None
+
+    db.commit()
+    db.refresh(dataset)
+
+    count = db.scalar(
+        select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == dataset.id)
+    ) or 0
+
+    return DatasetOut(
+        id=dataset.id,
+        name=dataset.name,
+        description=dataset.description,
+        columns=dataset.columns or [],
+        row_count=count,
+        created_at=dataset.created_at.isoformat(),
+        updated_at=dataset.updated_at.isoformat(),
+    )
+
+
+class MergeDatasetsIn(BaseModel):
+    dataset_ids: list[int] = Field(..., min_length=1)
+    name: str = Field(..., min_length=1, max_length=255)
+    description: str | None = None
+
+
+@router.post("/merge", response_model=DatasetOut, status_code=status.HTTP_201_CREATED)
+def merge_datasets(
+    payload: MergeDatasetsIn,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> DatasetOut:
+    """Merge multiple existing saved datasets into a new combined dataset."""
+    datasets = db.scalars(
+        select(Dataset).where(Dataset.id.in_(payload.dataset_ids))
+    ).all()
+    if not datasets:
+        raise HTTPException(status_code=404, detail="no matching datasets found")
+
+    # Combine columns
+    combined_columns = set()
+    for d in datasets:
+        combined_columns.update(d.columns or [])
+
+    new_dataset = Dataset(
+        name=payload.name.strip(),
+        description=payload.description.strip() if payload.description else None,
+        columns=list(combined_columns),
+    )
+    db.add(new_dataset)
+    db.flush()
+
+    # Copy rows across all selected datasets
+    seen_urls = set()
+    for d in datasets:
+        rows = db.scalars(
+            select(DatasetRow)
+            .where(DatasetRow.dataset_id == d.id)
+            .order_by(DatasetRow.id)
+        ).all()
+        for r in rows:
+            url_key = r.source_url or f"{d.id}_{r.id}"
+            if url_key in seen_urls:
+                continue
+            seen_urls.add(url_key)
+            new_row = DatasetRow(
+                dataset_id=new_dataset.id,
+                source_job_id=r.source_job_id,
+                source_url=r.source_url,
+                data=r.data,
+            )
+            db.add(new_row)
+
+    preferred_order = [
+        "year", "make", "model", "trim", "drivetrain", "mileage_km", "mileage", "price",
+        "seller_type", "city", "province", "dealer_name", "date_observed",
+        "listing_url", "title", "url"
+    ]
+    new_dataset.columns = [c for c in preferred_order if c in combined_columns] + sorted(
+        c for c in combined_columns if c not in preferred_order
+    )
+
+    db.commit()
+    db.refresh(new_dataset)
+
+    count = db.scalar(
+        select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == new_dataset.id)
+    ) or 0
+
+    return DatasetOut(
+        id=new_dataset.id,
+        name=new_dataset.name,
+        description=new_dataset.description,
+        columns=new_dataset.columns,
+        row_count=count,
+        created_at=new_dataset.created_at.isoformat(),
+        updated_at=new_dataset.updated_at.isoformat(),
     )
 
 
@@ -243,3 +363,4 @@ def export_dataset_csv(
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f'attachment; filename="{safe_name}.csv"'},
     )
+

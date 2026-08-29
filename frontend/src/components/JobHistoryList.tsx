@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Layers, Square, Trash2 } from 'lucide-react';
+import { AlertCircle, Layers, Square, Trash2 } from 'lucide-react';
 
 import type { JobOut } from '@/lib/api/client';
 import { api } from '@/lib/api/client';
@@ -26,6 +26,9 @@ export function JobHistoryList({ jobs }: Props) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const cancel = useMutation({
     mutationFn: (id: number) => api.jobs.cancel(id),
@@ -39,6 +42,11 @@ export function JobHistoryList({ jobs }: Props) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['jobs'] });
       setSelectedIds((prev) => prev.filter((x) => !jobs.some((j) => j.id === x)));
+      setConfirmDeleteId(null);
+      setErrorMessage(null);
+    },
+    onError: (err: Error) => {
+      setErrorMessage(`Failed to delete job: ${err.message}`);
     },
   });
 
@@ -47,6 +55,11 @@ export function JobHistoryList({ jobs }: Props) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['jobs'] });
       setSelectedIds([]);
+      setConfirmBulkDelete(false);
+      setErrorMessage(null);
+    },
+    onError: (err: Error) => {
+      setErrorMessage(`Failed to delete selected jobs: ${err.message}`);
     },
   });
 
@@ -67,9 +80,73 @@ export function JobHistoryList({ jobs }: Props) {
   if (jobs.length === 0) {
     return <p className="text-sm text-slate-500">No jobs yet.</p>;
   }
+
   return (
     <div className="space-y-3">
-      {selectedIds.length > 0 && (
+      {errorMessage && (
+        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {/* Bulk Delete In-App Confirmation Modal */}
+      {confirmBulkDelete && (
+        <div className="rounded-xl border border-red-300 bg-red-50 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-red-900">
+            <Trash2 className="h-4 w-4 text-red-600" />
+            <span>Confirm Deletion of {selectedIds.length} Job Record(s)</span>
+          </div>
+          <p className="text-xs text-red-700">
+            This will permanently remove the selected crawl histories and their extracted page results from the database.
+          </p>
+          <div className="flex justify-end gap-2 pt-1">
+            <button
+              onClick={() => setConfirmBulkDelete(false)}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => deleteBulk.mutate(selectedIds)}
+              disabled={deleteBulk.isPending}
+              className="rounded-lg bg-red-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              {deleteBulk.isPending ? 'Deleting…' : 'Yes, Delete Selected'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Single Delete In-App Confirmation Modal */}
+      {confirmDeleteId !== null && (
+        <div className="rounded-xl border border-red-300 bg-red-50 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-red-900">
+            <Trash2 className="h-4 w-4 text-red-600" />
+            <span>Confirm Deletion of Job #{confirmDeleteId}</span>
+          </div>
+          <p className="text-xs text-red-700">
+            Are you sure you want to delete Job #{confirmDeleteId}? This action cannot be undone.
+          </p>
+          <div className="flex justify-end gap-2 pt-1">
+            <button
+              onClick={() => setConfirmDeleteId(null)}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => deleteSingle.mutate(confirmDeleteId)}
+              disabled={deleteSingle.isPending}
+              className="rounded-lg bg-red-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              {deleteSingle.isPending ? 'Deleting…' : 'Yes, Delete Job'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {selectedIds.length > 0 && !confirmBulkDelete && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 shadow-sm">
           <div className="flex items-center gap-2 text-xs font-semibold text-brand-900">
             <Layers className="h-4 w-4 text-brand-600" />
@@ -77,16 +154,11 @@ export function JobHistoryList({ jobs }: Props) {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                if (window.confirm(`Are you sure you want to delete ${selectedIds.length} selected job(s)?`)) {
-                  deleteBulk.mutate(selectedIds);
-                }
-              }}
-              disabled={deleteBulk.isPending}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:opacity-50 transition-colors"
+              onClick={() => setConfirmBulkDelete(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors"
             >
               <Trash2 className="h-3.5 w-3.5 text-red-600" />
-              {deleteBulk.isPending ? 'Deleting…' : `Delete Selected (${selectedIds.length})`}
+              Delete Selected ({selectedIds.length})
             </button>
             <button
               onClick={() => navigate(`/jobs/merge?ids=${selectedIds.join(',')}`)}
@@ -192,12 +264,7 @@ export function JobHistoryList({ jobs }: Props) {
                             Results →
                           </Link>
                           <button
-                            onClick={() => {
-                              if (window.confirm(`Delete Job #${j.id}?`)) {
-                                deleteSingle.mutate(j.id);
-                              }
-                            }}
-                            disabled={deleteSingle.isPending}
+                            onClick={() => setConfirmDeleteId(j.id)}
                             className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
                             title="Delete job history record"
                           >

@@ -285,6 +285,17 @@ export interface CreateDatasetBody {
   source_job_ids?: number[];
 }
 
+export interface UpdateDatasetBody {
+  name?: string;
+  description?: string;
+}
+
+export interface MergeDatasetsBody {
+  dataset_ids: number[];
+  name: string;
+  description?: string;
+}
+
 export interface MergeJobsResult {
   columns: string[];
   total_rows: number;
@@ -395,6 +406,16 @@ export const api = {
     list: () => request<DatasetOut[]>('/api/datasets'),
     create: (body: CreateDatasetBody) =>
       request<DatasetOut>('/api/datasets', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    patch: (id: number, body: UpdateDatasetBody) =>
+      request<DatasetOut>(`/api/datasets/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      }),
+    merge: (body: MergeDatasetsBody) =>
+      request<DatasetOut>('/api/datasets/merge', {
         method: 'POST',
         body: JSON.stringify(body),
       }),

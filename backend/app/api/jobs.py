@@ -441,7 +441,7 @@ def get_all_results_export_csv(
 
     if all_structured_items:
         preferred_order = [
-            "year", "make", "model", "trim", "drivetrain", "mileage", "price",
+            "year", "make", "model", "trim", "drivetrain", "mileage_km", "mileage", "price",
             "seller_type", "city", "province", "dealer_name", "date_observed",
             "listing_url", "transmission", "fuel", "name", "brand", "currency"
         ]
@@ -672,7 +672,7 @@ def merge_jobs(
                 all_columns.update(row_data.keys())
 
     preferred_order = [
-        "year", "make", "model", "trim", "drivetrain", "mileage", "price",
+        "year", "make", "model", "trim", "drivetrain", "mileage_km", "mileage", "price",
         "seller_type", "city", "province", "dealer_name", "date_observed",
         "listing_url", "_job_id", "title", "url"
     ]
@@ -730,6 +730,21 @@ def delete_job(
     if user.role != "admin" and job.created_by_id != user.id:
         raise HTTPException(status_code=403, detail="forbidden")
 
+    # Clear references from dataset rows
+    from app.models.dataset import DatasetRow
+
+    db.query(DatasetRow).filter(DatasetRow.source_job_id == job_id).update(
+        {"source_job_id": None}, synchronize_session=False
+    )
+
+    # Delete results and targets explicitly
+    target_ids = [t[0] for t in db.query(Target.id).filter(Target.job_id == job_id).all()]
+    if target_ids:
+        db.query(JobResult).filter(JobResult.target_id.in_(target_ids)).delete(
+            synchronize_session=False
+        )
+        db.query(Target).filter(Target.job_id == job_id).delete(synchronize_session=False)
+
     db.delete(job)
     db.commit()
 
@@ -741,9 +756,20 @@ def bulk_delete_jobs(
     db: Annotated[Session, Depends(get_db)],
 ) -> None:
     """Delete multiple jobs and their associated targets and results."""
+    from app.models.dataset import DatasetRow
+
     for jid in payload.job_ids:
         job = db.get(Job, jid)
         if job and (user.role == "admin" or job.created_by_id == user.id):
+            db.query(DatasetRow).filter(DatasetRow.source_job_id == jid).update(
+                {"source_job_id": None}, synchronize_session=False
+            )
+            target_ids = [t[0] for t in db.query(Target.id).filter(Target.job_id == jid).all()]
+            if target_ids:
+                db.query(JobResult).filter(JobResult.target_id.in_(target_ids)).delete(
+                    synchronize_session=False
+                )
+                db.query(Target).filter(Target.job_id == jid).delete(synchronize_session=False)
             db.delete(job)
     db.commit()
 
