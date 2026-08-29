@@ -109,18 +109,11 @@ export function RunnerPage() {
       const urlObj = new URL(base);
       const generated: string[] = [];
 
-      if (helperType === 'autotrader') {
-        // AutoTrader uses rcs for offset and rcp/size for page size
-        const step = helperStep > 0 ? helperStep : 20;
-        urlObj.searchParams.set('rcp', String(step));
-        urlObj.searchParams.set('size', String(step));
-        for (let i = 0; i < helperPages; i++) {
-          const currentOffset = i * step;
-          const u = new URL(urlObj.toString());
-          u.searchParams.set('rcs', String(currentOffset));
-          generated.push(u.toString());
-        }
-      } else if (helperType === 'page_num') {
+      if (helperType === 'autotrader' || helperType === 'page_num') {
+        // AutoTrader Next.js backend uses page=1, page=2... (20 items/page)
+        urlObj.searchParams.delete('rcs');
+        urlObj.searchParams.delete('rcp');
+        urlObj.searchParams.delete('size');
         for (let i = 1; i <= helperPages; i++) {
           const u = new URL(urlObj.toString());
           u.searchParams.set('page', String(i));
