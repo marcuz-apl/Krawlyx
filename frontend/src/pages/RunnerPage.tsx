@@ -110,9 +110,10 @@ export function RunnerPage() {
       const generated: string[] = [];
 
       if (helperType === 'autotrader') {
-        // AutoTrader uses rcs for offset and rcp for page size
+        // AutoTrader uses rcs for offset and rcp/size for page size
         const step = helperStep > 0 ? helperStep : 20;
         urlObj.searchParams.set('rcp', String(step));
+        urlObj.searchParams.set('size', String(step));
         for (let i = 0; i < helperPages; i++) {
           const currentOffset = i * step;
           const u = new URL(urlObj.toString());

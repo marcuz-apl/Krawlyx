@@ -123,11 +123,14 @@ class Crawl4AIEngine:
                     user_agent=ua,
                 )
         except Exception as exc:
+            import traceback
+            tb = traceback.format_exc()
+            logger.error("crawl4ai fetch error for %s:\n%s", target.url, tb)
             yield CrawlRecord(
                 target_id=target.target_id,
                 source_url=target.url,
                 status="error",
-                error=f"crawl4ai fetch failed: {exc}",
+                error=f"crawl4ai fetch failed: {exc or type(exc).__name__}",
             )
             return
 
