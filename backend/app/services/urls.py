@@ -38,7 +38,8 @@ class UrlParseResult:
 def _normalize_for_dedup(url: str) -> str:
     """Lowercase scheme + host, keep path/query verbatim. Used to detect dupes."""
     parts = urlsplit(url)
-    return f"{parts.scheme.lower()}://{parts.netloc.lower()}{parts.path}"
+    query_str = f"?{parts.query}" if parts.query else ""
+    return f"{parts.scheme.lower()}://{parts.netloc.lower()}{parts.path}{query_str}"
 
 
 def parse(lines: Iterable[str]) -> UrlParseResult:

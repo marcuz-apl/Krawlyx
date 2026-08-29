@@ -113,15 +113,32 @@ class Crawl4AIEngine:
         ua = user_agent("crawl4ai")
 
         # NOTE: constructing the crawler in production needs the Playwright
-        # browser installed (`crawl4ai-setup`). Tests substitute a fake.
+        # browser installed (`crawl4ai-setup`). On Windows, Playwright requires
+        # a ProactorEventLoop which we guarantee inside a dedicated thread.
         try:
-            async with AsyncWebCrawler() as crawler:
-                result = await crawler.arun(
-                    url=target.url,
-                    headless=self.config.headless,
-                    page_timeout=self.config.browser_timeout_s * 1000,
-                    user_agent=ua,
-                )
+            import asyncio
+            import sys
+
+            def _sync_fetch():
+                if sys.platform == "win32":
+                    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    async def _inner():
+                        async with AsyncWebCrawler() as crawler:
+                            return await crawler.arun(
+                                url=target.url,
+                                headless=self.config.headless,
+                                page_timeout=self.config.browser_timeout_s * 1000,
+                                user_agent=ua,
+                            )
+
+                    return loop.run_until_complete(_inner())
+                finally:
+                    loop.close()
+
+            result = await asyncio.to_thread(_sync_fetch)
         except Exception as exc:
             import traceback
             tb = traceback.format_exc()
