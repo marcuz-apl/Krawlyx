@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useLogin } from '@/hooks/useAuth';
@@ -14,16 +14,10 @@ export function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  useEffect(() => {
-    // Reset credentials on load so previous user info is completely removed
-    setUsername('');
-    setPassword('');
-  }, []);
-
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     login.mutate(
-      { username: username.trim(), password },
+      { username, password },
       {
         onSuccess: () => {
           const state = (location.state as LocationState | null) ?? {};
@@ -37,7 +31,6 @@ export function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-100 p-6">
       <form
         onSubmit={onSubmit}
-        autoComplete="off"
         className="w-full max-w-sm bg-white shadow rounded-lg p-6 space-y-4"
       >
         <h1 className="text-2xl font-semibold text-slate-900">zenCrawl</h1>
@@ -49,8 +42,7 @@ export function LoginPage() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            autoComplete="off"
-            placeholder="Enter username"
+            autoComplete="username"
             className="mt-1 block w-full rounded border border-slate-300 px-3 py-2 text-slate-900 focus:border-brand-500 focus:outline-none"
           />
         </label>
@@ -62,8 +54,7 @@ export function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            autoComplete="new-password"
-            placeholder="Enter password"
+            autoComplete="current-password"
             className="mt-1 block w-full rounded border border-slate-300 px-3 py-2 text-slate-900 focus:border-brand-500 focus:outline-none"
           />
         </label>
