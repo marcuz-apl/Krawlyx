@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Square } from 'lucide-react';
+import { Layers, Square } from 'lucide-react';
 
 import type { JobOut } from '@/lib/api/client';
 import { api } from '@/lib/api/client';
@@ -22,7 +23,10 @@ function badge(status: string): string {
 }
 
 export function JobHistoryList({ jobs }: Props) {
+  const navigate = useNavigate();
   const qc = useQueryClient();
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
   const cancel = useMutation({
     mutationFn: (id: number) => api.jobs.cancel(id),
     onSuccess: () => {
@@ -30,46 +34,107 @@ export function JobHistoryList({ jobs }: Props) {
     },
   });
 
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleAll = () => {
+    if (selectedIds.length === jobs.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(jobs.map((j) => j.id));
+    }
+  };
+
   if (jobs.length === 0) {
     return <p className="text-sm text-slate-500">No jobs yet.</p>;
   }
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <table className="w-full text-sm">
-        <thead className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200">
-          <tr>
-            <th className="px-4 py-3 w-16">#</th>
-            <th className="px-4 py-3">Status</th>
-            <th className="px-4 py-3">Counts</th>
-            <th className="px-4 py-3">Started</th>
-            <th className="px-4 py-3 text-right">Elapsed</th>
-            <th className="px-4 py-3 text-right w-24">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {jobs.map((j) => {
-            const isRunning = ['running', 'queued'].includes(j.status);
-            return (
-              <tr key={j.id} className="hover:bg-slate-50/80 transition-colors">
-                <td className="px-4 py-3 font-mono font-medium text-brand-700">
-                  <Link to={`/jobs/${j.id}`} className="hover:underline">
-                    #{j.id}
-                  </Link>
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${badge(j.status)}`}
-                  >
-                    {isRunning && <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />}
-                    {j.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-xs text-slate-600">
-                  <span className="text-emerald-700 font-medium">{j.counts.done} done</span>
-                  {j.counts.error > 0 && <span className="text-red-600 font-medium"> · {j.counts.error} err</span>}
-                  {j.counts.pending > 0 && <span className="text-slate-500"> · {j.counts.pending} pending</span>}
-                  {j.counts.fetching > 0 && <span className="text-amber-600"> · {j.counts.fetching} fetching</span>}
-                </td>
+    <div className="space-y-3">
+      {selectedIds.length > 0 && (
+        <div className="flex items-center justify-between rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 shadow-sm">
+          <div className="flex items-center gap-2 text-xs font-semibold text-brand-900">
+            <Layers className="h-4 w-4 text-brand-600" />
+            <span>{selectedIds.length} job(s) selected</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSelectedIds([])}
+              className="text-xs text-brand-700 hover:underline px-2 py-1"
+            >
+              Clear
+            </button>
+            <button
+              onClick={() => navigate(`/jobs/merge?ids=${selectedIds.join(',')}`)}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-brand-700 transition-colors"
+            >
+              <Layers className="h-3.5 w-3.5" />
+              Merge Selected Datasets →
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200">
+            <tr>
+              <th className="px-3 py-3 w-10 text-center">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.length === jobs.length && jobs.length > 0}
+                  onChange={toggleAll}
+                  className="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                />
+              </th>
+              <th className="px-3 py-3 w-14">#</th>
+              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Counts</th>
+              <th className="px-4 py-3">Started</th>
+              <th className="px-4 py-3 text-right">Elapsed</th>
+              <th className="px-4 py-3 text-right w-24">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {jobs.map((j) => {
+              const isRunning = ['running', 'queued'].includes(j.status);
+              const isSelected = selectedIds.includes(j.id);
+              return (
+                <tr
+                  key={j.id}
+                  className={`hover:bg-slate-50/80 transition-colors ${
+                    isSelected ? 'bg-brand-50/30' : ''
+                  }`}
+                >
+                  <td className="px-3 py-3 text-center">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleSelect(j.id)}
+                      className="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                    />
+                  </td>
+                  <td className="px-3 py-3 font-mono font-medium text-brand-700">
+                    <Link to={`/jobs/${j.id}`} className="hover:underline">
+                      #{j.id}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${badge(j.status)}`}
+                    >
+                      {isRunning && <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />}
+                      {j.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-slate-600">
+                    <span className="text-emerald-700 font-medium">{j.counts.done} done</span>
+                    {j.counts.error > 0 && <span className="text-red-600 font-medium"> · {j.counts.error} err</span>}
+                    {j.counts.pending > 0 && <span className="text-slate-500"> · {j.counts.pending} pending</span>}
+                    {j.counts.fetching > 0 && <span className="text-amber-600"> · {j.counts.fetching} fetching</span>}
+                  </td>
                 <td className="px-4 py-3 text-xs text-slate-500">
                   {j.started_at ? new Date(j.started_at).toLocaleString() : '—'}
                 </td>
@@ -104,6 +169,8 @@ export function JobHistoryList({ jobs }: Props) {
         </tbody>
       </table>
     </div>
+    </div>
   );
 }
+
 

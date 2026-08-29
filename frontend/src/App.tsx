@@ -4,11 +4,14 @@ import { Outlet, createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AppNav } from '@/components/AppNav';
 import { RequireAuth } from '@/components/RequireAuth';
 import { AdminPanelPage } from '@/pages/AdminPanelPage';
+import { DatasetDetailPage } from '@/pages/DatasetDetailPage';
+import { DatasetsPage } from '@/pages/DatasetsPage';
 import { JobHistoryPage } from '@/pages/JobHistoryPage';
 import { JobProgressPage } from '@/pages/JobProgressPage';
 import { JobResultDetailPage } from '@/pages/JobResultDetailPage';
 import { JobResultsPage } from '@/pages/JobResultsPage';
 import { LoginPage } from '@/pages/LoginPage';
+import { MergedResultsPage } from '@/pages/MergedResultsPage';
 import { RunnerPage } from '@/pages/RunnerPage';
 import { SchedulesPage } from '@/pages/SchedulesPage';
 
@@ -31,6 +34,9 @@ const router = createBrowserRouter([
         children: [
           { path: '/', element: <RunnerPage /> },
           { path: '/history', element: <JobHistoryPage /> },
+          { path: '/datasets', element: <DatasetsPage /> },
+          { path: '/datasets/:id', element: <DatasetDetailPage /> },
+          { path: '/jobs/merge', element: <MergedResultsPage /> },
           { path: '/schedules', element: <SchedulesPage /> },
           { path: '/admin', element: <AdminPanelPage /> },
           { path: '/jobs/:id', element: <JobProgressPage /> },

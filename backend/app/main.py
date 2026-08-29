@@ -16,7 +16,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api import auth, engines, export_targets, health, jobs, schedules, users
+from app.api import auth, datasets, engines, export_targets, health, jobs, schedules, users
 from app.api import settings as settings_api
 from app.core.config import get_settings
 from app.core.db import SessionLocal, upgrade_db
@@ -59,6 +59,7 @@ def create_app() -> FastAPI:
     app.include_router(auth.router, prefix="/api/auth")
     app.include_router(engines.router)
     app.include_router(jobs.router)
+    app.include_router(datasets.router)
     app.include_router(export_targets.router)
     app.include_router(schedules.router)
     app.include_router(users.router)

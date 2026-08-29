@@ -14,7 +14,7 @@ logger = logging.getLogger("zencrawl.engines.extractors")
 
 
 def extract_structured_data(html: str, source_url: str, options: dict[str, Any] | None = None) -> list[dict[str, Any]]:
-    """Extract structured records from HTML (AutoTrader, JSON-LD, Microdata)."""
+    """Extract structured records from HTML (Custom Schema, AutoTrader, JSON-LD, Microdata)."""
     if not html:
         return []
 
@@ -27,14 +27,21 @@ def extract_structured_data(html: str, source_url: str, options: dict[str, Any] 
         logger.warning("BeautifulSoup parsing failed: %s", exc)
         return []
 
-    # 1. Check for AutoTrader / Car marketplace data
+    # 1. Custom User-Defined Schema (if specified in options)
+    custom_schema = options.get("custom_schema")
+    if custom_schema and isinstance(custom_schema, dict) and custom_schema.get("fields"):
+        custom_items = _extract_custom_schema(soup, source_url, custom_schema)
+        if custom_items:
+            return custom_items
+
+    # 2. Check for AutoTrader / Car marketplace data
     domain = urlparse(source_url).netloc.lower()
     if "autotrader.ca" in domain or "autotrader" in domain:
         at_items = _extract_autotrader(soup, source_url)
         if at_items:
             return at_items
 
-    # 2. Check for __NEXT_DATA__ listings on other Next.js platforms
+    # 3. Check for __NEXT_DATA__ listings on other Next.js platforms
     next_data_el = soup.find("script", id="__NEXT_DATA__")
     if next_data_el and next_data_el.string:
         try:
@@ -46,12 +53,87 @@ def extract_structured_data(html: str, source_url: str, options: dict[str, Any] 
         except Exception:
             pass
 
-    # 3. Check for JSON-LD structured schemas
+    # 4. Check for JSON-LD structured schemas
     ld_items = _extract_json_ld(soup, source_url)
     if ld_items:
         return ld_items
 
     return items
+
+
+def _extract_custom_schema(soup: BeautifulSoup, source_url: str, schema: dict[str, Any]) -> list[dict[str, Any]]:
+    """Extract rows using user-defined custom fields (up to 10 fields)."""
+    raw_fields = schema.get("fields") or []
+    # Cap at 10 fields max
+    fields = [f for f in raw_fields if isinstance(f, dict) and f.get("name")][:10]
+    if not fields:
+        return []
+
+    item_selector = (schema.get("item_selector") or "").strip()
+    today = datetime.date.today().isoformat()
+    rows: list[dict[str, Any]] = []
+
+    # Repeating container mode (e.g. each card / product)
+    containers = soup.select(item_selector) if item_selector else []
+
+    if containers:
+        for card in containers:
+            row: dict[str, Any] = {"type": "custom_schema", "date_observed": today, "source_url": source_url}
+            for f in fields:
+                fname = f["name"].strip()
+                selector = (f.get("selector") or "").strip()
+                attr = (f.get("attribute") or "text").strip().lower()
+
+                val = None
+                if selector:
+                    el = card.select_one(selector)
+                    if el:
+                        if attr == "href":
+                            val = el.get("href")
+                            if val and not val.startswith("http"):
+                                val = urljoin(source_url, val)
+                        elif attr == "src":
+                            val = el.get("src")
+                            if val and not val.startswith("http"):
+                                val = urljoin(source_url, val)
+                        else:
+                            val = " ".join(el.get_text().split())
+                else:
+                    # Heuristic search by field name within the card
+                    el = card.find(lambda e: fname.lower() in (e.get("class", []) or "") or fname.lower() in (e.get("id", "") or ""))
+                    if el:
+                        val = " ".join(el.get_text().split())
+
+                row[fname] = val or ""
+            rows.append(row)
+    else:
+        # Single page mode (1 record for this page)
+        row = {"type": "custom_schema", "date_observed": today, "source_url": source_url}
+        for f in fields:
+            fname = f["name"].strip()
+            selector = (f.get("selector") or "").strip()
+            attr = (f.get("attribute") or "text").strip().lower()
+
+            val = None
+            if selector:
+                el = soup.select_one(selector)
+                if el:
+                    if attr == "href":
+                        val = el.get("href")
+                        if val and not val.startswith("http"):
+                            val = urljoin(source_url, val)
+                    elif attr == "src":
+                        val = el.get("src")
+                        if val and not val.startswith("http"):
+                            val = urljoin(source_url, val)
+                    else:
+                        val = " ".join(el.get_text().split())
+
+            row[fname] = val or ""
+        rows.append(row)
+
+    return rows
+
 
 
 def _extract_autotrader(soup: BeautifulSoup, source_url: str) -> list[dict[str, Any]]:

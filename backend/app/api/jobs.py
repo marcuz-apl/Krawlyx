@@ -17,6 +17,7 @@ from datetime import UTC, datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -609,3 +610,105 @@ def job_log(
         content="\n".join(lines) + ("\n" if lines else ""),
         media_type="text/plain; charset=utf-8",
     )
+
+
+class MergeJobsIn(BaseModel):
+    job_ids: list[int] = Field(..., min_length=1)
+
+
+class MergeJobsOut(BaseModel):
+    columns: list[str]
+    total_rows: int
+    rows: list[dict[str, Any]]
+    source_job_ids: list[int]
+
+
+@router.post("/merge", response_model=MergeJobsOut)
+def merge_jobs(
+    payload: MergeJobsIn,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> MergeJobsOut:
+    """Merge structured dataset results across multiple jobs."""
+    all_rows: list[dict[str, Any]] = []
+    seen_urls: set[str] = set()
+    all_columns: set[str] = set()
+
+    for jid in payload.job_ids:
+        results = db.execute(
+            select(JobResult, Target.url)
+            .join(Target, Target.id == JobResult.target_id)
+            .where(Target.job_id == jid)
+            .order_by(JobResult.id)
+        ).all()
+
+        for r, url in results:
+            meta = r.metadata_json or {}
+            items = meta.get("items") or []
+            if isinstance(items, list) and items:
+                for it in items:
+                    if isinstance(it, dict):
+                        link = it.get("listing_url") or it.get("url") or f"{jid}_{len(all_rows)}"
+                        if link in seen_urls:
+                            continue
+                        seen_urls.add(link)
+                        row_copy = dict(it)
+                        row_copy["_job_id"] = jid
+                        all_rows.append(row_copy)
+                        all_columns.update(k for k in it.keys() if k != "type")
+            else:
+                if url in seen_urls:
+                    continue
+                seen_urls.add(url)
+                row_data = {
+                    "title": r.title,
+                    "url": url,
+                    "http_status": r.http_status,
+                    "duration_ms": r.duration_ms,
+                    "date_observed": r.fetched_at.isoformat() if r.fetched_at else "",
+                    "_job_id": jid,
+                }
+                all_rows.append(row_data)
+                all_columns.update(row_data.keys())
+
+    preferred_order = [
+        "year", "make", "model", "trim", "drivetrain", "mileage", "price",
+        "seller_type", "city", "province", "dealer_name", "date_observed",
+        "listing_url", "_job_id", "title", "url"
+    ]
+    sorted_cols = [c for c in preferred_order if c in all_columns] + sorted(
+        c for c in all_columns if c not in preferred_order
+    )
+
+    return MergeJobsOut(
+        columns=sorted_cols,
+        total_rows=len(all_rows),
+        rows=all_rows,
+        source_job_ids=payload.job_ids,
+    )
+
+
+@router.post("/merge/export.csv", response_class=Response)
+def export_merged_jobs_csv(
+    payload: MergeJobsIn,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> Response:
+    """Download merged jobs data directly as Excel-compatible CSV."""
+    merged = merge_jobs(payload, _user, db)
+    output = io.StringIO()
+    output.write("\ufeff")  # UTF-8 BOM
+    writer = csv.writer(output)
+
+    headers = merged.columns
+    writer.writerow(headers)
+    for r in merged.rows:
+        writer.writerow([r.get(h, "") for h in headers])
+
+    job_str = "_".join(str(j) for j in payload.job_ids[:5])
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="merged-jobs-{job_str}.csv"'},
+    )
+

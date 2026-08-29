@@ -262,6 +262,36 @@ export interface UserUpdateBody {
   role?: 'runner' | 'admin';
 }
 
+// ---- datasets & merge ----
+
+export interface DatasetOut {
+  id: number;
+  name: string;
+  description: string | null;
+  columns: string[];
+  row_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DatasetDetailOut extends DatasetOut {
+  rows: Array<Record<string, any>>;
+}
+
+export interface CreateDatasetBody {
+  name: string;
+  description?: string;
+  columns?: string[];
+  source_job_ids?: number[];
+}
+
+export interface MergeJobsResult {
+  columns: string[];
+  total_rows: number;
+  rows: Array<Record<string, any>>;
+  source_job_ids: number[];
+}
+
 // ---- settings ----
 
 export interface SettingsOut {
@@ -342,12 +372,30 @@ export const api = {
       request<JobResultOut>(`/api/jobs/${id}/results/${rid}`),
     rerun: (id: number) =>
       request<JobOut>(`/api/jobs/${id}/rerun`, { method: 'POST' }),
+    merge: (job_ids: number[]) =>
+      request<MergeJobsResult>('/api/jobs/merge', {
+        method: 'POST',
+        body: JSON.stringify({ job_ids }),
+      }),
     /** Same-origin browser download URLs (cookie auth is automatic). */
     resultDownloadUrl: (id: number, rid: number, kind: 'md' | 'json') =>
       `/api/jobs/${id}/results/${rid}/download.${kind}`,
     exportUrl: (id: number) => `/api/jobs/${id}/export.json`,
     exportCsvUrl: (id: number) => `/api/jobs/${id}/export.csv`,
     exportZipUrl: (id: number) => `/api/jobs/${id}/export.zip`,
+  },
+
+  datasets: {
+    list: () => request<DatasetOut[]>('/api/datasets'),
+    create: (body: CreateDatasetBody) =>
+      request<DatasetOut>('/api/datasets', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    get: (id: number, limit = 500, offset = 0) =>
+      request<DatasetDetailOut>(`/api/datasets/${id}?limit=${limit}&offset=${offset}`),
+    delete: (id: number) => request<void>(`/api/datasets/${id}`, { method: 'DELETE' }),
+    exportCsvUrl: (id: number) => `/api/datasets/${id}/export.csv`,
   },
 
   exportTargets: {
