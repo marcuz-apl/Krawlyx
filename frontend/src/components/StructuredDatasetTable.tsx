@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   Calendar,
   Car,
   ChevronDown,
@@ -74,6 +77,14 @@ function extractCityProv(it: Record<string, any>): string {
   return '';
 }
 
+function parseNumeric(val: any): number {
+  if (typeof val === 'number') return val;
+  if (!val) return 0;
+  const cleaned = String(val).replace(/[^0-9.-]/g, '');
+  const parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
 export function StructuredDatasetTable({ items: initialItems, onUpdateItems, datasetId }: Props) {
   if (!initialItems || initialItems.length === 0) return null;
 
@@ -98,6 +109,29 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
   const [filterCityProv, setFilterCityProv] = useState<string>('all');
   const [filterText, setFilterText] = useState<string>('');
   const [filterPanelOpen, setFilterPanelOpen] = useState<boolean>(true);
+
+  // Sorting state: Year, Make, Model, Trim, Drivetrain, Mileage, Price, City/Prov, Date
+  const [sortField, setSortField] = useState<string>('default');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else {
+        setSortField('default');
+        setSortDirection('desc');
+      }
+    } else {
+      setSortField(field);
+      if (['year', 'price', 'date_observed'].includes(field)) {
+        setSortDirection('desc');
+      } else {
+        setSortDirection('asc');
+      }
+    }
+    setCurrentPage(1);
+  };
 
   // SQL Console state
   const [sqlConsoleOpen, setSqlConsoleOpen] = useState(false);
@@ -299,16 +333,54 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
     setCurrentPage(1);
   };
 
+  // Multi-Column Sorting
+  const sortedItems = useMemo(() => {
+    if (sortField === 'default') return filteredItems;
+
+    return [...filteredItems].sort((a, b) => {
+      let cmp = 0;
+      if (sortField === 'year') {
+        cmp = parseNumeric(extractYear(a)) - parseNumeric(extractYear(b));
+      } else if (sortField === 'make') {
+        cmp = extractMake(a).localeCompare(extractMake(b));
+      } else if (sortField === 'model') {
+        cmp = extractModel(a).localeCompare(extractModel(b));
+      } else if (sortField === 'trim') {
+        cmp = extractTrim(a).localeCompare(extractTrim(b));
+      } else if (sortField === 'drivetrain') {
+        cmp = extractDrivetrain(a).localeCompare(extractDrivetrain(b));
+      } else if (sortField === 'mileage') {
+        cmp = parseNumeric(a.mileage_km ?? a.mileage) - parseNumeric(b.mileage_km ?? b.mileage);
+      } else if (sortField === 'price') {
+        cmp = parseNumeric(a.price) - parseNumeric(b.price);
+      } else if (sortField === 'city' || sortField === 'city_prov') {
+        cmp = extractCityProv(a).localeCompare(extractCityProv(b));
+      } else if (sortField === 'date_observed') {
+        cmp = String(a.date_observed || '').localeCompare(String(b.date_observed || ''));
+      } else {
+        const valA = a[sortField];
+        const valB = b[sortField];
+        if (typeof valA === 'number' && typeof valB === 'number') {
+          cmp = valA - valB;
+        } else {
+          cmp = String(valA || '').localeCompare(String(valB || ''));
+        }
+      }
+
+      return sortDirection === 'asc' ? cmp : -cmp;
+    });
+  }, [filteredItems, sortField, sortDirection]);
+
   const isVehicle = activeItems.some((i) => i.type === 'vehicle_listing' || (i.make && i.year));
   const isCustom = activeItems.some((i) => i.type === 'custom_schema');
   const customColumns = availableColumns;
 
-  const totalRows = filteredItems.length;
+  const totalRows = sortedItems.length;
   const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
   const activePage = Math.min(currentPage, totalPages);
   const startIndex = (activePage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, totalRows);
-  const paginatedItems = filteredItems.slice(startIndex, endIndex);
+  const paginatedItems = sortedItems.slice(startIndex, endIndex);
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
@@ -321,13 +393,13 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
   };
 
   const exportFilteredCsv = () => {
-    if (filteredItems.length === 0) return;
+    if (sortedItems.length === 0) return;
     const cols = isVehicle
       ? ['year', 'make', 'model', 'trim', 'drivetrain', 'mileage_km', 'price', 'seller_type', 'dealer_name', 'city', 'province', 'date_observed', 'listing_url']
       : availableColumns;
 
     const headers = cols.join(',');
-    const rows = filteredItems.map((it) =>
+    const rows = sortedItems.map((it) =>
       cols
         .map((c) => {
           const val = it[c] ?? (c === 'mileage_km' ? it.mileage : '');
@@ -743,29 +815,69 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
           </div>
         )}
 
-        {/* Free Text Quick Search & Active Filter Badges */}
+        {/* Free Text Quick Search, Sort Selector & Active Filter Badges */}
         <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200/60">
-          <div className="relative flex-1 min-w-[220px] max-w-md">
-            <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400" />
-            <input
-              type="text"
-              value={filterText}
-              onChange={(e) => {
-                setFilterText(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder="Search in all columns (e.g. Laramie, Red, Leather)..."
-              className="w-full rounded-lg border border-slate-300 bg-white pl-8 pr-7 py-1 text-xs focus:border-brand-500 focus:outline-none placeholder:text-slate-400 shadow-sm"
-            />
-            {filterText && (
-              <button
-                type="button"
-                onClick={() => setFilterText('')}
-                className="absolute right-2.5 top-1.5 text-slate-400 hover:text-slate-600 text-xs font-bold"
+          <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
+              <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400" />
+              <input
+                type="text"
+                value={filterText}
+                onChange={(e) => {
+                  setFilterText(e.target.value);
+                  setCurrentPage(1);
+                }}
+                placeholder="Search in all columns (e.g. Laramie, Red, Leather)..."
+                className="w-full rounded-lg border border-slate-300 bg-white pl-8 pr-7 py-1 text-xs focus:border-brand-500 focus:outline-none placeholder:text-slate-400 shadow-sm"
+              />
+              {filterText && (
+                <button
+                  type="button"
+                  onClick={() => setFilterText('')}
+                  className="absolute right-2.5 top-1.5 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Quick Sort Dropdown */}
+            <div className="flex items-center gap-1.5 text-xs">
+              <ArrowUpDown className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+              <select
+                value={sortField === 'default' ? 'default' : `${sortField}_${sortDirection}`}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === 'default') {
+                    setSortField('default');
+                    setSortDirection('desc');
+                  } else {
+                    const lastIdx = val.lastIndexOf('_');
+                    const f = val.substring(0, lastIdx);
+                    const d = val.substring(lastIdx + 1);
+                    setSortField(f);
+                    setSortDirection(d as 'asc' | 'desc');
+                  }
+                  setCurrentPage(1);
+                }}
+                className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none"
               >
-                ✕
-              </button>
-            )}
+                <option value="default">Sort: Default</option>
+                <option value="year_desc">📅 Year: Newest First</option>
+                <option value="year_asc">📅 Year: Oldest First</option>
+                <option value="price_asc">💵 Price: Low to High ($)</option>
+                <option value="price_desc">💵 Price: High to Low ($)</option>
+                <option value="mileage_asc">🔢 Mileage: Low to High</option>
+                <option value="mileage_desc">🔢 Mileage: High to Low</option>
+                <option value="make_asc">🚗 Make: A → Z</option>
+                <option value="make_desc">🚗 Make: Z → A</option>
+                <option value="model_asc">🏷️ Model: A → Z</option>
+                <option value="trim_asc">✨ Trim: A → Z</option>
+                <option value="drivetrain_asc">⚡ Drivetrain: A → Z</option>
+                <option value="city_asc">📍 City / Prov: A → Z</option>
+                <option value="date_observed_desc">🕒 Date: Most Recent</option>
+              </select>
+            </div>
           </div>
 
           {/* Filter Pills */}
@@ -837,6 +949,11 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
             {dedupEnabled && (
               <span className="rounded bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-800">
                 Deduplicated
+              </span>
+            )}
+            {sortField !== 'default' && (
+              <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 flex items-center gap-1">
+                Sorted by {sortField} ({sortDirection.toUpperCase()})
               </span>
             )}
           </div>
@@ -920,37 +1037,216 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
-          <thead className="border-b border-slate-200 bg-slate-100/75 text-slate-600 font-semibold uppercase tracking-wider">
+          <thead className="border-b border-slate-200 bg-slate-100/75 text-slate-600 font-semibold uppercase tracking-wider select-none">
             <tr>
               {isVehicle ? (
                 <>
-                  <th className="px-3 py-2.5">Year</th>
-                  <th className="px-3 py-2.5">Make</th>
-                  <th className="px-3 py-2.5">Model</th>
-                  <th className="px-3 py-2.5">Trim</th>
-                  <th className="px-3 py-2.5">Drivetrain</th>
-                  <th className="px-3 py-2.5">mileage</th>
-                  <th className="px-3 py-2.5 text-right">Price</th>
-                  <th className="px-3 py-2.5">Seller</th>
-                  <th className="px-3 py-2.5">City / Prov</th>
-                  <th className="px-3 py-2.5">Date Observed</th>
+                  <th
+                    onClick={() => handleSort('year')}
+                    className="px-3 py-2.5 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Year</span>
+                      {sortField === 'year' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort('make')}
+                    className="px-3 py-2.5 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Make</span>
+                      {sortField === 'make' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort('model')}
+                    className="px-3 py-2.5 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Model</span>
+                      {sortField === 'model' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort('trim')}
+                    className="px-3 py-2.5 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Trim</span>
+                      {sortField === 'trim' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort('drivetrain')}
+                    className="px-3 py-2.5 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Drivetrain</span>
+                      {sortField === 'drivetrain' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort('mileage')}
+                    className="px-3 py-2.5 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Mileage</span>
+                      {sortField === 'mileage' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort('price')}
+                    className="px-3 py-2.5 text-right cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center justify-end gap-1">
+                      <span>Price</span>
+                      {sortField === 'price' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort('seller_type')}
+                    className="px-3 py-2.5 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Seller</span>
+                      {sortField === 'seller_type' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort('city')}
+                    className="px-3 py-2.5 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>City / Prov</span>
+                      {sortField === 'city' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort('date_observed')}
+                    className="px-3 py-2.5 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Date</span>
+                      {sortField === 'date_observed' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
                   <th className="px-3 py-2.5 text-right">Link</th>
                 </>
               ) : isCustom ? (
                 <>
                   {customColumns.map((col) => (
-                    <th key={col} className="px-3 py-2.5 font-semibold text-slate-700">
-                      {col}
+                    <th
+                      key={col}
+                      onClick={() => handleSort(col)}
+                      className="px-3 py-2.5 font-semibold text-slate-700 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                    >
+                      <div className="flex items-center gap-1">
+                        <span>{col}</span>
+                        {sortField === col ? (
+                          sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                        ) : (
+                          <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                        )}
+                      </div>
                     </th>
                   ))}
-                  <th className="px-3 py-2.5">Date</th>
+                  <th
+                    onClick={() => handleSort('date_observed')}
+                    className="px-3 py-2.5 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Date</span>
+                      {sortField === 'date_observed' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
                   <th className="px-3 py-2.5 text-right">Source Link</th>
                 </>
               ) : (
                 <>
-                  <th className="px-3 py-2.5">Name / Title</th>
-                  <th className="px-3 py-2.5">Brand</th>
-                  <th className="px-3 py-2.5 text-right">Price</th>
+                  <th
+                    onClick={() => handleSort('name')}
+                    className="px-3 py-2.5 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Name / Title</span>
+                      {sortField === 'name' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort('brand')}
+                    className="px-3 py-2.5 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Brand</span>
+                      {sortField === 'brand' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort('price')}
+                    className="px-3 py-2.5 text-right cursor-pointer hover:bg-slate-200/80 transition-colors"
+                  >
+                    <div className="flex items-center justify-end gap-1">
+                      <span>Price</span>
+                      {sortField === 'price' ? (
+                        sortDirection === 'asc' ? <ArrowUp className="h-3 w-3 text-brand-600" /> : <ArrowDown className="h-3 w-3 text-brand-600" />
+                      ) : (
+                        <ArrowUpDown className="h-2.5 w-2.5 text-slate-400 opacity-60" />
+                      )}
+                    </div>
+                  </th>
                   <th className="px-3 py-2.5">Date Observed</th>
                   <th className="px-3 py-2.5 text-right">Link</th>
                 </>
