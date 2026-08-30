@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import {
   BookOpen,
-  ExternalLink,
   Search,
   Sparkles,
   X,
@@ -300,14 +299,7 @@ export function DocsModal({ isOpen, onClose }: DocsModalProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            <a
-              href="/docs"
-              target="_blank"
-              rel="noreferrer"
-              className="hidden sm:inline-flex items-center gap-1 text-xs text-brand-600 dark:text-brand-400 hover:underline font-medium"
-            >
-              OpenAPI Swagger <ExternalLink className="h-3 w-3" />
-            </a>
+            
             <button
               onClick={onClose}
               className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition"
@@ -441,10 +433,10 @@ export function DocsModal({ isOpen, onClose }: DocsModalProps) {
                     <span className="font-mono text-[11px] uppercase">{activeSection.content.codeBlock.language}</span>
                   </div>
                 )}
-                <div className="relative rounded-xl border border-slate-800 bg-slate-950 p-4 font-mono text-xs text-slate-200 shadow-inner">
+                <div className="relative rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/90 dark:bg-slate-950/60 p-4 font-mono text-xs text-slate-800 dark:text-slate-200 shadow-inner">
                   <button
                     onClick={() => copyToClipboard(activeSection.content.codeBlock!.code)}
-                    className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] text-slate-300 hover:bg-slate-800 transition"
+                    className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 text-[11px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
                     title="Copy code"
                   >
                     {copiedCode ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}

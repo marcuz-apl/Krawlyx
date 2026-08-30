@@ -146,7 +146,7 @@ export function DatasetsPage() {
 
       {/* Deduplication Notification Alert */}
       {dedupMsg && (
-        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-xs font-semibold text-indigo-900 shadow-sm flex items-center justify-between">
+        <div className="rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50 dark:bg-indigo-950/40 p-4 text-xs font-semibold text-indigo-900 dark:text-indigo-200 shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-indigo-600 flex-shrink-0" />
             <span>{dedupMsg}</span>
@@ -162,7 +162,7 @@ export function DatasetsPage() {
 
       {/* Selected Merge Banner */}
       {selectedIds.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-brand-200 dark:border-brand-900/60 bg-brand-50 px-4 py-2.5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-brand-200 dark:border-brand-900/60 bg-brand-50 dark:bg-brand-950/40 px-4 py-2.5 shadow-sm">
           <div className="flex items-center gap-2 text-xs font-semibold text-brand-900">
             <Layers className="h-4 w-4 text-brand-600" />
             <span>{selectedIds.length} dataset(s) selected</span>
@@ -190,7 +190,7 @@ export function DatasetsPage() {
 
       {/* Create Dataset Form */}
       {createOpen && (
-        <div className="rounded-xl border border-brand-200 dark:border-brand-900/60 bg-brand-50/50 p-5 space-y-4">
+        <div className="rounded-xl border border-brand-200 dark:border-brand-900/60 bg-brand-50/50 dark:bg-brand-950/40 p-5 space-y-4">
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Create New Dataset</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -234,7 +234,7 @@ export function DatasetsPage() {
 
       {/* Edit / Rename Dataset Modal */}
       {editingDataset && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50/60 p-5 space-y-4">
+        <div className="rounded-xl border border-amber-300 dark:border-amber-900/60 bg-amber-50/60 dark:bg-amber-950/40 p-5 space-y-4">
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
             <Edit2 className="h-4 w-4 text-amber-700" />
             Rename Dataset
@@ -283,7 +283,7 @@ export function DatasetsPage() {
 
       {/* Merge Selected Datasets Modal */}
       {mergeOpen && (
-        <div className="rounded-xl border border-brand-300 bg-brand-50/75 p-5 space-y-4">
+        <div className="rounded-xl border border-brand-300 dark:border-brand-900/60 bg-brand-50/75 dark:bg-brand-950/40 p-5 space-y-4">
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
             <Layers className="h-4 w-4 text-brand-600" />
             Merge {selectedIds.length} Saved Datasets
@@ -386,7 +386,7 @@ export function DatasetsPage() {
           <p className="text-sm text-slate-500 animate-pulse">Loading datasets…</p>
         </div>
       ) : error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-700">
+        <div className="rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 p-4 text-xs text-red-700 dark:text-red-300">
           Failed to load datasets: {String(error)}
         </div>
       ) : !datasets || datasets.length === 0 ? (
@@ -415,7 +415,7 @@ export function DatasetsPage() {
               <div
                 key={d.id}
                 className={`flex flex-col justify-between rounded-xl border bg-white dark:bg-slate-900 p-5 shadow-sm transition-all ${
-                  isSelected ? 'border-brand-500 ring-2 ring-brand-100 bg-brand-50/20' : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:border-slate-700'
+                  isSelected ? 'border-brand-500 ring-2 ring-brand-100 dark:ring-brand-950 bg-brand-50/20 dark:bg-brand-950/30' : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:border-slate-700'
                 }`}
               >
                 <div className="space-y-2">
@@ -434,7 +434,7 @@ export function DatasetsPage() {
                         {d.name}
                       </Link>
                     </div>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-semibold text-brand-700 flex-shrink-0">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 dark:bg-brand-950/60 px-2.5 py-0.5 text-[11px] font-semibold text-brand-700 dark:text-brand-300 border border-brand-200/60 dark:border-brand-900/60 flex-shrink-0">
                       <Layers className="h-3 w-3" />
                       {d.row_count} rows
                     </span>
@@ -470,7 +470,7 @@ export function DatasetsPage() {
                     <button
                       onClick={() => deduplicateMutation.mutate(d.id)}
                       disabled={deduplicateMutation.isPending}
-                      className="rounded p-1 text-indigo-500 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
+                      className="rounded p-1 text-indigo-500 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
                       title="Scan & remove duplicate records in this dataset"
                     >
                       <Sparkles className="h-3.5 w-3.5" />
@@ -503,7 +503,7 @@ export function DatasetsPage() {
                         }
                       }}
                       disabled={deleteMutation.isPending}
-                      className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                      className="rounded p-1 text-slate-400 hover:bg-red-50 dark:hover:bg-red-950/50 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                       title="Delete dataset"
                     >
                       <Trash2 className="h-3.5 w-3.5" />

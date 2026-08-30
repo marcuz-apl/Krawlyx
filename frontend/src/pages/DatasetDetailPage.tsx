@@ -182,7 +182,7 @@ export function DatasetDetailPage() {
               setSplitResults(null);
               setSplitModalOpen(true);
             }}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-purple-300 bg-purple-50 px-3.5 py-1.5 text-xs font-semibold text-purple-800 shadow-sm hover:bg-purple-100 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-purple-300 dark:border-purple-900/60 bg-purple-50 dark:bg-purple-950/40 px-3.5 py-1.5 text-xs font-semibold text-purple-800 dark:text-purple-300 shadow-sm hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors"
             title="Partition dataset into multiple datasets by Make or other attributes"
           >
             <Scissors className="h-4 w-4 text-purple-600" />
@@ -202,7 +202,7 @@ export function DatasetDetailPage() {
           <button
             onClick={() => dedupMutation.mutate()}
             disabled={dedupMutation.isPending}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-300 bg-indigo-50 px-3.5 py-1.5 text-xs font-semibold text-indigo-800 shadow-sm hover:bg-indigo-100 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-300 dark:border-indigo-900/60 bg-indigo-50 dark:bg-indigo-950/40 px-3.5 py-1.5 text-xs font-semibold text-indigo-800 dark:text-indigo-300 shadow-sm hover:bg-indigo-100 dark:hover:bg-indigo-900/40 disabled:opacity-50 transition-colors"
             title="Scan database and permanently remove duplicate rows"
           >
             <Sparkles className="h-4 w-4 text-indigo-600" />
@@ -211,7 +211,7 @@ export function DatasetDetailPage() {
           <a
             href={api.datasets.exportCsvUrl(data.id)}
             download
-            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3.5 py-1.5 text-xs font-semibold text-emerald-800 shadow-sm hover:bg-emerald-100 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/40 px-3.5 py-1.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300 shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
           >
             <Download className="h-4 w-4" /> Export CSV
           </a>
@@ -224,7 +224,7 @@ export function DatasetDetailPage() {
           <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <div className="rounded-lg bg-purple-100 p-2 text-purple-700">
+                <div className="rounded-lg bg-purple-100 dark:bg-purple-950/60 p-2 text-purple-700 dark:text-purple-300">
                   <Scissors className="h-5 w-5" />
                 </div>
                 <div>
@@ -242,7 +242,7 @@ export function DatasetDetailPage() {
 
             {splitResults ? (
               <div className="space-y-4">
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs text-emerald-900">
+                <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-xs text-emerald-900 dark:text-emerald-200">
                   <div className="flex items-center gap-2 font-bold mb-1">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                     Successfully created {splitResults.length} new datasets:
@@ -252,7 +252,7 @@ export function DatasetDetailPage() {
                       <li key={res.dataset_id} className="py-2 flex items-center justify-between">
                         <div>
                           <span className="font-semibold text-slate-900 dark:text-white">{res.name}</span>
-                          <span className="ml-2 rounded bg-emerald-200/80 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                          <span className="ml-2 rounded bg-emerald-200/80 dark:bg-emerald-900/60 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:text-emerald-200">
                             {res.row_count} rows
                           </span>
                         </div>
@@ -314,7 +314,7 @@ export function DatasetDetailPage() {
                     {Object.entries(splitPreview).map(([grp, count]) => (
                       <div key={grp} className="py-1.5 flex items-center justify-between">
                         <span className="font-mono text-slate-800 dark:text-slate-200 font-semibold">{data.name} - {grp}</span>
-                        <span className="rounded bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800">
+                        <span className="rounded bg-purple-100 dark:bg-purple-950/60 px-2 py-0.5 text-[10px] font-bold text-purple-800 dark:text-purple-300">
                           {count} rows
                         </span>
                       </div>
@@ -518,7 +518,7 @@ export function DatasetDetailPage() {
       )}
 
       {msg && (
-        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-xs font-semibold text-indigo-900 shadow-sm flex items-center justify-between">
+        <div className="rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50 dark:bg-indigo-950/40 p-4 text-xs font-semibold text-indigo-900 dark:text-indigo-200 shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-indigo-600 flex-shrink-0" />
             <span>{msg}</span>
