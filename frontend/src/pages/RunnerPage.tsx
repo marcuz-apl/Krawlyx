@@ -55,10 +55,20 @@ export function RunnerPage() {
     );
   };
 
+  // Worker stagger delay state (gap between workers)
+  const [staggerEnabled, setStaggerEnabled] = useState(true);
+  const [staggerMinMinutes, setStaggerMinMinutes] = useState(1);
+  const [staggerMaxMinutes, setStaggerMaxMinutes] = useState(4);
+
   const submit = useMutation<JobSubmitAck, Error, void>({
     mutationFn: async () => {
       const lines = urls.split('\n').map((l) => l.trim());
-      const jobOptions = { ...options };
+      const jobOptions: Record<string, any> = {
+        ...options,
+        stagger_workers: staggerEnabled,
+        stagger_min_seconds: Math.max(1, staggerMinMinutes) * 60,
+        stagger_max_seconds: Math.max(staggerMinMinutes, staggerMaxMinutes) * 60,
+      };
       if (schemaMode === 'custom') {
         jobOptions.custom_schema = {
           item_selector: itemSelector.trim() || undefined,
@@ -367,6 +377,65 @@ export function RunnerPage() {
           )}
 
           <UrlTextarea value={urls} onChange={setUrls} />
+
+          {/* Multi-Worker Time Gap / Anti-Ban Stagger Options */}
+          <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 space-y-2.5 text-xs">
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-800">
+                <input
+                  type="checkbox"
+                  checked={staggerEnabled}
+                  onChange={(e) => setStaggerEnabled(e.target.checked)}
+                  className="rounded border-slate-300 text-brand-600 focus:ring-brand-500 h-4 w-4"
+                />
+                <span>⏱️ Multi-Worker Time Gap (Anti-Ban / Rate-Limit Guard)</span>
+              </label>
+              <span className="rounded bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 text-[10px]">
+                Recommended for Multi-Page
+              </span>
+            </div>
+
+            <p className="text-[11px] text-slate-500">
+              Introduces a randomized delay between workers so paginated requests don't hit target sites at the same time and avoid bot detection/banning. (Page 1 starts immediately).
+            </p>
+
+            {staggerEnabled && (
+              <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-slate-200">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-600 font-medium">Random Gap between:</span>
+                  <input
+                    type="number"
+                    min={0.1}
+                    max={60}
+                    step={0.5}
+                    value={staggerMinMinutes}
+                    onChange={(e) => setStaggerMinMinutes(Math.max(0.1, Number(e.target.value)))}
+                    className="w-16 rounded border border-slate-300 bg-white px-2 py-1 text-center font-bold text-slate-800"
+                  />
+                  <span className="text-slate-600">min</span>
+                </div>
+
+                <span className="text-slate-400">and</span>
+
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="number"
+                    min={0.5}
+                    max={120}
+                    step={0.5}
+                    value={staggerMaxMinutes}
+                    onChange={(e) => setStaggerMaxMinutes(Math.max(1, Number(e.target.value)))}
+                    className="w-16 rounded border border-slate-300 bg-white px-2 py-1 text-center font-bold text-slate-800"
+                  />
+                  <span className="text-slate-600">minutes</span>
+                </div>
+
+                <span className="text-slate-500 text-[11px] font-mono">
+                  (approx. {Math.round(staggerMinMinutes * 60)}s – {Math.round(staggerMaxMinutes * 60)}s per worker)
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
         <label className="block">

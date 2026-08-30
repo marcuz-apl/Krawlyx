@@ -240,10 +240,36 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
             # partial run before a crash; recovery sweep handled this, but
             # the filter keeps the loop tidy).
             pending = [t for t in targets if t.status == "pending"]
-            tasks = [
-                asyncio.create_task(_run_target(handle, target_sem, engine, t, job.options or {}))
-                for t in pending
-            ]
+
+            opts = job.options or {}
+            stagger_enabled = opts.get("stagger_workers", True) if len(pending) > 1 else False
+            stagger_min_s = float(opts.get("stagger_min_seconds", 60.0))
+            stagger_max_s = float(opts.get("stagger_max_seconds", 240.0))
+
+            tasks = []
+            cumulative_delay = 0.0
+            import random
+
+            for idx, t in enumerate(pending):
+                if idx == 0 or not stagger_enabled:
+                    delay = 0.0
+                else:
+                    gap = random.uniform(stagger_min_s, stagger_max_s)
+                    cumulative_delay += gap
+                    delay = cumulative_delay
+
+                tasks.append(
+                    asyncio.create_task(
+                        _run_target(
+                            handle,
+                            target_sem,
+                            engine,
+                            t,
+                            opts,
+                            stagger_delay_s=delay,
+                        )
+                    )
+                )
             handle.target_tasks = set(tasks)
             await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -300,6 +326,7 @@ async def _run_target(
     engine: CrawlEngine,
     target_row: TargetRow,
     job_options: dict,
+    stagger_delay_s: float = 0.0,
 ) -> None:
     """Fetch one target, persist the (first) CrawlRecord, update status."""
     from app.core.db import SessionLocal
@@ -307,6 +334,27 @@ async def _run_target(
     from app.models.base import utcnow
 
     job_logger_local = logging.getLogger(f"zencrawl.jobs.{handle.job_id}")
+
+    if handle.cancel_event.is_set():
+        return
+
+    # If stagger delay is enabled for multi-page jobs, pause before starting
+    if stagger_delay_s > 0:
+        job_logger_local.info(
+            "Target %d (%s) waiting %.1fs (~%.1f min worker gap) before crawl...",
+            target_row.id,
+            target_row.url,
+            stagger_delay_s,
+            stagger_delay_s / 60.0,
+        )
+        slept = 0.0
+        while slept < stagger_delay_s and not handle.cancel_event.is_set():
+            step = min(1.0, stagger_delay_s - slept)
+            await asyncio.sleep(step)
+            slept += step
+
+        if handle.cancel_event.is_set():
+            return
 
     async with sem:
         if handle.cancel_event.is_set():
