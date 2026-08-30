@@ -46,10 +46,21 @@ zenCrawl provides two built-in crawl engines tailored for different scraping tas
 
 ## Documentation
 
-- 🚀 [Get Started Quickly](docs/get-started-quickly.md) — 30-second setup and quickstart.
-- ⚙️ [Crawl Engines Comparison](docs/engines-comparison.md) — Deep dive into Crawl4AI vs. Scrapy.
-- 📋 [Implementation Plan](docs/implementation-plan.md) — Architectural design for universal datasets & transforms.
-- 🔍 [Walkthrough Guide](docs/walkthrough.md) — Feature walkthrough and usage guide.
+### Core Guides
+- 🚀 [Get Started Quickly](docs/get-started-quickly.md) — 30-second setup and quickstart guide.
+- ⚙️ [Crawl Engines Comparison](docs/engines-comparison.md) — Crawl4AI vs. Scrapy detailed comparison.
+
+### Implementation Plans
+- 📋 [Plan 01: Custom Schema & Datasets](docs/plans/plan-01-custom-schema-and-persistent-datasets.md) — Universal custom extraction rules & SQLite storage.
+- 📋 [Plan 02: Universal SQL Console](docs/plans/plan-02-universal-sql-console.md) — In-browser dynamic SQL transforms & cleaning.
+- 📋 [Plan 03: Rate Limiting & Engine Hardening](docs/plans/plan-03-multi-worker-rate-limiting-and-pagination.md) — Multi-worker stagger, timeouts & HTTP fallbacks.
+- 📋 [Plan 04: Multi-Job Dataset Merger](docs/plans/plan-04-multi-job-merger.md) — Combining and deduplicating historical crawl runs.
+
+### Feature Walkthroughs
+- 🔍 [Walkthrough 01: Custom Schema & Datasets](docs/walkthroughs/walkthrough-01-custom-schema-and-persistent-datasets.md)
+- 🔍 [Walkthrough 02: Universal SQL Console](docs/walkthroughs/walkthrough-02-universal-sql-console.md)
+- 🔍 [Walkthrough 03: Rate Limiting & Engine Hardening](docs/walkthroughs/walkthrough-03-multi-worker-rate-limiting-and-pagination.md)
+- 🔍 [Walkthrough 04: Multi-Job Dataset Merger](docs/walkthroughs/walkthrough-04-multi-job-merger.md)
 
 ## Versioning
 
