@@ -236,10 +236,8 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
             per_job_parallel = min(get_settings().max_parallel_targets_per_job, len(targets))
             target_sem = asyncio.Semaphore(per_job_parallel)
 
-            # Skip targets that were already skipped (e.g. by a previous
-            # partial run before a crash; recovery sweep handled this, but
-            # the filter keeps the loop tidy).
-            pending = [t for t in targets if t.status == "pending"]
+            # Include targets in pending (or left in fetching)
+            pending = [t for t in targets if t.status in {"pending", "fetching"}]
 
             opts = job.options or {}
             stagger_enabled = bool(opts.get("stagger_workers", False)) if len(pending) > 1 else False
@@ -302,20 +300,12 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
 
 
 def _handoff_next(sem: asyncio.Semaphore) -> None:
-    """Pull the next queued job (if any) and spawn it under the released slot.
-
-    Pulled out of `_run_job`'s finally block so a `return` here can't
-    swallow an in-flight exception (ruff B012). When a job finishes, we
-    always want to start the next one waiting in the queue; this is the
-    point that gates the concurrency cap.
-    """
+    """Pull the next queued job (if any) and spawn it under the released slot."""
     while True:
         try:
             next_id = _queue.popleft()
         except IndexError:
             return
-        # Spawn it under the slot we just released; this is a chained
-        # handoff so we never exceed the configured cap.
         asyncio.create_task(_run_job(next_id, sem))
         return
 
@@ -365,7 +355,7 @@ async def _run_target(
         db = SessionLocal()
         try:
             row = db.get(TargetRow, target_row.id)
-            if row is None or row.status != "pending":
+            if row is None or row.status not in {"pending", "fetching"}:
                 return
             row.status = "fetching"
             row.attempts = (row.attempts or 0) + 1
@@ -383,10 +373,6 @@ async def _run_target(
                         primary = record
                     else:
                         additional.append(_record_to_dict(record))
-                    # Stop after the first record — the schema's UNIQUE on
-                    # `job_results.target_id` makes a target 1:1 with its
-                    # primary record. Extra records are stashed in
-                    # `metadata_json.additional_records`.
             except Exception as exc:  # noqa: BLE001 — engine boundary
                 job_logger_local.warning("engine.fetch failed for target %d: %s", row.id, exc)
                 row.status = "error"
@@ -398,14 +384,14 @@ async def _run_target(
             elapsed_ms = int((time.monotonic() - started) * 1000)
 
             if primary is None:
-                row.status = "skipped"
+                row.status = "error"
                 row.error = "no record yielded"
                 db.commit()
                 _export_skipped(handle, row)
                 return
 
-            if primary.status == "skipped":
-                row.status = "skipped"
+            if primary.status in {"skipped", "error"}:
+                row.status = primary.status
                 row.error = primary.error
                 db.commit()
                 _export_skipped(handle, row)
@@ -439,8 +425,17 @@ async def _run_target(
             )
 
             # M4: stream the just-persisted result to the export file
-            # (no-op when the job has no folder target).
             _export_result(handle, row, db)
+        except Exception as exc:
+            job_logger_local.exception("unexpected error processing target %d: %s", target_row.id, exc)
+            try:
+                row = db.get(TargetRow, target_row.id)
+                if row and row.status == "fetching":
+                    row.status = "error"
+                    row.error = str(exc)[:500]
+                    db.commit()
+            except Exception:
+                pass
         finally:
             db.close()
 
@@ -452,6 +447,14 @@ def _mark_job_complete(
     db: Session, job: Job, handle: JobHandle, *, exporter: object | None = None
 ) -> None:
     from app.models.base import utcnow
+
+    # Cleanup any dangling targets left in 'fetching'
+    db.execute(
+        update(TargetRow)
+        .where(TargetRow.job_id == job.id, TargetRow.status == "fetching")
+        .values(status="error", error="interrupted")
+    )
+    db.commit()
 
     has_error = db.scalar(
         select(TargetRow.id).where(TargetRow.job_id == job.id, TargetRow.status == "error").limit(1)
