@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api/client";
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -20,6 +22,12 @@ import { AboutModal } from "./AboutModal";
 import { DocsModal } from "./DocsModal";
 
 export function Header() {
+  const { data: healthData } = useQuery({
+    queryKey: ['health'],
+    queryFn: () => api.health(),
+    staleTime: 30000,
+  });
+  const dynamicVersion = healthData?.version || "v1.5.8";
   const me = useMe();
   const logout = useLogout();
   const location = useLocation();
@@ -132,7 +140,7 @@ export function Header() {
                   MyKrawl
                 </span>
                 <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
-                  v1.5.5
+                  {dynamicVersion}
                 </span>
               </div>
             </Link>
@@ -209,7 +217,7 @@ export function Header() {
       <AboutModal
         isOpen={showAboutModal}
         onClose={() => setShowAboutModal(false)}
-        version="v1.5.5"
+        version={dynamicVersion}
       />
       <DocsModal
         isOpen={showDocsModal}

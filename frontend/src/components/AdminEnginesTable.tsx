@@ -86,28 +86,30 @@ export function AdminEnginesTable() {
                     <span className="ml-1 rounded bg-slate-100 px-2 py-0.5 text-slate-600">has secret</span>
                   )}
                 </td>
-                <td className="px-3 py-2">
-                  <button
-                    onClick={() => test.mutate(e.id)}
-                    disabled={test.isPending}
-                    className="mr-2 rounded border border-slate-300 dark:border-slate-700 px-2 py-0.5 text-xs hover:bg-slate-100 disabled:opacity-50"
-                  >
-                    Test
-                  </button>
-                  <button
-                    onClick={() => patch.mutate({ id: e.id, body: { pooled: !e.pooled } })}
-                    className="mr-2 rounded border border-slate-300 dark:border-slate-700 px-2 py-0.5 text-xs hover:bg-slate-100"
-                  >
-                    {e.pooled ? 'Unpool' : 'Pool'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm(`Delete engine ${e.name}?`)) remove.mutate(e.id);
-                    }}
-                    className="rounded border border-red-300 px-2 py-0.5 text-xs text-red-700 hover:bg-red-50"
-                  >
-                    Delete
-                  </button>
+                <td className="px-3 py-2 text-right whitespace-nowrap">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <button
+                      onClick={() => test.mutate(e.id)}
+                      disabled={test.isPending}
+                      className="rounded border border-slate-300 dark:border-slate-700 px-2 py-0.5 text-xs hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50"
+                    >
+                      Test
+                    </button>
+                    <button
+                      onClick={() => patch.mutate({ id: e.id, body: { pooled: !e.pooled } })}
+                      className="rounded border border-slate-300 dark:border-slate-700 px-2 py-0.5 text-xs hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      {e.pooled ? 'Unpool' : 'Pool'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Delete engine ${e.name}?`)) remove.mutate(e.id);
+                      }}
+                      className="rounded border border-red-300 dark:border-red-800 px-2 py-0.5 text-xs text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

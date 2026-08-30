@@ -53,7 +53,7 @@ export function Footer() {
               <Globe className="h-4 w-4" />
             </a>
             <a 
-              href="https://x.com/marcuszou" 
+              href="https://x.com/alfazeninc" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="hover:text-sky-400 dark:hover:text-sky-400 transition"
@@ -62,7 +62,7 @@ export function Footer() {
               <Twitter className="h-4 w-4" />
             </a>
             <a 
-              href="https://linkedin.com/in/marcuszou" 
+              href="https://linkedin.com/in/alfazeninc" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="hover:text-brand-700 dark:hover:text-brand-500 transition"
