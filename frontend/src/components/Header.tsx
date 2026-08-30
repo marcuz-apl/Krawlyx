@@ -100,7 +100,7 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/85 dark:border-slate-800 dark:bg-slate-950/85 backdrop-blur-md transition-colors duration-150">
-        <div className="flex h-14 items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><div className="flex h-14 items-center justify-between">
           {/* Left section: Docs & About */}
           <div className="flex items-center gap-1.5 sm:gap-3">
             <button
@@ -189,17 +189,19 @@ export function Header() {
               )}
             </button>
           </div>
-        </div>
+        </div></div>
 
         {/* Navigation Ribbon */}
-        <div className="border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 px-4 sm:px-6 py-1.5 overflow-x-auto">
-          <nav className="flex items-center gap-1.5">
+        <div className="border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-1.5 overflow-x-auto">
+            <nav className="flex items-center gap-1.5">
             {navLink("/", "New Job", PlusCircle)}
             {navLink("/history", "History", History)}
             {navLink("/datasets", "Datasets", Database)}
             {me.data?.role === "admin" && navLink("/schedules", "Schedules", Calendar)}
             {me.data?.role === "admin" && navLink("/admin", "Admin", Shield)}
           </nav>
+          </div>
         </div>
       </header>
 

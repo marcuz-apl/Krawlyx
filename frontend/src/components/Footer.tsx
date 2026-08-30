@@ -7,8 +7,9 @@ export function Footer() {
 
   return (
     <>
-      <footer className="w-full border-t border-slate-200 bg-white py-3 px-6 dark:border-slate-800 dark:bg-slate-950 transition-colors duration-150 mt-auto">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+      <footer className="w-full border-t border-slate-200 bg-white py-3 dark:border-slate-800 dark:bg-slate-950 transition-colors duration-150 mt-auto">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
           {/* Left Corner: Disclaimer & Contact */}
           <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
             <button
@@ -70,6 +71,7 @@ export function Footer() {
               <Linkedin className="h-4 w-4" />
             </a>
           </div>
+        </div>
         </div>
       </footer>
 

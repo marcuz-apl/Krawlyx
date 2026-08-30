@@ -161,7 +161,7 @@ export function RunnerPage() {
           setErrorMessages([]);
           submit.mutate();
         }}
-        className="max-w-3xl space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+        className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900"
       >
         <label className="block">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Engine</span>
