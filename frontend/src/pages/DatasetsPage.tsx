@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Database, Download, Plus, Trash2, Calendar, Layers, Edit2, Sparkles } from 'lucide-react';
+import { Database, Download, Plus, Trash2, Calendar, Layers, Edit2, Sparkles, Search, CheckSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { api } from '@/lib/api/client';
@@ -24,6 +24,35 @@ export function DatasetsPage() {
   const [mergeOpen, setMergeOpen] = useState(false);
   const [mergeName, setMergeName] = useState('');
   const [mergeDescription, setMergeDescription] = useState('');
+
+  // Search filter
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filtered dataset list
+  const filteredDatasets = (datasets || []).filter((d) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      d.name.toLowerCase().includes(q) ||
+      (d.description && d.description.toLowerCase().includes(q))
+    );
+  });
+
+  const selectAllFiltered = () => {
+    const ids = filteredDatasets.map((d) => d.id);
+    setSelectedIds(Array.from(new Set([...selectedIds, ...ids])));
+  };
+
+  const selectAllMakeDatasets = () => {
+    // Detect datasets split by make (e.g. contains ' - Dodge', ' - Ford', etc. or description mentions split)
+    const makeDatasetIds = (datasets || [])
+      .filter((d) =>
+        (d.name.includes(' - ') && !d.name.startsWith('Merged')) ||
+        (d.description && d.description.toLowerCase().includes('split from dataset'))
+      )
+      .map((d) => d.id);
+    setSelectedIds(makeDatasetIds);
+  };
 
   const createMutation = useMutation({
     mutationFn: () => api.datasets.create({ name, description }),
@@ -299,6 +328,59 @@ export function DatasetsPage() {
         </div>
       )}
 
+      {/* Search & Batch Selection Bar */}
+      {datasets && datasets.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm">
+          <div className="relative flex-1 min-w-[220px] max-w-md">
+            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search datasets by name or description..."
+              className="w-full rounded-lg border border-slate-300 bg-white pl-8 pr-7 py-1.5 text-xs focus:border-brand-500 focus:outline-none"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <button
+              type="button"
+              onClick={selectAllMakeDatasets}
+              className="inline-flex items-center gap-1 rounded-lg border border-purple-200 bg-purple-50 px-2.5 py-1.5 font-semibold text-purple-700 hover:bg-purple-100 transition-colors shadow-sm"
+              title="Select all datasets that were partitioned by Make"
+            >
+              <CheckSquare className="h-3.5 w-3.5" />
+              Select All Make Datasets
+            </button>
+            <button
+              type="button"
+              onClick={selectAllFiltered}
+              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-medium text-slate-700 hover:bg-slate-100 transition-colors shadow-sm"
+            >
+              Select All Shown ({filteredDatasets.length})
+            </button>
+            {selectedIds.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSelectedIds([])}
+                className="text-xs text-rose-600 hover:underline px-2 py-1 font-semibold"
+              >
+                Deselect All
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="flex h-48 items-center justify-center">
           <p className="text-sm text-slate-500 animate-pulse">Loading datasets…</p>
@@ -321,9 +403,13 @@ export function DatasetsPage() {
             Start a Crawl Job →
           </Link>
         </div>
+      ) : filteredDatasets.length === 0 ? (
+        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-xs text-slate-500">
+          No datasets match your search query "{searchQuery}".
+        </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {datasets.map((d) => {
+          {filteredDatasets.map((d) => {
             const isSelected = selectedIds.includes(d.id);
             return (
               <div
