@@ -151,8 +151,7 @@ class Crawl4AIEngine:
                     md = raw_md.raw_markdown
                 elif isinstance(raw_md, str):
                     md = raw_md
-        except Exception as exc:
-            logger.warning("Crawl4AI browser timed out or failed (%s) for %s; using fast HTTP fallback", exc, target.url)
+        if not html:
             try:
                 import httpx
                 http_headers = {
@@ -165,13 +164,7 @@ class Crawl4AIEngine:
                     html = resp.text
                     status_code = resp.status_code
             except Exception as http_exc:
-                yield CrawlRecord(
-                    target_id=target.target_id,
-                    source_url=target.url,
-                    status="error",
-                    error=f"fetch failed: {exc} (fallback: {http_exc})",
-                )
-                return
+                logger.warning("HTTP fallback failed for %s: %s", target.url, http_exc)
 
         if not html:
             yield CrawlRecord(
