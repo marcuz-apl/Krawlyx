@@ -37,6 +37,15 @@ curl -H "Cookie: session=..." http://localhost:8000/api/settings | jq '.ssrf_gua
 | Engines | Crawl4AI, Scrapy (pluggable adapter registry) |
 | Storage | SQLite (WAL) + CSV/XLSX export with size-based splitting |
 
+## Crawl Engines (Crawl4AI vs. Scrapy)
+
+zenCrawl provides two built-in crawl engines tailored for different scraping tasks:
+
+- **🤖 Crawl4AI**: Headless Chromium browser engine with full JavaScript execution, Next.js/React hydration support, LLM-ready markdown extraction, and automatic HTTP fallback. Best for dynamic, JS-rendered SPAs.
+- **⚡ Scrapy**: Ultra-fast, lightweight asynchronous HTTP engine running in an isolated subprocess. Best for large-scale bulk scraping, server-rendered HTML, and deep link crawling.
+
+👉 **Detailed Guide**: Read the full [Engines Comparison Guide](docs/engines-comparison.md).
+
 ## Versioning
 
 This repo uses the **alfazen-versioning** contract: the root `VERSION` file holds
