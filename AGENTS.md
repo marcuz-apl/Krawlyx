@@ -62,7 +62,7 @@ python -m venv .venv && source .venv/Scripts/activate   # Windows Git Bash
 pip install -e ".[dev]"
 playwright install chromium        # for Crawl4AI
 crawl4ai-setup                     # Crawl4AI OS-level deps, run once
-uvicorn app.main:app --reload      # API on :8000
+uvicorn app.main:app --port 4040 --reload # API on :4040
 pytest                             # all tests
 pytest -m "not integration"        # fast unit pass
 ruff format . && ruff check --fix .
@@ -70,7 +70,7 @@ ruff format . && ruff check --fix .
 # — inside frontend/ —
 npm install
 npm run gen:api                    # regenerate typed client after ANY backend schema/router change
-npm run dev                        # Vite on :5173, proxies /api → :8000
+npm run dev                        # Vite on :4039, proxies /api → :4040
 npm run build                      # emits dist/, served by FastAPI in production
 npm run typecheck && npm run lint
 ```

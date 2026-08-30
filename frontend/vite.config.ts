@@ -1,23 +1,8 @@
-import { execSync } from 'child_process'
 import path from 'path'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
-function getBackendTarget(): string {
-  if (process.env.VITE_BACKEND_URL) {
-    return process.env.VITE_BACKEND_URL
-  }
-  if (process.platform !== 'win32') {
-    try {
-      const route = execSync('ip route show default 2>/dev/null', { encoding: 'utf8' })
-      const match = route.match(/default via ([^\s]+)/)
-      if (match && match[1]) {
-        return `http://${match[1]}:8000`
-      }
-    } catch {}
-  }
-  return 'http://127.0.0.1:8000'
-}
+const backendTarget = process.env.VITE_BACKEND_URL || 'http://127.0.0.1:4040'
 
 export default defineConfig({
   plugins: [react()],
@@ -27,10 +12,10 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    port: 4039,
     proxy: {
       '/api': {
-        target: getBackendTarget(),
+        target: backendTarget,
         changeOrigin: true,
       },
     },

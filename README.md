@@ -18,13 +18,13 @@ M6 Hardening complete (`v1.1.8-2608293`). See [`PRD.md`](PRD.md) §12 and commit
 python -m app.core.doctor
 
 # 2. Start the API
-uvicorn app.main:app --reload
+uvicorn app.main:app --port 4040 --reload
 
 # 3. Run the full test suite (no live network required for core tests)
 pytest -m "not integration" -q
 
 # 4. Check M6 features are configured
-curl -H "Cookie: session=..." http://localhost:8000/api/settings | jq '.ssrf_guard_enabled, .ssrf_allow_list, .admin_contact_email'
+curl -H "Cookie: session=..." http://localhost:4040/api/settings | jq '.ssrf_guard_enabled, .ssrf_allow_list, .admin_contact_email'
 ```
 [`AGENTS.md`](AGENTS.md) for the engineering contract used by AI agents and humans.
 

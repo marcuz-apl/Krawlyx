@@ -31,11 +31,11 @@ Expected: `all checks passed` (Python ≥3.11, SQLite, DB writable, log dir writ
 ## 3. Start the server
 
 ```bash
-uvicorn app.main:app --reload
+uvicorn app.main:app --port 4040 --reload
 ```
 
-- API: `http://localhost:8000`
-- Static SPA served at `/` in production; use Vite dev server (`npm run dev`) for frontend work (proxies `/api` → `:8000`).
+- API: `http://localhost:4040`
+- Static SPA served at `/` in production; use Vite dev server (`npm run dev`) for frontend work (proxies `/api` → `:4040` on port `:4039`).
 
 ## 4. Basic usage flow
 

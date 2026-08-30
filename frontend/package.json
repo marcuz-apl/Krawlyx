@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "gen:api": "openapi-typescript http://localhost:8000/openapi.json -o src/lib/api/schema.d.ts",
+    "gen:api": "openapi-typescript http://localhost:4040/openapi.json -o src/lib/api/schema.d.ts",
     "typecheck": "tsc -b --noEmit",
     "lint": "oxlint",
     "preview": "vite preview"
