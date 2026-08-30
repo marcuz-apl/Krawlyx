@@ -42,9 +42,9 @@ export function SchedulesPage() {
       {schedules.length === 0 ? (
         <p className="text-slate-500 dark:text-slate-400">No schedules yet.</p>
       ) : (
-        <div className="overflow-hidden rounded border border-slate-200 dark:border-slate-800">
+        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800/60 text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <thead className="bg-slate-50 dark:bg-slate-800/80 text-left text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 font-bold border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="px-3 py-2">Name</th>
                 <th className="px-3 py-2">Cron</th>
@@ -56,9 +56,9 @@ export function SchedulesPage() {
             </thead>
             <tbody>
               {schedules.map((s) => (
-                <tr key={s.id} className="border-t border-slate-100">
+                <tr key={s.id} className="border-t border-slate-100 dark:border-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                   <td className="px-3 py-2 font-medium text-slate-900 dark:text-white">{s.name}</td>
-                  <td className="px-3 py-2 text-xs text-slate-600">
+                  <td className="px-3 py-2 text-xs text-slate-700 dark:text-slate-300">
                     <div>{humanizeCron(s.cron, s.timezone)}</div>
                     <div className="font-mono text-slate-400">{s.cron} · {s.timezone}</div>
                   </td>

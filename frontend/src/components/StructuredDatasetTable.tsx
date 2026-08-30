@@ -936,7 +936,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 px-4 py-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 px-4 py-3">
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
@@ -1037,7 +1037,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
-          <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-100/75 text-slate-600 dark:text-slate-400 font-semibold uppercase tracking-wider select-none">
+          <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-100/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 font-bold uppercase tracking-wider select-none">
             <tr>
               {isVehicle ? (
                 <>
@@ -1179,7 +1179,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                     <th
                       key={col}
                       onClick={() => handleSort(col)}
-                      className="px-3 py-2.5 font-semibold text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-colors"
+                      className="px-3 py-2.5 font-bold text-slate-700 dark:text-slate-200 cursor-pointer hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors"
                     >
                       <div className="flex items-center gap-1">
                         <span>{col}</span>
@@ -1253,19 +1253,19 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
               )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {paginatedItems.map((row, idx) => (
-              <tr key={idx} className="hover:bg-slate-50 dark:bg-slate-900/80 transition-colors">
+              <tr key={idx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                 {isVehicle ? (
                   <>
                     <td className="px-3 py-2.5 font-semibold text-slate-900 dark:text-white">{row.year || '—'}</td>
                     <td className="px-3 py-2.5 font-medium text-slate-800 dark:text-slate-200">{row.make || '—'}</td>
-                    <td className="px-3 py-2.5 font-semibold text-brand-700">{row.model || '—'}</td>
-                    <td className="px-3 py-2.5 text-slate-600 dark:text-slate-400 truncate max-w-[180px]" title={row.trim}>
+                    <td className="px-3 py-2.5 font-semibold text-brand-600 dark:text-brand-400">{row.model || '—'}</td>
+                    <td className="px-3 py-2.5 text-slate-700 dark:text-slate-300 truncate max-w-[180px]" title={row.trim}>
                       {row.trim || '—'}
                     </td>
                     <td className="px-3 py-2.5">
-                      <span className="inline-block rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-700 dark:text-slate-300">
+                      <span className="inline-block rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 font-mono text-[11px] text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700">
                         {row.drivetrain || '—'}
                       </span>
                     </td>
@@ -1276,7 +1276,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                         ? String(row.mileage_km)
                         : '—'}
                     </td>
-                    <td className="px-3 py-2.5 text-right font-semibold text-emerald-700">
+                    <td className="px-3 py-2.5 text-right font-semibold text-emerald-700 dark:text-emerald-400 font-mono">
                       {typeof row.price === 'number'
                         ? `$${row.price.toLocaleString()}`
                         : row.price || '—'}
@@ -1297,7 +1297,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                         </span>
                       )}
                     </td>
-                    <td className="px-3 py-2.5 text-slate-600 dark:text-slate-400">
+                    <td className="px-3 py-2.5 text-slate-700 dark:text-slate-300">
                       {row.city || '—'} {row.province ? `, ${row.province}` : ''}
                     </td>
                     <td className="px-3 py-2.5 font-mono text-slate-500">{row.date_observed || '—'}</td>

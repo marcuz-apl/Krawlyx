@@ -103,7 +103,7 @@ export function JobHistoryList({ jobs }: Props) {
           <div className="flex justify-end gap-2 pt-1">
             <button
               onClick={() => setConfirmBulkDelete(false)}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
             >
               Cancel
             </button>
@@ -131,7 +131,7 @@ export function JobHistoryList({ jobs }: Props) {
           <div className="flex justify-end gap-2 pt-1">
             <button
               onClick={() => setConfirmDeleteId(null)}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
             >
               Cancel
             </button>
@@ -179,7 +179,7 @@ export function JobHistoryList({ jobs }: Props) {
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200 dark:bg-slate-800/60 dark:text-slate-400 dark:border-slate-800">
+          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-700 border-b border-slate-200 dark:bg-slate-800/90 dark:text-slate-200 dark:border-slate-800 font-bold">
             <tr>
               <th className="px-3 py-3 w-10 text-center">
                 <input
@@ -216,7 +216,7 @@ export function JobHistoryList({ jobs }: Props) {
                       className="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                     />
                   </td>
-                  <td className="px-3 py-3 font-mono font-medium text-brand-700">
+                  <td className="px-3 py-3 font-mono font-medium text-brand-600 dark:text-brand-400">
                     <Link to={`/jobs/${j.id}`} className="hover:underline">
                       #{j.id}
                     </Link>
@@ -230,15 +230,15 @@ export function JobHistoryList({ jobs }: Props) {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-300">
-                    <span className="text-emerald-700 font-medium">{j.counts.done} done</span>
-                    {j.counts.error > 0 && <span className="text-red-600 font-medium"> · {j.counts.error} err</span>}
-                    {j.counts.pending > 0 && <span className="text-slate-500"> · {j.counts.pending} pending</span>}
-                    {j.counts.fetching > 0 && <span className="text-amber-600"> · {j.counts.fetching} fetching</span>}
+                    <span className="text-emerald-700 dark:text-emerald-400 font-medium">{j.counts.done} done</span>
+                    {j.counts.error > 0 && <span className="text-red-600 dark:text-red-400 font-medium"> · {j.counts.error} err</span>}
+                    {j.counts.pending > 0 && <span className="text-slate-500 dark:text-slate-400"> · {j.counts.pending} pending</span>}
+                    {j.counts.fetching > 0 && <span className="text-amber-600 dark:text-amber-400"> · {j.counts.fetching} fetching</span>}
                   </td>
-                  <td className="px-4 py-3 text-xs text-slate-500">
+                  <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-400">
                     {j.started_at ? new Date(j.started_at).toLocaleString() : '—'}
                   </td>
-                  <td className="px-4 py-3 text-right text-xs font-mono text-slate-500">{j.elapsed_s}s</td>
+                  <td className="px-4 py-3 text-right text-xs font-mono text-slate-600 dark:text-slate-400">{j.elapsed_s}s</td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-1.5">
                       {isRunning ? (

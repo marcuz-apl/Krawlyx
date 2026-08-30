@@ -51,9 +51,9 @@ export function UsersTable() {
         />
       )}
 
-      <div className="overflow-hidden rounded border border-slate-200 dark:border-slate-800">
+      <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 dark:bg-slate-800/60 text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <thead className="bg-slate-50 dark:bg-slate-800/80 text-left text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 font-bold border-b border-slate-200 dark:border-slate-800">
             <tr>
               <th className="px-3 py-2 w-1/3">Username</th>
               <th className="px-3 py-2 w-1/3">Role</th>

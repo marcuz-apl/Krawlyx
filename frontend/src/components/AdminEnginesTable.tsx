@@ -52,9 +52,9 @@ export function AdminEnginesTable() {
         />
       )}
 
-      <div className="overflow-hidden rounded border border-slate-200 dark:border-slate-800">
+      <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 dark:bg-slate-800/60 text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <thead className="bg-slate-50 dark:bg-slate-800/80 text-left text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 font-bold border-b border-slate-200 dark:border-slate-800">
             <tr>
               <th className="px-3 py-2">Name</th>
               <th className="px-3 py-2">Type</th>
@@ -71,19 +71,19 @@ export function AdminEnginesTable() {
               </tr>
             )}
             {engines.map((e) => (
-              <tr key={e.id} className="border-t border-slate-100">
+              <tr key={e.id} className="border-t border-slate-100 dark:border-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                 <td className="px-3 py-2 font-medium text-slate-900 dark:text-white">{e.name}</td>
-                <td className="px-3 py-2 text-slate-600">{e.type}</td>
+                <td className="px-3 py-2 text-slate-700 dark:text-slate-300 font-mono text-xs">{e.type}</td>
                 <td className="px-3 py-2 text-xs">
                   {e.disabled_at ? (
-                    <span className="rounded bg-slate-200 px-2 py-0.5 text-slate-500 dark:text-slate-400">disabled</span>
+                    <span className="rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">disabled</span>
                   ) : e.pooled ? (
-                    <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-800">pooled</span>
+                    <span className="rounded bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 text-xs text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/60">pooled</span>
                   ) : (
-                    <span className="rounded bg-amber-100 px-2 py-0.5 text-amber-800">unpooled</span>
+                    <span className="rounded bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 text-xs text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60">unpooled</span>
                   )}
                   {e.has_secret && (
-                    <span className="ml-1 rounded bg-slate-100 px-2 py-0.5 text-slate-600">has secret</span>
+                    <span className="ml-1 rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">has secret</span>
                   )}
                 </td>
                 <td className="px-3 py-2 text-right whitespace-nowrap">

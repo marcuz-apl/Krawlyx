@@ -20,7 +20,7 @@ export function ResultTable({ jobId, results }: Props) {
     return <p className="text-sm text-slate-500 dark:text-slate-400">No results yet.</p>;
   }
   return (
-    <div className="overflow-hidden rounded border border-slate-200 dark:border-slate-800">
+    <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
       <table className="w-full text-sm">
         <thead className="bg-slate-50 dark:bg-slate-800/60 text-left text-xs uppercase tracking-wide text-slate-500">
           <tr>

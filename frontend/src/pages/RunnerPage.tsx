@@ -179,7 +179,7 @@ export function RunnerPage() {
               className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
                 schemaMode === 'auto'
                   ? 'border-brand-600 bg-brand-50 text-brand-700 font-semibold'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60'
               }`}
             >
               🚗 Auto-Detect (AutoTrader, Vehicles, JSON-LD, Products)
@@ -190,7 +190,7 @@ export function RunnerPage() {
               className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
                 schemaMode === 'custom'
                   ? 'border-brand-600 bg-brand-50 text-brand-700 font-semibold'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60'
               }`}
             >
               ⚙️ Custom Dataset Schema (Up to 20 Fields)
@@ -201,7 +201,7 @@ export function RunnerPage() {
               className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
                 schemaMode === 'raw'
                   ? 'border-brand-600 bg-brand-50 text-brand-700 font-semibold'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60'
               }`}
             >
               📄 Raw Markdown / Plain Text
@@ -234,7 +234,7 @@ export function RunnerPage() {
                   value={itemSelector}
                   onChange={(e) => setItemSelector(e.target.value)}
                   placeholder="e.g. .product-item, .card, article, tr (Leave empty for 1 row per page)"
-                  className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs focus:border-brand-500 focus:outline-none"
+                  className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-2.5 py-1 text-xs focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none"
                 />
               </div>
 
@@ -246,19 +246,19 @@ export function RunnerPage() {
                       value={field.name}
                       onChange={(e) => updateField(idx, 'name', e.target.value)}
                       placeholder={`Field ${idx + 1} Name *`}
-                      className="w-1/3 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium focus:border-brand-500 focus:outline-none"
+                      className="w-1/3 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-2.5 py-1 text-xs font-medium focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none"
                     />
                     <input
                       type="text"
                       value={field.selector}
                       onChange={(e) => updateField(idx, 'selector', e.target.value)}
                       placeholder="CSS Selector (Optional, e.g. .price, h2)"
-                      className="flex-1 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-mono focus:border-brand-500 focus:outline-none"
+                      className="flex-1 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-2.5 py-1 text-xs font-mono focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none"
                     />
                     <select
                       value={field.attribute}
                       onChange={(e) => updateField(idx, 'attribute', e.target.value)}
-                      className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs focus:border-brand-500 focus:outline-none"
+                      className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-2 py-1 text-xs focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none"
                     >
                       <option value="text">Text</option>
                       <option value="href">Link (href)</option>
@@ -318,7 +318,7 @@ export function RunnerPage() {
                   value={helperBaseUrl}
                   onChange={(e) => setHelperBaseUrl(e.target.value)}
                   placeholder="https://www.autotrader.ca/cars/... or https://example.com/search?page=1"
-                  className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs focus:border-brand-500 focus:outline-none"
+                  className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-2.5 py-1.5 text-xs focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none"
                 />
               </div>
 
@@ -343,7 +343,7 @@ export function RunnerPage() {
                     max={50}
                     value={helperPages}
                     onChange={(e) => setHelperPages(Math.max(1, Number(e.target.value)))}
-                    className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs"
+                    className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-2.5 py-1.5 text-xs"
                   />
                 </div>
                 <div>
@@ -364,7 +364,7 @@ export function RunnerPage() {
                 <button
                   type="button"
                   onClick={() => setShowHelper(false)}
-                  className="rounded-md border border-slate-300 bg-white px-3 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                  className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                 >
                   Cancel
                 </button>
@@ -413,7 +413,7 @@ export function RunnerPage() {
                     step={0.5}
                     value={staggerMinMinutes}
                     onChange={(e) => setStaggerMinMinutes(Math.max(0.1, Number(e.target.value)))}
-                    className="w-16 rounded border border-slate-300 bg-white px-2 py-1 text-center font-bold text-slate-800"
+                    className="w-16 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 py-1 text-center font-bold text-slate-800 dark:text-slate-100"
                   />
                   <span className="text-slate-600">min</span>
                 </div>
@@ -428,7 +428,7 @@ export function RunnerPage() {
                     step={0.5}
                     value={staggerMaxMinutes}
                     onChange={(e) => setStaggerMaxMinutes(Math.max(1, Number(e.target.value)))}
-                    className="w-16 rounded border border-slate-300 bg-white px-2 py-1 text-center font-bold text-slate-800"
+                    className="w-16 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 py-1 text-center font-bold text-slate-800 dark:text-slate-100"
                   />
                   <span className="text-slate-600">minutes</span>
                 </div>
