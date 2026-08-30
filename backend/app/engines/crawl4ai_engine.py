@@ -115,6 +115,10 @@ class Crawl4AIEngine:
         # NOTE: constructing the crawler in production needs the Playwright
         # browser installed (`crawl4ai-setup`). On Windows, Playwright requires
         # a ProactorEventLoop which we guarantee inside a dedicated thread.
+        html = ""
+        md = None
+        status_code = 200
+
         try:
             import asyncio
             import sys
@@ -130,7 +134,7 @@ class Crawl4AIEngine:
                             return await crawler.arun(
                                 url=target.url,
                                 headless=self.config.headless,
-                                page_timeout=self.config.browser_timeout_s * 1000,
+                                page_timeout=min(self.config.browser_timeout_s, 20) * 1000,
                                 user_agent=ua,
                             )
 
@@ -138,38 +142,46 @@ class Crawl4AIEngine:
                 finally:
                     loop.close()
 
-            result = await asyncio.to_thread(_sync_fetch)
+            result = await asyncio.wait_for(asyncio.to_thread(_sync_fetch), timeout=25.0)
+            html = getattr(result, "html", None) or getattr(result, "cleaned_html", None) or ""
+            status_code = getattr(result, "status_code", None) or 200
+            raw_md = getattr(result, "markdown", None)
+            if raw_md:
+                if hasattr(raw_md, "raw_markdown"):
+                    md = raw_md.raw_markdown
+                elif isinstance(raw_md, str):
+                    md = raw_md
         except Exception as exc:
-            import traceback
-            tb = traceback.format_exc()
-            logger.error("crawl4ai fetch error for %s:\n%s", target.url, tb)
+            logger.warning("Crawl4AI browser timed out or failed (%s) for %s; using fast HTTP fallback", exc, target.url)
+            try:
+                import httpx
+                http_headers = {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                    "Accept-Language": "en-CA,en-US;q=0.9,en;q=0.8",
+                }
+                async with httpx.AsyncClient(headers=http_headers, follow_redirects=True, timeout=15.0) as client:
+                    resp = await client.get(target.url)
+                    html = resp.text
+                    status_code = resp.status_code
+            except Exception as http_exc:
+                yield CrawlRecord(
+                    target_id=target.target_id,
+                    source_url=target.url,
+                    status="error",
+                    error=f"fetch failed: {exc} (fallback: {http_exc})",
+                )
+                return
+
+        if not html:
             yield CrawlRecord(
                 target_id=target.target_id,
                 source_url=target.url,
                 status="error",
-                error=f"crawl4ai fetch failed: {exc or type(exc).__name__}",
+                http_status=status_code,
+                error="empty HTML response",
             )
             return
-
-        html = getattr(result, "html", None) or getattr(result, "cleaned_html", None) or ""
-        if hasattr(result, "success") and not result.success:
-            yield CrawlRecord(
-                target_id=target.target_id,
-                source_url=target.url,
-                status="error",
-                http_status=getattr(result, "status_code", None),
-                error=getattr(result, "error_message", None) or "crawl4ai reported failure",
-            )
-            return
-
-        # Extract Markdown if available from Crawl4AI
-        md = None
-        raw_md = getattr(result, "markdown", None)
-        if raw_md:
-            if hasattr(raw_md, "raw_markdown"):
-                md = raw_md.raw_markdown
-            elif isinstance(raw_md, str):
-                md = raw_md
 
         import dataclasses
 
