@@ -440,6 +440,18 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ query }),
       }),
+    executeRawSql: (query: string, rows: Array<Record<string, any>>) =>
+      request<{
+        type: 'select' | 'mutation';
+        columns?: string[];
+        rows?: Array<Record<string, any>>;
+        rows_affected?: number;
+        remaining_count?: number;
+        total_returned?: number;
+      }>(`/api/datasets/sql-exec`, {
+        method: 'POST',
+        body: JSON.stringify({ query, rows }),
+      }),
   },
 
   exportTargets: {

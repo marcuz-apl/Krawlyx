@@ -539,6 +539,83 @@ def execute_dataset_sql(
             }
 
     except Exception as exc:
+        raise HTTPException(status_code=404, detail=f"SQL Error: {exc}")
+    finally:
+        mem_conn.close()
+
+
+class SqlRawExecIn(BaseModel):
+    query: str = Field(..., min_length=1, max_length=10000)
+    rows: list[dict[str, Any]] = Field(default_factory=list)
+
+
+@router.post("/sql-exec")
+def execute_raw_sql(
+    payload: SqlRawExecIn,
+    _user: Annotated[User, Depends(get_current_user)],
+) -> dict:
+    """Execute SQL queries against arbitrary in-memory rows without requiring a pre-saved dataset."""
+    import sqlite3
+
+    rows = payload.rows or []
+    all_keys = set()
+    for r in rows:
+        if isinstance(r, dict):
+            all_keys.update(r.keys())
+
+    cols = sorted(list(all_keys)) if all_keys else ["val"]
+
+    mem_conn = sqlite3.connect(":memory:")
+    mem_conn.row_factory = sqlite3.Row
+
+    col_defs = ", ".join([f'"{c}" TEXT' for c in cols])
+    mem_conn.execute(f'CREATE TABLE dataset (_row_id INTEGER PRIMARY KEY, {col_defs})')
+
+    for idx, r in enumerate(rows, start=1):
+        col_names = ", ".join([f'"{c}"' for c in cols])
+        placeholders = ", ".join(["?"] * len(cols))
+        vals = [(r or {}).get(c) for c in cols]
+        mem_conn.execute(
+            f'INSERT INTO dataset (_row_id, {col_names}) VALUES (?, {placeholders})',
+            [idx] + vals,
+        )
+
+    clean_sql = payload.query.strip().rstrip(";")
+    first_word = clean_sql.split()[0].upper() if clean_sql else ""
+
+    try:
+        cur = mem_conn.cursor()
+        cur.execute(clean_sql)
+
+        if first_word in {"SELECT", "PRAGMA", "EXPLAIN"}:
+            col_names = [d[0] for d in cur.description] if cur.description else []
+            fetched = cur.fetchmany(1000)
+            result_rows = [dict(zip(col_names, row)) for row in fetched]
+            return {
+                "type": "select",
+                "columns": col_names,
+                "rows": result_rows,
+                "total_returned": len(result_rows),
+            }
+        else:
+            rows_affected = cur.rowcount
+            cur2 = mem_conn.execute("SELECT * FROM dataset")
+            new_cols = [d[0] for d in cur2.description if d[0] != "_row_id"]
+            remaining_data = cur2.fetchall()
+
+            updated_rows = []
+            for r_row in remaining_data:
+                item_dict = {col: r_row[col] for col in new_cols if r_row[col] is not None}
+                updated_rows.append(item_dict)
+
+            return {
+                "type": "mutation",
+                "rows_affected": max(rows_affected, 0),
+                "remaining_count": len(updated_rows),
+                "columns": new_cols,
+                "rows": updated_rows,
+            }
+    except Exception as exc:
         raise HTTPException(status_code=400, detail=f"SQL Error: {exc}")
     finally:
         mem_conn.close()
