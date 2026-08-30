@@ -56,7 +56,7 @@ export function RunnerPage() {
   };
 
   // Worker stagger delay state (gap between workers)
-  const [staggerEnabled, setStaggerEnabled] = useState(true);
+  const [staggerEnabled, setStaggerEnabled] = useState(false);
   const [staggerMinMinutes, setStaggerMinMinutes] = useState(1);
   const [staggerMaxMinutes, setStaggerMaxMinutes] = useState(4);
 
@@ -120,13 +120,14 @@ export function RunnerPage() {
       const generated: string[] = [];
 
       if (helperType === 'autotrader' || helperType === 'page_num') {
-        // AutoTrader Next.js backend uses page=1, page=2... (20 distinct cars/page)
+        // AutoTrader Next.js backend uses size=20 (or 100) and page=1, page=2... (distinct cars/page)
         // Must remove search_id (which locks server cache to page 1) and legacy rcs/rcp
         urlObj.searchParams.delete('search_id');
         urlObj.searchParams.delete('search_type');
         urlObj.searchParams.delete('rcs');
         urlObj.searchParams.delete('rcp');
-        urlObj.searchParams.delete('size');
+        const sizeVal = helperStep > 0 ? String(helperStep) : '20';
+        urlObj.searchParams.set('size', sizeVal);
         for (let i = 1; i <= helperPages; i++) {
           const u = new URL(urlObj.toString());
           u.searchParams.set('page', String(i));

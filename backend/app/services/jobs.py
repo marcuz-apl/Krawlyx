@@ -242,7 +242,7 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
             pending = [t for t in targets if t.status == "pending"]
 
             opts = job.options or {}
-            stagger_enabled = opts.get("stagger_workers", True) if len(pending) > 1 else False
+            stagger_enabled = bool(opts.get("stagger_workers", False)) if len(pending) > 1 else False
             stagger_min_s = float(opts.get("stagger_min_seconds", 60.0))
             stagger_max_s = float(opts.get("stagger_max_seconds", 240.0))
 
