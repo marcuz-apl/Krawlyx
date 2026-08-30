@@ -7,6 +7,8 @@ concrete engine module. This isolation keeps the registry type-extensible
 trivially fixture-driven.
 """
 
+from __future__ import annotations
+
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from typing import Any, Protocol, runtime_checkable
@@ -82,6 +84,17 @@ class JobOptions:
     follow_links: bool = False
     max_depth: int = 1
     max_pages_per_target: int = 1
+    custom_schema: dict[str, Any] | None = None
+    extra: dict[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any] | None) -> JobOptions:
+        if not data:
+            return cls()
+        known = {"follow_links", "max_depth", "max_pages_per_target", "custom_schema"}
+        kwargs = {k: v for k, v in data.items() if k in known}
+        extra = {k: v for k, v in data.items() if k not in known}
+        return cls(**kwargs, extra=extra)
 
 
 @runtime_checkable

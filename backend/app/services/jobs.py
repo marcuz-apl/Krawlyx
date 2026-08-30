@@ -362,7 +362,7 @@ async def _run_target(
             db.commit()
 
             target = Target(target_id=str(row.id), url=row.url)
-            options = JobOptions.model_validate(job_options) if job_options else JobOptions()
+            options = JobOptions.from_dict(job_options)
 
             started = time.monotonic()
             try:
