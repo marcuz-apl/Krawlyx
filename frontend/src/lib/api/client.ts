@@ -522,5 +522,42 @@ export const api = {
 
   settings: {
     get: () => request<SettingsOut>('/api/settings'),
+    getDbStats: () =>
+      request<{
+        db_path: string;
+        db_size_bytes: number;
+        db_size_formatted: string;
+        wal_size_bytes: number;
+        wal_size_formatted: string;
+        journal_mode: string;
+        page_count: number;
+        page_size: number;
+        total_datasets: number;
+        total_dataset_rows: number;
+        total_jobs: number;
+        total_job_results: number;
+      }>('/api/settings/db/stats'),
+    runCheckpoint: () =>
+      request<{
+        action: string;
+        success: boolean;
+        message: string;
+        before_size_bytes: number;
+        after_size_bytes: number;
+        before_size_formatted: string;
+        after_size_formatted: string;
+        bytes_freed: number;
+      }>('/api/settings/db/checkpoint', { method: 'POST' }),
+    runVacuum: () =>
+      request<{
+        action: string;
+        success: boolean;
+        message: string;
+        before_size_bytes: number;
+        after_size_bytes: number;
+        before_size_formatted: string;
+        after_size_formatted: string;
+        bytes_freed: number;
+      }>('/api/settings/db/vacuum', { method: 'POST' }),
   },
 };

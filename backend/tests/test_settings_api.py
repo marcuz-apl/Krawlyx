@@ -41,3 +41,33 @@ def test_settings_returns_seven_fields(client: TestClient) -> None:
 def test_settings_requires_authentication(client: TestClient) -> None:
     r = client.get("/api/settings")
     assert r.status_code == 401
+
+
+def test_db_stats_and_checkpoint_and_vacuum(client: TestClient) -> None:
+    csrf = auth_as(client, "admin_db_user", "admin")
+    headers = {"X-CSRF-Token": csrf}
+
+    # 1. Get DB stats
+    r = client.get("/api/settings/db/stats", headers=headers)
+    assert r.status_code == 200
+    data = r.json()
+    assert "db_path" in data
+    assert "db_size_bytes" in data
+    assert "journal_mode" in data
+    assert data["page_size"] >= 512
+
+    # 2. Run checkpoint
+    r = client.post("/api/settings/db/checkpoint", headers=headers)
+    assert r.status_code == 200
+    res = r.json()
+    assert res["success"] is True
+    assert "before_size_formatted" in res
+    assert "after_size_formatted" in res
+
+    # 3. Run vacuum
+    r = client.post("/api/settings/db/vacuum", headers=headers)
+    assert r.status_code == 200
+    res = r.json()
+    assert res["success"] is True
+    assert "before_size_formatted" in res
+    assert "after_size_formatted" in res
