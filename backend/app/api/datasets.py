@@ -458,6 +458,12 @@ def execute_dataset_sql(
         if r.data:
             all_keys.update(r.data.keys())
 
+    # Support aliases for vehicle fields if one exists
+    if "mileage" in all_keys and "mileage_km" not in all_keys:
+        all_keys.add("mileage_km")
+    elif "mileage_km" in all_keys and "mileage" not in all_keys:
+        all_keys.add("mileage")
+
     # Build ordered column list
     cols = sorted(list(all_keys))
 
@@ -474,7 +480,16 @@ def execute_dataset_sql(
         row_id_map[idx] = r
         col_names = ", ".join([f'"{c}"' for c in cols])
         placeholders = ", ".join(["?"] * len(cols))
-        vals = [(r.data or {}).get(c) for c in cols]
+        row_dict = r.data or {}
+        vals = []
+        for c in cols:
+            val = row_dict.get(c)
+            if val is None:
+                if c == "mileage_km":
+                    val = row_dict.get("mileage")
+                elif c == "mileage":
+                    val = row_dict.get("mileage_km")
+            vals.append(val)
         mem_conn.execute(
             f'INSERT INTO dataset (_row_id, {col_names}) VALUES (?, {placeholders})',
             [idx] + vals,
@@ -485,7 +500,20 @@ def execute_dataset_sql(
 
     try:
         cur = mem_conn.cursor()
-        cur.execute(clean_sql)
+        try:
+            cur.execute(clean_sql)
+        except sqlite3.OperationalError as op_err:
+            err_str = str(op_err)
+            if "no such column:" in err_str:
+                col_name = err_str.split("no such column:")[-1].strip().strip("\"'`")
+                if col_name and not col_name.startswith("_"):
+                    mem_conn.execute(f'ALTER TABLE dataset ADD COLUMN "{col_name}" TEXT')
+                    cur = mem_conn.cursor()
+                    cur.execute(clean_sql)
+                else:
+                    raise op_err
+            else:
+                raise op_err
 
         if first_word in {"SELECT", "PRAGMA", "EXPLAIN"}:
             col_names = [d[0] for d in cur.description] if cur.description else []
@@ -539,7 +567,7 @@ def execute_dataset_sql(
             }
 
     except Exception as exc:
-        raise HTTPException(status_code=404, detail=f"SQL Error: {exc}")
+        raise HTTPException(status_code=400, detail=f"SQL Error: {exc}")
     finally:
         mem_conn.close()
 
@@ -563,6 +591,11 @@ def execute_raw_sql(
         if isinstance(r, dict):
             all_keys.update(r.keys())
 
+    if "mileage" in all_keys and "mileage_km" not in all_keys:
+        all_keys.add("mileage_km")
+    elif "mileage_km" in all_keys and "mileage" not in all_keys:
+        all_keys.add("mileage")
+
     cols = sorted(list(all_keys)) if all_keys else ["val"]
 
     mem_conn = sqlite3.connect(":memory:")
@@ -574,7 +607,16 @@ def execute_raw_sql(
     for idx, r in enumerate(rows, start=1):
         col_names = ", ".join([f'"{c}"' for c in cols])
         placeholders = ", ".join(["?"] * len(cols))
-        vals = [(r or {}).get(c) for c in cols]
+        row_dict = r or {}
+        vals = []
+        for c in cols:
+            val = row_dict.get(c)
+            if val is None:
+                if c == "mileage_km":
+                    val = row_dict.get("mileage")
+                elif c == "mileage":
+                    val = row_dict.get("mileage_km")
+            vals.append(val)
         mem_conn.execute(
             f'INSERT INTO dataset (_row_id, {col_names}) VALUES (?, {placeholders})',
             [idx] + vals,
@@ -585,7 +627,20 @@ def execute_raw_sql(
 
     try:
         cur = mem_conn.cursor()
-        cur.execute(clean_sql)
+        try:
+            cur.execute(clean_sql)
+        except sqlite3.OperationalError as op_err:
+            err_str = str(op_err)
+            if "no such column:" in err_str:
+                col_name = err_str.split("no such column:")[-1].strip().strip("\"'`")
+                if col_name and not col_name.startswith("_"):
+                    mem_conn.execute(f'ALTER TABLE dataset ADD COLUMN "{col_name}" TEXT')
+                    cur = mem_conn.cursor()
+                    cur.execute(clean_sql)
+                else:
+                    raise op_err
+            else:
+                raise op_err
 
         if first_word in {"SELECT", "PRAGMA", "EXPLAIN"}:
             col_names = [d[0] for d in cur.description] if cur.description else []
