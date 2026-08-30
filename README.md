@@ -44,7 +44,12 @@ zenCrawl provides two built-in crawl engines tailored for different scraping tas
 - **🤖 Crawl4AI**: Headless Chromium browser engine with full JavaScript execution, Next.js/React hydration support, LLM-ready markdown extraction, and automatic HTTP fallback. Best for dynamic, JS-rendered SPAs.
 - **⚡ Scrapy**: Ultra-fast, lightweight asynchronous HTTP engine running in an isolated subprocess. Best for large-scale bulk scraping, server-rendered HTML, and deep link crawling.
 
-👉 **Detailed Guide**: Read the full [Engines Comparison Guide](docs/engines-comparison.md).
+## Documentation
+
+- 🚀 [Get Started Quickly](docs/get-started-quickly.md) — 30-second setup and quickstart.
+- ⚙️ [Crawl Engines Comparison](docs/engines-comparison.md) — Deep dive into Crawl4AI vs. Scrapy.
+- 📋 [Implementation Plan](docs/implementation-plan.md) — Architectural design for universal datasets & transforms.
+- 🔍 [Walkthrough Guide](docs/walkthrough.md) — Feature walkthrough and usage guide.
 
 ## Versioning
 
