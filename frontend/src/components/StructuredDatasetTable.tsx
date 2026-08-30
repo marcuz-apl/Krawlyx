@@ -212,7 +212,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                 type="button"
                 onClick={() =>
                   setSqlQuery(
-                    `UPDATE dataset\nSET mileage_km = CAST(REPLACE(REPLACE(mileage_km, ' km', ''), ',', '') AS INTEGER)\nWHERE mileage_km IS NOT NULL;`
+                    `UPDATE dataset\nSET mileage = CAST(REPLACE(REPLACE(mileage, ' km', ''), ',', '') AS INTEGER)\nWHERE mileage IS NOT NULL;`
                   )
                 }
                 className="rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 px-2.5 py-1 text-indigo-300 font-mono"
@@ -435,7 +435,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                   <th className="px-3 py-2.5">Model</th>
                   <th className="px-3 py-2.5">Trim</th>
                   <th className="px-3 py-2.5">Drivetrain</th>
-                  <th className="px-3 py-2.5">Mileage (km)</th>
+                  <th className="px-3 py-2.5">mileage</th>
                   <th className="px-3 py-2.5 text-right">Price</th>
                   <th className="px-3 py-2.5">Seller</th>
                   <th className="px-3 py-2.5">City / Prov</th>
@@ -480,9 +480,11 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                       </span>
                     </td>
                     <td className="px-3 py-2.5 font-mono text-slate-700 font-medium">
-                      {row.mileage_km != null
-                        ? `${Number(row.mileage_km).toLocaleString()} km`
-                        : row.mileage || '—'}
+                      {row.mileage != null
+                        ? String(row.mileage)
+                        : row.mileage_km != null
+                        ? String(row.mileage_km)
+                        : '—'}
                     </td>
                     <td className="px-3 py-2.5 text-right font-semibold text-emerald-700">
                       {typeof row.price === 'number'

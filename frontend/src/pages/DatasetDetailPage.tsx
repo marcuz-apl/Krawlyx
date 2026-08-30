@@ -207,7 +207,7 @@ export function DatasetDetailPage() {
                 type="button"
                 onClick={() =>
                   setSqlQuery(
-                    `UPDATE dataset\nSET mileage_km = CAST(REPLACE(REPLACE(mileage_km, ' km', ''), ',', '') AS INTEGER)\nWHERE mileage_km IS NOT NULL;`
+                    `UPDATE dataset\nSET mileage = CAST(REPLACE(REPLACE(mileage, ' km', ''), ',', '') AS INTEGER)\nWHERE mileage IS NOT NULL;`
                   )
                 }
                 className="rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 px-2.5 py-1 text-indigo-300 font-mono"
