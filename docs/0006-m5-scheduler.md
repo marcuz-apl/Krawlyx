@@ -7,4 +7,4 @@ Version: `v1.1.5` (`675a220`)
 - Overlapping run prevention (`FR-SCH-03`): previous run must finish before new spawn.
 - Admin panel: engine instance CRUD (`FR-ENG-01..06`), settings (`FR-SET-02..04`), users.
 - Engine pool toggle (`FR-ENG-04`): disabled instances finish running but reject new jobs.
-- Global settings (`ZENCRAWL_ROBOTS_TXT_ENABLED`, `PER_DOMAIN_INTERVAL_S`, `SSRF_GUARD_ENABLED`, `CONTENT_SIZE_CAP_BYTES`) consumed by M6 adapters.
+- Global settings (`MYKRAWL_ROBOTS_TXT_ENABLED`, `PER_DOMAIN_INTERVAL_S`, `SSRF_GUARD_ENABLED`, `CONTENT_SIZE_CAP_BYTES`) consumed by M6 adapters.

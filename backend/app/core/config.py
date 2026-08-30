@@ -1,4 +1,4 @@
-"""Application settings (pydantic-settings, env prefix ZENCRAWL_)."""
+"""Application settings (pydantic-settings, env prefix MYKRAWL_)."""
 
 from functools import lru_cache
 from pathlib import Path
@@ -13,15 +13,15 @@ VERSION_FILE = ROOT_DIR / "VERSION"
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="ZENCRAWL_",
+        env_prefix="MYKRAWL_",
         env_file=(str(ROOT_DIR / ".env"), ".env"),
         extra="ignore",
     )
 
-    app_name: str = "zenCrawl"
+    app_name: str = "MyKrawl"
     # Required for any real deployment; the default keeps local dev frictionless.
     secret_key: str = "dev-insecure-secret-key"
-    db_path: Path = ROOT_DIR / "data" / "zencrawl.db"
+    db_path: Path = ROOT_DIR / "data" / "mykrawl.db"
     session_ttl_s: int = 60 * 60 * 12
     cookie_secure: bool = False
     admin_user: str | None = None
@@ -43,16 +43,13 @@ class Settings(BaseSettings):
     # is non-empty, only targets whose host matches an entry (suffix
     # match) are accepted. Empty list = block-by-default.
     ssrf_allow_list: list[str] = []
-    # NFR-05: identifiable User-Agent `zenCrawl/0.1 (+{admin_contact_email})`.
-    # Empty contact is allowed — the UA degrades to `zenCrawl/0.1`.
+    # NFR-05: identifiable User-Agent `MyKrawl/0.1 (+{admin_contact_email})`.
+    # Empty contact is allowed — the UA degrades to `MyKrawl/0.1`.
     admin_contact_email: str = ""
 
     @field_validator("ssrf_allow_list", mode="before")
     @classmethod
     def _parse_allow_list(cls, v: object) -> object:
-        # Accept either a real list (programmatic callers) or a
-        # comma-separated string (env var, e.g.
-        # ZENCRAWL_SSRF_ALLOW_LIST=internal.example.com,other.internal).
         if isinstance(v, str):
             return [s.strip() for s in v.split(",") if s.strip()]
         return v

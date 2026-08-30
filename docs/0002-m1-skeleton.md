@@ -6,4 +6,4 @@ Version: `v1.0.9` (`32007df`)
 - React + Vite + Tailwind + shadcn/ui scaffold (`frontend/`).
 - Engine registry interface (`engines/registry.py`, `engines/base.py`).
 - Alembic initial migration (`alembic/`).
-- Bootstrap admin (`ZENCRAWL_ADMIN_USER` / `PASSWORD`).
+- Bootstrap admin (`MYKRAWL_ADMIN_USER` / `PASSWORD`).

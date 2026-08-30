@@ -1,7 +1,7 @@
 [project]
-name = "zencrawl"
+name = "mykrawl"
 version = "0.1.0"
-description = "zenCrawl backend API — self-hosted web scraping workbench"
+description = "MyKrawl backend API — self-hosted web scraping workbench"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115,<1",

@@ -77,7 +77,7 @@ def configure_logging() -> None:
     """Idempotent: install handlers + filter once per process."""
     root = logging.getLogger()
     # If a previous call already attached our named handlers, skip.
-    if any(getattr(h, "_zencrawl_owned", False) for h in root.handlers):
+    if any(getattr(h, "_mykrawl_owned", False) for h in root.handlers):
         return
 
     data_dir = _data_dir()
@@ -92,13 +92,13 @@ def configure_logging() -> None:
     file_h.setLevel(logging.INFO)
     file_h.setFormatter(fmt)
     file_h.addFilter(scrub)
-    file_h._zencrawl_owned = True  # type: ignore[attr-defined]
+    file_h._mykrawl_owned = True  # type: ignore[attr-defined]
 
     stdout_h = logging.StreamHandler(stream=sys.stdout)
     stdout_h.setLevel(logging.INFO)
     stdout_h.setFormatter(fmt)
     stdout_h.addFilter(scrub)
-    stdout_h._zencrawl_owned = True  # type: ignore[attr-defined]
+    stdout_h._mykrawl_owned = True  # type: ignore[attr-defined]
 
     # Wipe any handlers another library pre-installed, then install
     # ours + the filter at the root.
@@ -110,7 +110,7 @@ def configure_logging() -> None:
     for noisy in ("apscheduler", "apscheduler.scheduler", "sqlalchemy.engine"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
 
-    logging.getLogger("zencrawl.app").info("logging configured (file=%s)", app_log)
+    logging.getLogger("mykrawl.app").info("logging configured (file=%s)", app_log)
 
 
 class AutoFlushRotatingFileHandler(RotatingFileHandler):
@@ -125,7 +125,7 @@ def job_log_handler(job_id: int) -> RotatingFileHandler:
     """Return a per-job rotating file handler.
 
     The caller is responsible for attaching the handler to the
-    `zencrawl.jobs.{id}` logger for the job's lifetime and
+    `mykrawl.jobs.{id}` logger for the job's lifetime and
     detaching it in a `finally` block.
     """
     log_dir = _data_dir() / "logs" / "jobs"
@@ -135,5 +135,5 @@ def job_log_handler(job_id: int) -> RotatingFileHandler:
     h.setLevel(logging.INFO)
     h.setFormatter(logging.Formatter(_LOG_FORMAT, _DATE_FORMAT))
     h.addFilter(JobLogFilter())
-    h._zencrawl_owned = True  # type: ignore[attr-defined]
+    h._mykrawl_owned = True  # type: ignore[attr-defined]
     return h

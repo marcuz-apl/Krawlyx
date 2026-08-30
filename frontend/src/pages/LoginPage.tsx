@@ -40,7 +40,7 @@ export function LoginPage() {
         autoComplete="off"
         className="w-full max-w-sm bg-white shadow rounded-lg p-6 space-y-4"
       >
-        <h1 className="text-2xl font-semibold text-slate-900">zenCrawl</h1>
+        <h1 className="text-2xl font-semibold text-slate-900">MyKrawl</h1>
         <p className="text-sm text-slate-500">Sign in to your account</p>
 
         <label className="block">

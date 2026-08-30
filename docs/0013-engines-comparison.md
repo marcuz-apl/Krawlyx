@@ -1,6 +1,6 @@
 # Engines Comparison — Crawl4AI vs. Scrapy
 
-zenCrawl includes two pluggable crawl engines in v1. Choose the engine that best fits your target website, performance requirements, and data structure.
+MyKrawl includes two pluggable crawl engines in v1. Choose the engine that best fits your target website, performance requirements, and data structure.
 
 ---
 
@@ -28,7 +28,7 @@ Choose **Crawl4AI** when scraping dynamic, modern web applications:
 4. **Anti-Bot & Browser Emulation**: Pages that require valid browser canvas, viewport, and header fingerprints.
 
 > [!NOTE]
-> In zenCrawl, Crawl4AI is guarded by a **25-second execution timeout** and an automatic high-speed HTTP fallback. If a headless browser instance encounters resource contention, it seamlessly falls back to direct HTTP fetching.
+> In MyKrawl, Crawl4AI is guarded by a **25-second execution timeout** and an automatic high-speed HTTP fallback. If a headless browser instance encounters resource contention, it seamlessly falls back to direct HTTP fetching.
 
 ---
 

@@ -30,7 +30,7 @@ from app.engines.normalize import normalize_record
 from app.engines.schemas import ScrapyConfig
 from app.engines.ssrf import resolve_safe
 
-logger = logging.getLogger("zencrawl.engines.scrapy")
+logger = logging.getLogger("mykrawl.engines.scrapy")
 
 ENGINE_TYPE = "scrapy"
 
@@ -40,7 +40,7 @@ CAPABILITIES = Capabilities(
     max_pages_per_target=1000,
 )
 
-TEMPLATE_PATH = Path(__file__).parent / "templates" / "zen_spider.py"
+TEMPLATE_PATH = Path(__file__).parent / "templates" / "krawl_spider.py"
 
 # Hard cap so a slow/dead subprocess cannot wedge a job forever.
 SUBPROCESS_TIMEOUT_S = 600
@@ -170,21 +170,21 @@ class ScrapyEngine:
         # This is "no faster than the admin asked" — the engine can
         # be slower but not faster.
         effective_delay = max(self.config.download_delay_s, float(cfg.per_domain_interval_s))
-        env = {k: v for k, v in os.environ.items() if k != "ZENCRAWL_TARGET_URL"}
+        env = {k: v for k, v in os.environ.items() if k != "MYKRAWL_TARGET_URL"}
         backend_dir = str(Path(__file__).resolve().parents[2])
         pythonpath = os.environ.get("PYTHONPATH", "")
         env["PYTHONPATH"] = f"{backend_dir}{os.pathsep}{pythonpath}" if pythonpath else backend_dir
         env.update(
             {
-                "ZENCRAWL_TARGET_URL": target.url,
-                "ZENCRAWL_USER_AGENT": user_agent("scrapy"),
-                "ZENCRAWL_CONCURRENCY": str(self.config.concurrency),
-                "ZENCRAWL_DOWNLOAD_DELAY": str(effective_delay),
-                "ZENCRAWL_AUTOTHROTTLE": "1" if self.config.autothrottle else "0",
-                "ZENCRAWL_MAX_PAGES": str(
+                "MYKRAWL_TARGET_URL": target.url,
+                "MYKRAWL_USER_AGENT": user_agent("scrapy"),
+                "MYKRAWL_CONCURRENCY": str(self.config.concurrency),
+                "MYKRAWL_DOWNLOAD_DELAY": str(effective_delay),
+                "MYKRAWL_AUTOTHROTTLE": "1" if self.config.autothrottle else "0",
+                "MYKRAWL_MAX_PAGES": str(
                     min(self.config.max_pages_per_target, options.max_pages_per_target)
                 ),
-                "ZENCRAWL_FOLLOW_LINKS": "1" if self.config.follow_links else "0",
+                "MYKRAWL_FOLLOW_LINKS": "1" if self.config.follow_links else "0",
                 "PYTHONUNBUFFERED": "1",
                 "PYTHONIOENCODING": "utf-8",
             }

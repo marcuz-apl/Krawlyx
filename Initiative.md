@@ -1,8 +1,8 @@
-# zenCrawl app
+# MyKrawl app
 
 
 
-- I want to build a simple web app named "zenCrawl" to scrap any website.
+- I want to build a simple web app named "MyKrawl" to scrap any website.
 - The web app shall be built with Python or Java, Please advise the best language for this purpose.
 - The web crawl framework can be: `Firecrawl`, `Crawl4AI`, `Scrapy`, while the user shall be able to select the engine in the settings.
 - Database wise: a simple file based SQLite3 file shall be enough to handle the case. If not, please advise.

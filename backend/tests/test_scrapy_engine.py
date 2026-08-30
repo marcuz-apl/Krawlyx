@@ -38,7 +38,7 @@ def test_scrapy_factory_returns_protocol_compatible_instance() -> None:
 def test_scrapy_spider_template_exists() -> None:
     """The adapter requires the spider template to live next to it."""
     template = (
-        Path(__file__).resolve().parents[1] / "app" / "engines" / "templates" / "zen_spider.py"
+        Path(__file__).resolve().parents[1] / "app" / "engines" / "templates" / "krawl_spider.py"
     )
     assert template.is_file(), f"missing spider template: {template}"
 
@@ -68,15 +68,15 @@ def test_scrapy_env_uses_configured_values() -> None:
     target = Target("t1", "https://example.com/")
     env = engine._build_env(target, JobOptions(max_pages_per_target=10))
 
-    assert env["ZENCRAWL_TARGET_URL"] == "https://example.com/"
+    assert env["MYKRAWL_TARGET_URL"] == "https://example.com/"
     # M6: user_agent comes from the global Settings (NFR-05); engine
     # config user_agent is no longer echoed directly into the env.
-    assert env["ZENCRAWL_USER_AGENT"] == "zenCrawl/0.1 via scrapy"
-    assert env["ZENCRAWL_CONCURRENCY"] == "4"
-    assert env["ZENCRAWL_DOWNLOAD_DELAY"] == "1.0"  # M6: admin floor wins
-    assert env["ZENCRAWL_AUTOTHROTTLE"] == "0"
+    assert env["MYKRAWL_USER_AGENT"] == "MyKrawl/0.1 via scrapy"
+    assert env["MYKRAWL_CONCURRENCY"] == "4"
+    assert env["MYKRAWL_DOWNLOAD_DELAY"] == "1.0"  # M6: admin floor wins
+    assert env["MYKRAWL_AUTOTHROTTLE"] == "0"
     # max_pages is capped at the smaller of (config, options)
-    assert env["ZENCRAWL_MAX_PAGES"] == "10"
+    assert env["MYKRAWL_MAX_PAGES"] == "10"
     assert env["PYTHONUNBUFFERED"] == "1"
 
 
@@ -140,7 +140,7 @@ def test_scrapy_imports_and_has_correct_python() -> None:
     cmd = [sys.executable, "-u", str(TEMPLATE_PATH)]
     assert cmd[0] == sys.executable
     assert cmd[1] == "-u"
-    assert cmd[2].endswith("zen_spider.py")
+    assert cmd[2].endswith("krawl_spider.py")
 
 
 async def _drain(ait):

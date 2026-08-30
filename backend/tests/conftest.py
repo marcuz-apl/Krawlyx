@@ -12,9 +12,9 @@ import tempfile
 from pathlib import Path
 
 # Establish the test DB path before any app module imports settings.
-_DATA_DIR = Path(tempfile.mkdtemp(prefix="zencrawl-test-"))
-os.environ.setdefault("ZENCRAWL_DB_PATH", str(_DATA_DIR / "test.db"))
-os.environ.setdefault("ZENCRAWL_SECRET_KEY", "test-secret-key-do-not-use-in-prod")
+_DATA_DIR = Path(tempfile.mkdtemp(prefix="mykrawl-test-"))
+os.environ.setdefault("MYKRAWL_DB_PATH", str(_DATA_DIR / "test.db"))
+os.environ.setdefault("MYKRAWL_SECRET_KEY", "test-secret-key-do-not-use-in-prod")
 
 import pytest
 from sqlalchemy import text

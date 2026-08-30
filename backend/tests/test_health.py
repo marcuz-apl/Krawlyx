@@ -13,5 +13,5 @@ def test_health_reports_status_and_version() -> None:
     assert resp.status_code == 200
     body = resp.json()
     assert body["status"] == "ok"
-    assert body["app"] == "zenCrawl"
+    assert body["app"] == "MyKrawl"
     assert body["version"].startswith("v")

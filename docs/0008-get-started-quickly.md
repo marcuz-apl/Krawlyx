@@ -1,4 +1,4 @@
-# Get Started Quickly — zenCrawl
+# Get Started Quickly — MyKrawl
 
 ## 1. First-time setup (30 seconds)
 
@@ -13,12 +13,12 @@ crawl4ai-setup
 Copy `.env.example` → `.env` and fill at minimum:
 
 ```env
-ZENCRAWL_SECRET_KEY=$(openssl rand -hex 32)
-ZENCRAWL_ADMIN_USER=admin
-ZENCRAWL_ADMIN_PASSWORD=<strong-password>
+MYKRAWL_SECRET_KEY=$(openssl rand -hex 32)
+MYKRAWL_ADMIN_USER=admin
+MYKRAWL_ADMIN_PASSWORD=<strong-password>
 ```
 
-First run bootstraps the SQLite DB (`data/zencrawl.db`) and admin user.
+First run bootstraps the SQLite DB (`data/mykrawl.db`) and admin user.
 
 ## 2. Verify environment
 
@@ -52,12 +52,12 @@ uvicorn app.main:app --reload
 
 | Guard | Default | Config env key |
 |---|---|---|
-| SSRF guard | `on` (block loopback/private/link-local/metadata) | `ZENCRAWL_SSRF_GUARD_ENABLED` |
-| SSRF allow-list | empty (block-by-default) | `ZENCRAWL_SSRF_ALLOW_LIST` |
-| robots.txt compliance | `on` | `ZENCRAWL_ROBOTS_TXT_ENABLED` |
-| Per-domain rate limit | `1.0` s | `ZENCRAWL_PER_DOMAIN_INTERVAL_S` |
-| Content size cap | `5` MB | `ZENCRAWL_CONTENT_SIZE_CAP_BYTES` |
-| User-Agent | `zenCrawl/0.1 (+{email}) via {engine}` (`NFR-05`) | `ZENCRAWL_ADMIN_CONTACT_EMAIL` |
+| SSRF guard | `on` (block loopback/private/link-local/metadata) | `MYKRAWL_SSRF_GUARD_ENABLED` |
+| SSRF allow-list | empty (block-by-default) | `MYKRAWL_SSRF_ALLOW_LIST` |
+| robots.txt compliance | `on` | `MYKRAWL_ROBOTS_TXT_ENABLED` |
+| Per-domain rate limit | `1.0` s | `MYKRAWL_PER_DOMAIN_INTERVAL_S` |
+| Content size cap | `5` MB | `MYKRAWL_CONTENT_SIZE_CAP_BYTES` |
+| User-Agent | `MyKrawl/0.1 (+{email}) via {engine}` (`NFR-05`) | `MYKRAWL_ADMIN_CONTACT_EMAIL` |
 
 When `SSRF_ALLOW_LIST` is non-empty, **only** listed hosts pass (suffix match, case-insensitive). Empty list = standard block-by-default.
 
@@ -88,7 +88,7 @@ No live network in tests: engine adapters use monkeypatched fixtures / canned pa
 
 ## 8. Things never committed
 
-- `data/zencrawl.db` — SQLite system of record (`.gitignore`: `data/*.db`).
+- `data/mykrawl.db` — SQLite system of record (`.gitignore`: `data/*.db`).
 - `data/logs/app.log` and `data/logs/jobs/*.log` — runtime artifacts (`.gitignore`: `data/logs/`).
 - `.env` — secrets (`.env.example` only).
 - `frontend/dist/` — built SPA (`.gitignore`).

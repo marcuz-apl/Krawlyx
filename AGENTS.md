@@ -1,4 +1,4 @@
-# AGENTS.md — zenCrawl
+# AGENTS.md — MyKrawl
 
 Guidance for AI coding agents (and humans) working in this repository.
 **Read `PRD.md` first** — it is the source of truth for scope and requirements;
@@ -28,7 +28,7 @@ cron scheduling, CSV/XLSX export with size-based file splitting.
 ## Planned layout
 
 ```text
-data/                # SQLite DB lives here (zencrawl.db) — tracked in git; -wal/-shm sidecars ignored
+data/                # SQLite DB lives here (mykrawl.db) — tracked in git; -wal/-shm sidecars ignored
 backend/
   app/
     main.py            # app factory, router mounting, lifespan (scheduler start);
@@ -75,9 +75,9 @@ npm run build                      # emits dist/, served by FastAPI in productio
 npm run typecheck && npm run lint
 ```
 
-First run creates `./data/` and the SQLite file (`zencrawl.db`) inside it, applies
+First run creates `./data/` and the SQLite file (`mykrawl.db`) inside it, applies
 migrations, and bootstraps an
-admin from env vars (`ZENCRAWL_ADMIN_USER` / `ZENCRAWL_ADMIN_PASSWORD`).
+admin from env vars (`MYKRAWL_ADMIN_USER` / `MYKRAWL_ADMIN_PASSWORD`).
 
 ## Architecture invariants
 

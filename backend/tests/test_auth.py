@@ -71,8 +71,8 @@ def test_bootstrap_admin_creates_admin_when_empty(monkeypatch) -> None:
     from app.core.config import get_settings
     from app.services.users import bootstrap_admin, count_users
 
-    monkeypatch.setenv("ZENCRAWL_ADMIN_USER", "root")
-    monkeypatch.setenv("ZENCRAWL_ADMIN_PASSWORD", "secret123")
+    monkeypatch.setenv("MYKRAWL_ADMIN_USER", "root")
+    monkeypatch.setenv("MYKRAWL_ADMIN_PASSWORD", "secret123")
     monkeypatch.setattr("app.core.config.get_settings", get_settings)  # keep cache_clear effective
     get_settings.cache_clear()
 

@@ -30,13 +30,13 @@ def user_agent(template: str | None = None) -> str:
 
     `template` is the engine's per-adapter UA prefix (e.g. ``"crawl4ai"``).
     The admin contact from ``Settings.admin_contact_email`` is appended
-    when set, e.g. ``"zenCrawl/0.1 (+ops@example.com) via crawl4ai"``.
-    An empty contact degrades to ``"zenCrawl/0.1 via crawl4ai"``.
+    when set, e.g. ``"MyKrawl/0.1 (+ops@example.com) via crawl4ai"``.
+    An empty contact degrades to ``"MyKrawl/0.1 via crawl4ai"``.
     """
     from app.core.config import get_settings
 
     contact = get_settings().admin_contact_email.strip()
-    base = "zenCrawl/0.1"
+    base = "MyKrawl/0.1"
     if contact:
         base = f"{base} (+{contact})"
     if template:

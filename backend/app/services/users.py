@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.security import hash_password, verify_password
 from app.models import User
 
-logger = logging.getLogger("zencrawl.users")
+logger = logging.getLogger("mykrawl.users")
 
 
 def get_by_username(db: Session, username: str) -> User | None:
@@ -41,7 +41,7 @@ def bootstrap_admin(db: Session) -> bool:
 
     settings = get_settings()
     if not settings.admin_user or not settings.admin_password:
-        logger.warning("ZENCRAWL_ADMIN_USER/ZENCRAWL_ADMIN_PASSWORD not set; skipping bootstrap")
+        logger.warning("MYKRAWL_ADMIN_USER/MYKRAWL_ADMIN_PASSWORD not set; skipping bootstrap")
         return False
     if count_users(db) > 0:
         return False

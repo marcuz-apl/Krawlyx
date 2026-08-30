@@ -29,7 +29,7 @@ from app.schemas import (
     ExportTargetUpdate,
 )
 
-logger = logging.getLogger("zencrawl.api.export_targets")
+logger = logging.getLogger("mykrawl.api.export_targets")
 
 router = APIRouter(prefix="/api/export-targets", tags=["export-targets"])
 
@@ -188,9 +188,9 @@ def test_target(
     try:
         directory = Path(row.path).expanduser().resolve()
         directory.mkdir(parents=True, exist_ok=True)
-        probe = directory / f"zenCrawl_probe_{uuid.uuid4().hex[:8]}.txt"
+        probe = directory / f"MyKrawl_probe_{uuid.uuid4().hex[:8]}.txt"
         probe.write_text(
-            f"zenCrawl probe at {datetime.now(UTC).isoformat(timespec='seconds')}\n",
+            f"MyKrawl probe at {datetime.now(UTC).isoformat(timespec='seconds')}\n",
             encoding="utf-8",
         )
         probe.unlink()

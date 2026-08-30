@@ -40,7 +40,7 @@ from app.models import EngineInstance, Job
 from app.models import Target as TargetRow
 from app.services.engines import decrypt_config
 
-logger = logging.getLogger("zencrawl.jobs")
+logger = logging.getLogger("mykrawl.jobs")
 
 # ---- in-memory runtime state (singleton per process) ----
 _active: dict[int, JobHandle] = {}
@@ -176,7 +176,7 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
     # the worker (and the engine adapters it calls into) flows into
     # data/logs/jobs/{id}.log. The handler is detached in `finally`
     # below so the file handle isn't leaked.
-    job_logger = logging.getLogger(f"zencrawl.jobs.{job_id}")
+    job_logger = logging.getLogger(f"mykrawl.jobs.{job_id}")
     job_handler = job_log_handler(job_id)
     job_logger.addHandler(job_handler)
     job_logger.setLevel(logging.INFO)
@@ -323,7 +323,7 @@ async def _run_target(
     from app.models import JobResult
     from app.models.base import utcnow
 
-    job_logger_local = logging.getLogger(f"zencrawl.jobs.{handle.job_id}")
+    job_logger_local = logging.getLogger(f"mykrawl.jobs.{handle.job_id}")
 
     if handle.cancel_event.is_set():
         return

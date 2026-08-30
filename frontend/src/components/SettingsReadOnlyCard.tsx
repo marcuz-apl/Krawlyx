@@ -21,7 +21,7 @@ export function SettingsReadOnlyCard() {
       <Row label="Content size cap (bytes)" value={String(s.content_size_cap_bytes)} />
       <p className="mt-4 rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
         Settings are read-only. To change them, edit the matching
-        <code className="mx-1 rounded bg-amber-100 px-1 py-0.5 font-mono">ZENCRAWL_*</code>
+        <code className="mx-1 rounded bg-amber-100 px-1 py-0.5 font-mono">MYKRAWL_*</code>
         entries in <code className="mx-1 rounded bg-amber-100 px-1 py-0.5 font-mono">.env</code>
         and restart the server.
       </p>

@@ -25,7 +25,7 @@ from app.schemas import (
 )
 from app.services import engines as engines_svc
 
-logger = logging.getLogger("zencrawl.api.engines")
+logger = logging.getLogger("mykrawl.api.engines")
 
 router = APIRouter(tags=["engines"])
 

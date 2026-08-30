@@ -26,7 +26,7 @@ from app.models.user import User as UserRow
 from app.schemas import UserCreate, UserOut, UserUpdate
 from app.services.users import create_user
 
-logger = logging.getLogger("zencrawl.api.users")
+logger = logging.getLogger("mykrawl.api.users")
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 

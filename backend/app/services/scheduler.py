@@ -41,7 +41,7 @@ from sqlalchemy import select, update
 from app.core.db import SessionLocal
 from app.models import EngineInstance, ExportTarget, Job, Schedule, Target
 
-logger = logging.getLogger("zencrawl.scheduler")
+logger = logging.getLogger("mykrawl.scheduler")
 
 # ---- in-memory singleton state ----
 _scheduler: AsyncIOScheduler | None = None

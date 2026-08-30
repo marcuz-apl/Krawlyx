@@ -1,1 +1,1 @@
-"""zenCrawl backend application package."""
+"""MyKrawl backend application package."""

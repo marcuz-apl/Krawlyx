@@ -321,7 +321,7 @@ def test_endpoint_probe_writes_and_removes(tmp_path) -> None:
         body = r.json()
         assert body["ok"] is True
         # No probe files left behind.
-        assert not list(tmp_path.glob("zenCrawl_probe_*.txt"))
+        assert not list(tmp_path.glob("MyKrawl_probe_*.txt"))
 
 
 def test_endpoint_probe_reports_permission_failure(tmp_path) -> None:
@@ -340,9 +340,9 @@ def test_endpoint_probe_reports_permission_failure(tmp_path) -> None:
     from tests._helpers import auth_as
 
     if sys.platform == "win32":
-        bad_path = "Z:\\zenCrawl-bad-target\\exports"
+        bad_path = "Z:\\MyKrawl-bad-target\\exports"
     else:
-        bad_path = "/this/path/should/not/exist/zenCrawl-bad-target"
+        bad_path = "/this/path/should/not/exist/MyKrawl-bad-target"
 
     tid = _make_target("bad", path=bad_path, fmt="csv")
 

@@ -120,7 +120,7 @@ def test_per_job_log_file_is_created_and_populated(client: TestClient) -> None:
     log_path = get_settings().db_path.parent / "logs" / "jobs" / f"{jid}.log"
     assert log_path.is_file(), f"per-job log not at {log_path}"
     text = log_path.read_text(encoding="utf-8")
-    assert "zencrawl.jobs" in text
+    assert "mykrawl.jobs" in text
 
 
 def test_job_log_endpoint_returns_tail(client: TestClient) -> None:

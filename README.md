@@ -1,4 +1,4 @@
-# zenCrawl
+# MyKrawl
 
 A self-hosted web scraping workbench: paste URLs, pick a crawl engine from an
 admin-curated pool, run batch crawls on demand or on a cron schedule, and land
@@ -9,7 +9,7 @@ no paid APIs.
 
 ## Status
 
-M6 Hardening complete (`v1.1.8-2608293`). See [`PRD.md`](PRD.md) §12 and commit log. Key M6 additions: SSRF allow-list (`ZENCRAWL_SSRF_ALLOW_LIST`), per-host throttle (`FR-SET-02`), per-job rotating logs (`data/logs/jobs/`), identifiable User-Agent (`NFR-05`), `app/core/doctor.py`, and `app/core/logging_config.py`.
+M6 Hardening complete (`v1.1.8-2608293`). See [`PRD.md`](PRD.md) §12 and commit log. Key M6 additions: SSRF allow-list (`MYKRAWL_SSRF_ALLOW_LIST`), per-host throttle (`FR-SET-02`), per-job rotating logs (`data/logs/jobs/`), identifiable User-Agent (`NFR-05`), `app/core/doctor.py`, and `app/core/logging_config.py`.
 
 ## Quick test (final product)
 
@@ -39,7 +39,7 @@ curl -H "Cookie: session=..." http://localhost:8000/api/settings | jq '.ssrf_gua
 
 ## Crawl Engines (Crawl4AI vs. Scrapy)
 
-zenCrawl provides two built-in crawl engines tailored for different scraping tasks:
+MyKrawl provides two built-in crawl engines tailored for different scraping tasks:
 
 - **🤖 Crawl4AI**: Headless Chromium browser engine with full JavaScript execution, Next.js/React hydration support, LLM-ready markdown extraction, and automatic HTTP fallback. Best for dynamic, JS-rendered SPAs.
 - **⚡ Scrapy**: Ultra-fast, lightweight asynchronous HTTP engine running in an isolated subprocess. Best for large-scale bulk scraping, server-rendered HTML, and deep link crawling.

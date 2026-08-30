@@ -1,14 +1,14 @@
 """Generic Scrapy spider invoked as a subprocess by `ScrapyEngine`.
 
-The spider receives a single URL via the `ZENCRAWL_TARGET_URL` environment
+The spider receives a single URL via the `MYKRAWL_TARGET_URL` environment
 variable, plus tunables through the standard Scrapy `settings` overrides:
 
-  - ZENCRAWL_USER_AGENT        User-Agent header
-  - ZENCRAWL_CONCURRENCY       request concurrency
-  - ZENCRAWL_DOWNLOAD_DELAY     per-request delay (seconds)
-  - ZENCRAWL_AUTOTHROTTLE      "1" enables AutoThrottle
-  - ZENCRAWL_MAX_PAGES         hard cap on total requests
-  - ZENCRAWL_FOLLOW_LINKS      "1" enables follow-links crawl (capped depth 1)
+  - MYKRAWL_USER_AGENT        User-Agent header
+  - MYKRAWL_CONCURRENCY       request concurrency
+  - MYKRAWL_DOWNLOAD_DELAY     per-request delay (seconds)
+  - MYKRAWL_AUTOTHROTTLE      "1" enables AutoThrottle
+  - MYKRAWL_MAX_PAGES         hard cap on total requests
+  - MYKRAWL_FOLLOW_LINKS      "1" enables follow-links crawl (capped depth 1)
 
 The spider streams one JSONL line per item to stdout, flushed, so the parent
 process can parse results incrementally. The parent process treats the
@@ -72,12 +72,12 @@ class ZenSpider(Spider):
     }
 
     def __init__(self) -> None:
-        start = os.environ.get("ZENCRAWL_TARGET_URL")
+        start = os.environ.get("MYKRAWL_TARGET_URL")
         if not start:
-            raise RuntimeError("ZENCRAWL_TARGET_URL must be set")
+            raise RuntimeError("MYKRAWL_TARGET_URL must be set")
         self.start_urls = [start]
-        self.max_pages = _int("ZENCRAWL_MAX_PAGES", 1)
-        self.follow_links = _bool("ZENCRAWL_FOLLOW_LINKS", False)
+        self.max_pages = _int("MYKRAWL_MAX_PAGES", 1)
+        self.follow_links = _bool("MYKRAWL_FOLLOW_LINKS", False)
         self.start_netloc = urlparse(start).netloc
         self._seen = 0
 
@@ -120,16 +120,16 @@ class ZenSpider(Spider):
 
 
 def main() -> int:
-    target_url = os.environ.get("ZENCRAWL_TARGET_URL")
+    target_url = os.environ.get("MYKRAWL_TARGET_URL")
     if not target_url:
-        print("ZENCRAWL_TARGET_URL not set", file=sys.stderr, flush=True)
+        print("MYKRAWL_TARGET_URL not set", file=sys.stderr, flush=True)
         return 2
 
     settings = {
-        "USER_AGENT": os.environ.get("ZENCRAWL_USER_AGENT", "zenCrawl/0.1 (+local)"),
-        "CONCURRENT_REQUESTS": _int("ZENCRAWL_CONCURRENCY", 8),
-        "DOWNLOAD_DELAY": _float("ZENCRAWL_DOWNLOAD_DELAY", 0.0),
-        "AUTOTHROTTLE_ENABLED": _bool("ZENCRAWL_AUTOTHROTTLE", True),
+        "USER_AGENT": os.environ.get("MYKRAWL_USER_AGENT", "MyKrawl/0.1 (+local)"),
+        "CONCURRENT_REQUESTS": _int("MYKRAWL_CONCURRENCY", 8),
+        "DOWNLOAD_DELAY": _float("MYKRAWL_DOWNLOAD_DELAY", 0.0),
+        "AUTOTHROTTLE_ENABLED": _bool("MYKRAWL_AUTOTHROTTLE", True),
         "ROBOTSTXT_OBEY": True,
         "LOG_LEVEL": "ERROR",
     }

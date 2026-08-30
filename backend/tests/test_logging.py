@@ -52,11 +52,11 @@ def test_configure_logging_is_idempotent() -> None:
     try:
         # Remove our owned handlers so the first call re-installs them
         # from a clean slate.
-        root.handlers = [h for h in saved if not getattr(h, "_zencrawl_owned", False)]
+        root.handlers = [h for h in saved if not getattr(h, "_mykrawl_owned", False)]
         configure_logging()
-        n_first = len([h for h in root.handlers if getattr(h, "_zencrawl_owned", False)])
+        n_first = len([h for h in root.handlers if getattr(h, "_mykrawl_owned", False)])
         configure_logging()
-        n_second = len([h for h in root.handlers if getattr(h, "_zencrawl_owned", False)])
+        n_second = len([h for h in root.handlers if getattr(h, "_mykrawl_owned", False)])
         assert n_first == n_second
         assert n_first >= 2  # we install at least the file + stdout handlers
     finally:

@@ -10,7 +10,7 @@ from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup
 
-logger = logging.getLogger("zencrawl.engines.extractors")
+logger = logging.getLogger("mykrawl.engines.extractors")
 
 
 def extract_structured_data(html: str, source_url: str, options: dict[str, Any] | None = None) -> list[dict[str, Any]]:

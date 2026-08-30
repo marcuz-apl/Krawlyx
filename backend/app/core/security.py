@@ -10,11 +10,11 @@ from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from app.core.config import get_settings
 
-logger = logging.getLogger("zencrawl.security")
+logger = logging.getLogger("mykrawl.security")
 
 SESSION_COOKIE = "zc_session"
 CSRF_COOKIE = "zc_csrf"
-_CSRF_SALT = "zencrawl.session.v1"
+_CSRF_SALT = "mykrawl.session.v1"
 
 
 @dataclass(frozen=True)

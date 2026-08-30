@@ -28,7 +28,7 @@ from app.schemas import (
 )
 from app.services import scheduler as scheduler_svc
 
-logger = logging.getLogger("zencrawl.api.schedules")
+logger = logging.getLogger("mykrawl.api.schedules")
 
 router = APIRouter(prefix="/api/schedules", tags=["schedules"])
 

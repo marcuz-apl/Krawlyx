@@ -20,7 +20,7 @@ class Crawl4AIConfig(_StrictModel):
     headless: bool = True
     browser_timeout_s: int = Field(default=30, ge=1, le=300)
     text_mode: bool = False
-    user_agent: str = "zenCrawl/0.1 (+local)"
+    user_agent: str = "MyKrawl/0.1 (+local)"
     wait_for: str | None = None
     follow_links: bool = False
     max_depth: int = Field(default=1, ge=1, le=5)
@@ -31,7 +31,7 @@ class ScrapyConfig(_StrictModel):
     concurrency: int = Field(default=8, ge=1, le=64)
     download_delay_s: float = Field(default=0.0, ge=0.0, le=60.0)
     autothrottle: bool = True
-    user_agent: str = "zenCrawl/0.1 (+local)"
+    user_agent: str = "MyKrawl/0.1 (+local)"
     follow_links: bool = True
     max_depth: int = Field(default=2, ge=1, le=10)
     max_pages_per_target: int = Field(default=100, ge=1, le=10_000)

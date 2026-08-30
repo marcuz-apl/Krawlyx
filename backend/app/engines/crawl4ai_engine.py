@@ -32,7 +32,7 @@ from app.engines.normalize import normalize_record
 from app.engines.schemas import Crawl4AIConfig
 from app.engines.ssrf import resolve_safe
 
-logger = logging.getLogger("zencrawl.engines.crawl4ai")
+logger = logging.getLogger("mykrawl.engines.crawl4ai")
 
 ENGINE_TYPE = "crawl4ai"
 

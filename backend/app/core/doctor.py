@@ -1,4 +1,4 @@
-"""Environment diagnostic for self-hosters (`python -m zencrawl.doctor`).
+"""Environment diagnostic for self-hosters (`python -m mykrawl.doctor`).
 
 Runs a short list of read-only checks and prints a one-screen report.
 Exits 0 when everything passes, 1 otherwise. The check list is
@@ -152,7 +152,7 @@ def _check_admin_exists() -> Check:
             return Check(
                 name="Bootstrap admin",
                 ok=False,
-                detail="no users; set ZENCRAWL_ADMIN_USER + ZENCRAWL_ADMIN_PASSWORD",
+                detail="no users; set MYKRAWL_ADMIN_USER + MYKRAWL_ADMIN_PASSWORD",
             )
         admin = db.query(User).filter(User.role == "admin").first()
         if admin is None:
@@ -176,7 +176,7 @@ _CHECKS = [
 
 
 def run() -> int:
-    print("zenCrawl doctor")
+    print("MyKrawl doctor")
     print("=" * 40)
     failed = 0
     for fn in _CHECKS:

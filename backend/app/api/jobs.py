@@ -38,7 +38,7 @@ from app.schemas import (
 from app.services import jobs as jobs_svc
 from app.services.urls import parse as parse_urls
 
-logger = logging.getLogger("zencrawl.api.jobs")
+logger = logging.getLogger("mykrawl.api.jobs")
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 

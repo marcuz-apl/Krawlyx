@@ -24,7 +24,7 @@ from app.engines import registry
 from app.engines.schemas import config_model_for
 from app.models import EngineInstance
 
-logger = logging.getLogger("zencrawl.engines.service")
+logger = logging.getLogger("mykrawl.engines.service")
 
 # Per PRD FR-ENG-02, certain config keys hold secrets. This set is the
 # single source of truth for which keys are redacted in API responses.
