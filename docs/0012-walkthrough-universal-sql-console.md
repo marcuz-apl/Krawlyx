@@ -41,5 +41,5 @@ WHERE price IS NULL OR price = 0 OR title LIKE '%wholesale%';
 ---
 
 ## 3. Results Verification
-- After clicking **Execute SQL**, the console displays the execution time, rows affected, and updates the live data table immediately.
-- Exporting CSV now exports the newly transformed columns and clean values.
+- After clicking **Execute SQL**, the console displays execution time, rows affected, and updates the live table immediately.
+- Exporting CSV or XLSX outputs the updated, cleaned values.

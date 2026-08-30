@@ -1,4 +1,4 @@
-# Implementation Plan 02: Universal SQL Query & Transform Console
+# Plan 02: Universal SQL Query & Transform Console
 
 ## 1. Goal & Requirements
 Enable users to execute live SQL statements (`SELECT`, `UPDATE`, `DELETE`, `ALTER TABLE`) directly in the browser against any scraped dataset to clean dirty data, cast types, strip currencies, compute ratios, and filter outliers without requiring external Python scripts.

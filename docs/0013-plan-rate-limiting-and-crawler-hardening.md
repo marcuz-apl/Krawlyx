@@ -1,4 +1,4 @@
-# Implementation Plan 03: Multi-Worker Rate Limiting & Crawl Engine Hardening
+# Plan 03: Multi-Worker Rate Limiting & Crawl Engine Hardening
 
 ## 1. Goal & Requirements
 Prevent anti-bot IP bans during multi-page crawls by introducing an optional randomized worker start gap (1–4 minutes), bounded execution timeouts (25s), and automatic high-speed HTTP fallback so crawling never hangs indefinitely.

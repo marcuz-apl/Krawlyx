@@ -46,21 +46,28 @@ zenCrawl provides two built-in crawl engines tailored for different scraping tas
 
 ## Documentation
 
-### Core Guides
-- 🚀 [Get Started Quickly](docs/get-started-quickly.md) — 30-second setup and quickstart guide.
-- ⚙️ [Crawl Engines Comparison](docs/engines-comparison.md) — Crawl4AI vs. Scrapy detailed comparison.
+All project documentation, architectural decision records, implementation plans, and walkthroughs are organized chronologically in `docs/`:
 
-### Implementation Plans
-- 📋 [Plan 01: Custom Schema & Datasets](docs/plans/plan-01-custom-schema-and-persistent-datasets.md) — Universal custom extraction rules & SQLite storage.
-- 📋 [Plan 02: Universal SQL Console](docs/plans/plan-02-universal-sql-console.md) — In-browser dynamic SQL transforms & cleaning.
-- 📋 [Plan 03: Rate Limiting & Engine Hardening](docs/plans/plan-03-multi-worker-rate-limiting-and-pagination.md) — Multi-worker stagger, timeouts & HTTP fallbacks.
-- 📋 [Plan 04: Multi-Job Dataset Merger](docs/plans/plan-04-multi-job-merger.md) — Combining and deduplicating historical crawl runs.
+### Milestone Architecture & Guides
+- `0001` — [ADR: Web Architecture Decision (NiceGUI vs Flet)](docs/0001-nicegui-vs-flet.md)
+- `0002` — [M1: Project Skeleton & Database Architecture](docs/0002-m1-skeleton.md)
+- `0003` — [M2: Pluggable Engine Adapter Contract](docs/0003-m2-engines.md)
+- `0004` — [M3: Async Worker Pool & Job Queue](docs/0004-m3-runner.md)
+- `0005` — [M4: Streaming CSV/XLSX Exporter & File Splitting](docs/0005-m4-export.md)
+- `0006` — [M5: APScheduler Cron Scheduling Engine](docs/0006-m5-scheduler.md)
+- `0007` — [M6: Security, SSRF Guard & Diagnostics Hardening](docs/0007-m6-hardening.md)
+- `0008` — [🚀 Get Started Quickly Guide](docs/0008-get-started-quickly.md)
 
-### Feature Walkthroughs
-- 🔍 [Walkthrough 01: Custom Schema & Datasets](docs/walkthroughs/walkthrough-01-custom-schema-and-persistent-datasets.md)
-- 🔍 [Walkthrough 02: Universal SQL Console](docs/walkthroughs/walkthrough-02-universal-sql-console.md)
-- 🔍 [Walkthrough 03: Rate Limiting & Engine Hardening](docs/walkthroughs/walkthrough-03-multi-worker-rate-limiting-and-pagination.md)
-- 🔍 [Walkthrough 04: Multi-Job Dataset Merger](docs/walkthroughs/walkthrough-04-multi-job-merger.md)
+### Implementation Plans & Walkthroughs
+- `0009` — [Plan: Custom Schema & Persistent Datasets](docs/0009-plan-custom-schema-and-datasets.md)
+- `0010` — [Walkthrough: Custom Schema & Persistent Datasets](docs/0010-walkthrough-custom-schema-and-datasets.md)
+- `0011` — [Plan: Universal SQL Transform Console](docs/0011-plan-universal-sql-console.md)
+- `0012` — [Walkthrough: Universal SQL Transform Console](docs/0012-walkthrough-universal-sql-console.md)
+- `0013` — [Plan: Rate Limiting & Engine Hardening](docs/0013-plan-rate-limiting-and-crawler-hardening.md)
+- `0014` — [Walkthrough: Rate Limiting & Engine Hardening](docs/0014-walkthrough-rate-limiting-and-crawler-hardening.md)
+- `0015` — [Plan: Multi-Job Dataset Merger](docs/0015-plan-multi-job-merger.md)
+- `0016` — [Walkthrough: Multi-Job Dataset Merger](docs/0016-walkthrough-multi-job-merger.md)
+- `0017` — [⚙️ Crawl Engines Comparison: Crawl4AI vs. Scrapy](docs/0017-engines-comparison.md)
 
 ## Versioning
 

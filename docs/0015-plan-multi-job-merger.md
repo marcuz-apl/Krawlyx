@@ -1,4 +1,4 @@
-# Implementation Plan 04: Multi-Job Dataset Merger
+# Plan 04: Multi-Job Dataset Merger
 
 ## 1. Goal & Requirements
 Allow users to combine, deduplicate, and export results across multiple historical crawl runs without manually merging spreadsheet files.
