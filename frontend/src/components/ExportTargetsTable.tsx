@@ -56,7 +56,7 @@ export function ExportTargetsTable() {
             <tr>
               <th className="px-3 py-2">Name</th>
               <th className="px-3 py-2">Mode / Format</th>
-              <th className="px-3 py-2">Path</th>
+              <th className="px-3 py-2 min-w-[240px] max-w-xs">Path</th>
               <th className="px-3 py-2">Split MB</th>
               <th className="px-3 py-2">Flags</th>
               <th className="px-3 py-2 w-32">Actions</th>

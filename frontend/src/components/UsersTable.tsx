@@ -55,9 +55,9 @@ export function UsersTable() {
         <table className="w-full text-sm">
           <thead className="bg-slate-50 dark:bg-slate-800/60 text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
             <tr>
-              <th className="px-3 py-2">Username</th>
-              <th className="px-3 py-2">Role</th>
-              <th className="px-3 py-2 w-48">Actions</th>
+              <th className="px-3 py-2 w-1/3">Username</th>
+              <th className="px-3 py-2 w-1/3">Role</th>
+              <th className="px-3 py-2 w-1/3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -70,23 +70,25 @@ export function UsersTable() {
             )}
             {users.map((u) => (
               <tr key={u.id} className="border-t border-slate-100">
-                <td className="px-3 py-2 font-medium text-slate-900 dark:text-white">{u.username}</td>
-                <td className="px-3 py-2 text-slate-600">{u.role}</td>
-                <td className="px-3 py-2">
-                  <button
-                    onClick={() => setPwFor(u)}
-                    className="mr-2 rounded border border-slate-300 dark:border-slate-700 px-2 py-0.5 text-xs hover:bg-slate-100"
-                  >
-                    Change password
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm(`Delete user ${u.username}?`)) remove.mutate(u.id);
-                    }}
-                    className="rounded border border-red-300 px-2 py-0.5 text-xs text-red-700 hover:bg-red-50"
-                  >
-                    Delete
-                  </button>
+                <td className="px-3 py-2 w-1/3 font-medium text-slate-900 dark:text-white">{u.username}</td>
+                <td className="px-3 py-2 w-1/3 text-slate-600 dark:text-slate-300">{u.role}</td>
+                <td className="px-3 py-2 w-1/3 text-right whitespace-nowrap">
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => setPwFor(u)}
+                      className="rounded border border-slate-300 dark:border-slate-700 px-2 py-0.5 text-xs hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      Change password
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Delete user ${u.username}?`)) remove.mutate(u.id);
+                      }}
+                      className="rounded border border-red-300 dark:border-red-800 px-2 py-0.5 text-xs text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

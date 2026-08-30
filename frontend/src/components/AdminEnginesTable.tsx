@@ -59,7 +59,7 @@ export function AdminEnginesTable() {
               <th className="px-3 py-2">Name</th>
               <th className="px-3 py-2">Type</th>
               <th className="px-3 py-2">Status</th>
-              <th className="px-3 py-2 w-44">Actions</th>
+              <th className="px-3 py-2 text-right w-64">Actions</th>
             </tr>
           </thead>
           <tbody>

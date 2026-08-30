@@ -31,7 +31,7 @@ export function Footer() {
 
           {/* Center: Copyright */}
           <div className="text-slate-500 dark:text-slate-400 font-medium text-center">
-            MyKrawl Scraping Workbench — © {new Date().getFullYear()} Alfazen Inc. All rights reserved
+            MyKrawl Workbench — © {new Date().getFullYear()} Alfazen Inc. All rights reserved
           </div>
 
           {/* Right Corner: Social Links */}
@@ -53,7 +53,7 @@ export function Footer() {
               <Globe className="h-4 w-4" />
             </a>
             <a 
-              href="https://x.com/alfazeninc/" 
+              href="https://x.com/marcuszou" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="hover:text-sky-400 dark:hover:text-sky-400 transition"
@@ -62,7 +62,7 @@ export function Footer() {
               <Twitter className="h-4 w-4" />
             </a>
             <a 
-              href="https://linkedin.com/in/alfazeninc/" 
+              href="https://linkedin.com/in/marcuszou" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="hover:text-brand-700 dark:hover:text-brand-500 transition"

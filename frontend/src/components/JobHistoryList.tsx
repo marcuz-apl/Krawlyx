@@ -194,7 +194,7 @@ export function JobHistoryList({ jobs }: Props) {
               <th className="px-4 py-3">Counts</th>
               <th className="px-4 py-3">Started</th>
               <th className="px-4 py-3 text-right">Elapsed</th>
-              <th className="px-4 py-3 text-right w-28">Actions</th>
+              <th className="px-4 py-3 text-right w-40 whitespace-nowrap">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -239,7 +239,7 @@ export function JobHistoryList({ jobs }: Props) {
                     {j.started_at ? new Date(j.started_at).toLocaleString() : '—'}
                   </td>
                   <td className="px-4 py-3 text-right text-xs font-mono text-slate-500">{j.elapsed_s}s</td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-1.5">
                       {isRunning ? (
                         <button
@@ -259,7 +259,7 @@ export function JobHistoryList({ jobs }: Props) {
                         <>
                           <Link
                             to={`/jobs/${j.id}/results`}
-                            className="text-xs font-medium text-brand-600 hover:text-brand-800 hover:underline mr-1"
+                            className="inline-block text-xs font-medium text-brand-600 hover:text-brand-800 hover:underline mr-2 whitespace-nowrap"
                           >
                             Results →
                           </Link>
