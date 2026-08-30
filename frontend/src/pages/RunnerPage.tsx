@@ -121,13 +121,12 @@ export function RunnerPage() {
 
       if (helperType === 'autotrader' || helperType === 'page_num') {
         // AutoTrader Next.js backend uses size=20 (or 100) and page=1, page=2... (distinct cars/page)
-        // Must remove search_id (which locks server cache to page 1) and legacy rcs/rcp
-        urlObj.searchParams.delete('search_id');
-        urlObj.searchParams.delete('search_type');
         urlObj.searchParams.delete('rcs');
         urlObj.searchParams.delete('rcp');
-        const sizeVal = helperStep > 0 ? String(helperStep) : '20';
-        urlObj.searchParams.set('size', sizeVal);
+        if (!urlObj.searchParams.has('size')) {
+          const sizeVal = helperStep > 0 ? String(helperStep) : '20';
+          urlObj.searchParams.set('size', sizeVal);
+        }
         for (let i = 1; i <= helperPages; i++) {
           const u = new URL(urlObj.toString());
           u.searchParams.set('page', String(i));
