@@ -58,16 +58,12 @@ All project documentation, architectural decision records, implementation plans,
 - `0007` — [M6: Security, SSRF Guard & Diagnostics Hardening](docs/0007-m6-hardening.md)
 - `0008` — [🚀 Get Started Quickly Guide](docs/0008-get-started-quickly.md)
 
-### Implementation Plans & Walkthroughs
-- `0009` — [Plan: Custom Schema & Persistent Datasets](docs/0009-plan-custom-schema-and-datasets.md)
-- `0010` — [Walkthrough: Custom Schema & Persistent Datasets](docs/0010-walkthrough-custom-schema-and-datasets.md)
-- `0011` — [Plan: Universal SQL Transform Console](docs/0011-plan-universal-sql-console.md)
-- `0012` — [Walkthrough: Universal SQL Transform Console](docs/0012-walkthrough-universal-sql-console.md)
-- `0013` — [Plan: Rate Limiting & Engine Hardening](docs/0013-plan-rate-limiting-and-crawler-hardening.md)
-- `0014` — [Walkthrough: Rate Limiting & Engine Hardening](docs/0014-walkthrough-rate-limiting-and-crawler-hardening.md)
-- `0015` — [Plan: Multi-Job Dataset Merger](docs/0015-plan-multi-job-merger.md)
-- `0016` — [Walkthrough: Multi-Job Dataset Merger](docs/0016-walkthrough-multi-job-merger.md)
-- `0017` — [⚙️ Crawl Engines Comparison: Crawl4AI vs. Scrapy](docs/0017-engines-comparison.md)
+### Universal Workbench Features & Guides
+- `0009` — [Universal Custom Schema & Persistent Datasets](docs/0009-custom-schema-and-datasets.md) — Plan & Walkthrough for arbitrary schema extraction and SQLite persistence.
+- `0010` — [Universal SQL Query & Transform Console](docs/0010-universal-sql-console.md) — Plan & Walkthrough for in-browser dynamic SQL transforms and data cleaning.
+- `0011` — [Multi-Worker Rate Limiting & Engine Hardening](docs/0011-rate-limiting-and-crawler-hardening.md) — Plan & Walkthrough for anti-ban stagger, 25s timeouts, and HTTP fallbacks.
+- `0012` — [Multi-Job Dataset Merger](docs/0012-multi-job-merger.md) — Plan & Walkthrough for multi-job selection, column union, and unified export.
+- `0013` — [⚙️ Crawl Engines Comparison: Crawl4AI vs. Scrapy](docs/0013-engines-comparison.md) — Deep dive into engine differences, speeds, and use cases.
 
 ## Versioning
 
