@@ -452,6 +452,22 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ query, rows }),
       }),
+    split: (id: number, attribute: string = 'make') =>
+      request<{
+        source_dataset_id: number;
+        source_dataset_name: string;
+        attribute: string;
+        created_datasets: Array<{
+          key: string;
+          dataset_id: number;
+          name: string;
+          row_count: number;
+        }>;
+        total_rows_split: number;
+      }>(`/api/datasets/${id}/split`, {
+        method: 'POST',
+        body: JSON.stringify({ attribute }),
+      }),
   },
 
   exportTargets: {

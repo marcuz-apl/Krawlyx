@@ -196,3 +196,20 @@ def test_multi_job_merge_and_save_dataset():
         assert res.status_code == 200
         assert len(res.json()["rows"]) == 3
 
+        # Test splitting dataset by 'make'
+        split_res = client.post(
+            f"/api/datasets/{d_data['id']}/split",
+            json={"attribute": "make"},
+            headers=headers,
+        )
+        assert split_res.status_code == 201
+        split_data = split_res.json()
+        assert split_data["source_dataset_id"] == d_data["id"]
+        assert split_data["total_rows_split"] == 3
+        # Should have split into 2 datasets: Ford (2 rows) and Toyota (1 row)
+        created = split_data["created_datasets"]
+        assert len(created) == 2
+        makes = {c["key"]: c["row_count"] for c in created}
+        assert makes["Ford"] == 2
+        assert makes["Toyota"] == 1
+

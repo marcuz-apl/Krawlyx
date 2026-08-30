@@ -272,6 +272,117 @@ def merge_datasets(
     )
 
 
+class SplitDatasetIn(BaseModel):
+    attribute: str = Field(default="make", min_length=1, max_length=100)
+
+
+class SplitItemOut(BaseModel):
+    key: str
+    dataset_id: int
+    name: str
+    row_count: int
+
+
+class SplitDatasetOut(BaseModel):
+    source_dataset_id: int
+    source_dataset_name: str
+    attribute: str
+    created_datasets: list[SplitItemOut]
+    total_rows_split: int
+
+
+@router.post("/{dataset_id}/split", response_model=SplitDatasetOut, status_code=status.HTTP_201_CREATED)
+def split_dataset(
+    dataset_id: int,
+    payload: SplitDatasetIn,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> SplitDatasetOut:
+    """Split an existing dataset into multiple new datasets partitioned by an attribute (e.g. make, year, city, province)."""
+    dataset = db.get(Dataset, dataset_id)
+    if not dataset:
+        raise HTTPException(status_code=404, detail="dataset not found")
+
+    rows = db.scalars(
+        select(DatasetRow).where(DatasetRow.dataset_id == dataset.id).order_by(DatasetRow.id)
+    ).all()
+    if not rows:
+        raise HTTPException(status_code=400, detail="dataset has no rows to split")
+
+    attr = payload.attribute.strip().lower()
+
+    # Group rows by the target attribute
+    groups: dict[str, list[DatasetRow]] = {}
+    for r in rows:
+        data = r.data or {}
+        val = None
+        for k, v in data.items():
+            if k.lower() == attr:
+                val = v
+                break
+
+        # If attribute is "make" and not found directly, check title
+        if (val is None or str(val).strip() == "") and attr == "make":
+            title = str(data.get("title") or "")
+            import re
+            common_makes = [
+                "dodge", "ford", "chevrolet", "chevy", "toyota", "honda", "nissan", "ram",
+                "jeep", "gmc", "bmw", "mercedes-benz", "audi", "hyundai", "kia", "volkswagen",
+                "subaru", "mazda", "lexus", "cadillac", "buick", "chrysler", "acura", "infiniti",
+                "lincoln", "volvo", "porsche", "tesla", "land rover", "jaguar", "genesis", "mitsubishi"
+            ]
+            for cm in common_makes:
+                if re.search(r'\b' + re.escape(cm) + r'\b', title, re.IGNORECASE):
+                    val = cm.capitalize()
+                    break
+
+        key = str(val).strip() if (val is not None and str(val).strip() != "") else "Other"
+        groups.setdefault(key, []).append(r)
+
+    created_items: list[SplitItemOut] = []
+    total_split = 0
+
+    for key, group_rows in sorted(groups.items(), key=lambda x: len(x[1]), reverse=True):
+        new_name = f"{dataset.name} - {key}"
+        new_desc = f"Split from dataset '{dataset.name}' (ID: {dataset.id}) by {attr} = '{key}'."
+        new_ds = Dataset(
+            name=new_name,
+            description=new_desc,
+            columns=list(dataset.columns or []),
+        )
+        db.add(new_ds)
+        db.flush()
+
+        for gr in group_rows:
+            new_row = DatasetRow(
+                dataset_id=new_ds.id,
+                source_job_id=gr.source_job_id,
+                source_url=gr.source_url,
+                data=gr.data,
+            )
+            db.add(new_row)
+
+        created_items.append(
+            SplitItemOut(
+                key=key,
+                dataset_id=new_ds.id,
+                name=new_name,
+                row_count=len(group_rows),
+            )
+        )
+        total_split += len(group_rows)
+
+    db.commit()
+
+    return SplitDatasetOut(
+        source_dataset_id=dataset.id,
+        source_dataset_name=dataset.name,
+        attribute=attr,
+        created_datasets=created_items,
+        total_rows_split=total_split,
+    )
+
+
 @router.get("/{dataset_id}", response_model=DatasetDetailOut)
 def get_dataset(
     dataset_id: int,
