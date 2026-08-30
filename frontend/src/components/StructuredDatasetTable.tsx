@@ -1,13 +1,25 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
+  Calendar,
+  Car,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   Code2,
+  Download,
   ExternalLink,
+  Filter,
+  MapPin,
   Play,
+  RotateCcw,
+  Search,
+  SlidersHorizontal,
   Sparkles,
+  Tag,
   Terminal,
+  X,
 } from 'lucide-react';
 import { api } from '@/lib/api/client';
 
@@ -15,6 +27,51 @@ interface Props {
   items: Array<Record<string, any>>;
   onUpdateItems?: (updated: Array<Record<string, any>>) => void;
   datasetId?: number;
+}
+
+// Helpers for multi-attribute parsing
+function extractYear(it: Record<string, any>): string {
+  if (it.year !== undefined && it.year !== null && String(it.year).trim() !== '') return String(it.year).trim();
+  if (it.Year !== undefined && it.Year !== null && String(it.Year).trim() !== '') return String(it.Year).trim();
+  const m = String(it.title || '').match(/\b(19\d\d|20\d\d)\b/);
+  return m ? m[1] : '';
+}
+
+function extractMake(it: Record<string, any>): string {
+  if (it.make !== undefined && it.make !== null && String(it.make).trim() !== '') return String(it.make).trim();
+  if (it.Make !== undefined && it.Make !== null && String(it.Make).trim() !== '') return String(it.Make).trim();
+  return '';
+}
+
+function extractModel(it: Record<string, any>): string {
+  if (it.model !== undefined && it.model !== null && String(it.model).trim() !== '') return String(it.model).trim();
+  if (it.Model !== undefined && it.Model !== null && String(it.Model).trim() !== '') return String(it.Model).trim();
+  return '';
+}
+
+function extractTrim(it: Record<string, any>): string {
+  if (it.trim !== undefined && it.trim !== null && String(it.trim).trim() !== '') return String(it.trim).trim();
+  if (it.Trim !== undefined && it.Trim !== null && String(it.Trim).trim() !== '') return String(it.Trim).trim();
+  return '';
+}
+
+function extractDrivetrain(it: Record<string, any>): string {
+  if (it.drivetrain !== undefined && it.drivetrain !== null && String(it.drivetrain).trim() !== '') return String(it.drivetrain).trim();
+  if (it.Drivetrain !== undefined && it.Drivetrain !== null && String(it.Drivetrain).trim() !== '') return String(it.Drivetrain).trim();
+  const m = String(it.specs || it.title || it.trim || '').match(/\b(4x4|AWD|FWD|RWD|4WD|2WD)\b/i);
+  return m ? m[1].toUpperCase() : '';
+}
+
+function extractCityProv(it: Record<string, any>): string {
+  const parts = [];
+  if (it.city) parts.push(String(it.city).trim());
+  if (it.province) parts.push(String(it.province).trim());
+  if (parts.length > 0) return parts.join(', ');
+  if (it.location) return String(it.location).trim();
+  if (it.City || it.Province) {
+    return [it.City, it.Province].filter(Boolean).map(v => String(v).trim()).join(', ');
+  }
+  return '';
 }
 
 export function StructuredDatasetTable({ items: initialItems, onUpdateItems, datasetId }: Props) {
@@ -31,6 +88,16 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
   const [pageSize, setPageSize] = useState<number>(20);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [dedupEnabled, setDedupEnabled] = useState<boolean>(false);
+
+  // Filter state: Year, Make, Model, Trim, Drivetrain, City/Prov, Free-text
+  const [filterYear, setFilterYear] = useState<string>('all');
+  const [filterMake, setFilterMake] = useState<string>('all');
+  const [filterModel, setFilterModel] = useState<string>('all');
+  const [filterTrim, setFilterTrim] = useState<string>('all');
+  const [filterDrivetrain, setFilterDrivetrain] = useState<string>('all');
+  const [filterCityProv, setFilterCityProv] = useState<string>('all');
+  const [filterText, setFilterText] = useState<string>('');
+  const [filterPanelOpen, setFilterPanelOpen] = useState<boolean>(true);
 
   // SQL Console state
   const [sqlConsoleOpen, setSqlConsoleOpen] = useState(false);
@@ -131,16 +198,117 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
 
   const activeItems = dedupEnabled ? uniqueItems : items;
 
+  // Distinct filter options extracted dynamically
+  const distinctYears = useMemo(() => {
+    const s = new Set<string>();
+    for (const it of activeItems) {
+      const y = extractYear(it);
+      if (y) s.add(y);
+    }
+    return Array.from(s).sort((a, b) => Number(b) - Number(a));
+  }, [activeItems]);
+
+  const distinctMakes = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const it of activeItems) {
+      const m = extractMake(it);
+      if (m) counts[m] = (counts[m] || 0) + 1;
+    }
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [activeItems]);
+
+  const distinctModels = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const it of activeItems) {
+      if (filterMake !== 'all' && extractMake(it).toLowerCase() !== filterMake.toLowerCase()) continue;
+      const mod = extractModel(it);
+      if (mod) counts[mod] = (counts[mod] || 0) + 1;
+    }
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [activeItems, filterMake]);
+
+  const distinctTrims = useMemo(() => {
+    const s = new Set<string>();
+    for (const it of activeItems) {
+      if (filterMake !== 'all' && extractMake(it).toLowerCase() !== filterMake.toLowerCase()) continue;
+      if (filterModel !== 'all' && extractModel(it).toLowerCase() !== filterModel.toLowerCase()) continue;
+      const tr = extractTrim(it);
+      if (tr) s.add(tr);
+    }
+    return Array.from(s).sort();
+  }, [activeItems, filterMake, filterModel]);
+
+  const distinctDrivetrains = useMemo(() => {
+    const s = new Set<string>();
+    for (const it of activeItems) {
+      const dr = extractDrivetrain(it);
+      if (dr) s.add(dr);
+    }
+    return Array.from(s).sort();
+  }, [activeItems]);
+
+  const distinctLocations = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const it of activeItems) {
+      const loc = extractCityProv(it);
+      if (loc) counts[loc] = (counts[loc] || 0) + 1;
+    }
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [activeItems]);
+
+  // Combined Multi-Attribute Filtering
+  const filteredItems = useMemo(() => {
+    return activeItems.filter((item) => {
+      if (filterText.trim()) {
+        const q = filterText.toLowerCase();
+        const match = Object.values(item).some((v) =>
+          String(v ?? '').toLowerCase().includes(q)
+        );
+        if (!match) return false;
+      }
+      if (filterYear !== 'all' && extractYear(item) !== filterYear) return false;
+      if (filterMake !== 'all' && extractMake(item).toLowerCase() !== filterMake.toLowerCase()) return false;
+      if (filterModel !== 'all' && extractModel(item).toLowerCase() !== filterModel.toLowerCase()) return false;
+      if (filterTrim !== 'all' && extractTrim(item).toLowerCase() !== filterTrim.toLowerCase()) return false;
+      if (filterDrivetrain !== 'all' && extractDrivetrain(item).toUpperCase() !== filterDrivetrain.toUpperCase()) return false;
+      if (filterCityProv !== 'all') {
+        const loc = extractCityProv(item);
+        if (!loc.toLowerCase().includes(filterCityProv.toLowerCase())) return false;
+      }
+      return true;
+    });
+  }, [activeItems, filterText, filterYear, filterMake, filterModel, filterTrim, filterDrivetrain, filterCityProv]);
+
+  const activeFilterCount =
+    (filterYear !== 'all' ? 1 : 0) +
+    (filterMake !== 'all' ? 1 : 0) +
+    (filterModel !== 'all' ? 1 : 0) +
+    (filterTrim !== 'all' ? 1 : 0) +
+    (filterDrivetrain !== 'all' ? 1 : 0) +
+    (filterCityProv !== 'all' ? 1 : 0) +
+    (filterText.trim() ? 1 : 0);
+
+  const handleClearAllFilters = () => {
+    setFilterYear('all');
+    setFilterMake('all');
+    setFilterModel('all');
+    setFilterTrim('all');
+    setFilterDrivetrain('all');
+    setFilterCityProv('all');
+    setFilterText('');
+    setCurrentPage(1);
+  };
+
   const isVehicle = activeItems.some((i) => i.type === 'vehicle_listing' || (i.make && i.year));
   const isCustom = activeItems.some((i) => i.type === 'custom_schema');
   const customColumns = availableColumns;
 
-  const totalRows = activeItems.length;
+  const totalRows = filteredItems.length;
   const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
   const activePage = Math.min(currentPage, totalPages);
   const startIndex = (activePage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, totalRows);
-  const paginatedItems = activeItems.slice(startIndex, endIndex);
+  const paginatedItems = filteredItems.slice(startIndex, endIndex);
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
@@ -150,6 +318,34 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
   const toggleDedup = () => {
     setDedupEnabled((prev) => !prev);
     setCurrentPage(1);
+  };
+
+  const exportFilteredCsv = () => {
+    if (filteredItems.length === 0) return;
+    const cols = isVehicle
+      ? ['year', 'make', 'model', 'trim', 'drivetrain', 'mileage_km', 'price', 'seller_type', 'dealer_name', 'city', 'province', 'date_observed', 'listing_url']
+      : availableColumns;
+
+    const headers = cols.join(',');
+    const rows = filteredItems.map((it) =>
+      cols
+        .map((c) => {
+          const val = it[c] ?? (c === 'mileage_km' ? it.mileage : '');
+          const str = String(val ?? '').replace(/"/g, '""');
+          return `"${str}"`;
+        })
+        .join(',')
+    );
+
+    const csvContent = '\uFEFF' + [headers, ...rows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `filtered_dataset_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -329,6 +525,304 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
           )}
         </div>
       )}
+
+      {/* Interactive Faceted Vehicle & Attribute Filter Panel */}
+      <div className="border-b border-slate-200 bg-slate-50/60 p-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4 text-brand-600" />
+            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              Dataset Filters
+            </span>
+            {activeFilterCount > 0 && (
+              <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold text-brand-700">
+                {activeFilterCount} active
+              </span>
+            )}
+            <span className="text-xs text-slate-500 font-medium ml-1">
+              Showing <strong className="text-slate-800">{filteredItems.length}</strong> of{' '}
+              {activeItems.length} records
+              {filteredItems.length < activeItems.length && (
+                <span className="text-slate-400"> ({activeItems.length - filteredItems.length} filtered out)</span>
+              )}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {activeFilterCount > 0 && (
+              <button
+                type="button"
+                onClick={handleClearAllFilters}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg px-2.5 py-1 transition-colors"
+              >
+                <RotateCcw className="h-3 w-3" /> Clear All Filters
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={exportFilteredCsv}
+              disabled={filteredItems.length === 0}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-lg px-3 py-1 shadow-sm transition-colors disabled:opacity-50"
+              title="Download currently filtered rows as CSV"
+            >
+              <Download className="h-3.5 w-3.5" /> Export Filtered CSV ({filteredItems.length})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFilterPanelOpen((o) => !o)}
+              className="text-xs text-slate-500 hover:text-slate-800 p-1"
+              title={filterPanelOpen ? 'Collapse filter panel' : 'Expand filter panel'}
+            >
+              {filterPanelOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
+
+        {filterPanelOpen && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-1">
+            {/* 1. Year Filter */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                <Calendar className="h-3 w-3 text-slate-400" /> Year
+              </label>
+              <select
+                value={filterYear}
+                onChange={(e) => {
+                  setFilterYear(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className={`w-full rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm focus:outline-none transition-colors ${
+                  filterYear !== 'all'
+                    ? 'border-brand-500 bg-brand-50/50 text-brand-900 font-bold'
+                    : 'border-slate-300 bg-white text-slate-700'
+                }`}
+              >
+                <option value="all">All Years ({distinctYears.length})</option>
+                {distinctYears.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 2. Make Filter */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                <Car className="h-3 w-3 text-slate-400" /> Make
+              </label>
+              <select
+                value={filterMake}
+                onChange={(e) => {
+                  setFilterMake(e.target.value);
+                  setFilterModel('all');
+                  setFilterTrim('all');
+                  setCurrentPage(1);
+                }}
+                className={`w-full rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm focus:outline-none transition-colors ${
+                  filterMake !== 'all'
+                    ? 'border-brand-500 bg-brand-50/50 text-brand-900 font-bold'
+                    : 'border-slate-300 bg-white text-slate-700'
+                }`}
+              >
+                <option value="all">All Makes ({distinctMakes.length})</option>
+                {distinctMakes.map(([mk, count]) => (
+                  <option key={mk} value={mk}>
+                    {mk} ({count})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 3. Model Filter */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                <Tag className="h-3 w-3 text-slate-400" /> Model
+              </label>
+              <select
+                value={filterModel}
+                onChange={(e) => {
+                  setFilterModel(e.target.value);
+                  setFilterTrim('all');
+                  setCurrentPage(1);
+                }}
+                className={`w-full rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm focus:outline-none transition-colors ${
+                  filterModel !== 'all'
+                    ? 'border-brand-500 bg-brand-50/50 text-brand-900 font-bold'
+                    : 'border-slate-300 bg-white text-slate-700'
+                }`}
+              >
+                <option value="all">All Models ({distinctModels.length})</option>
+                {distinctModels.map(([mod, count]) => (
+                  <option key={mod} value={mod}>
+                    {mod} ({count})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 4. Trim Filter */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-slate-400" /> Trim
+              </label>
+              <select
+                value={filterTrim}
+                onChange={(e) => {
+                  setFilterTrim(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className={`w-full rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm focus:outline-none transition-colors ${
+                  filterTrim !== 'all'
+                    ? 'border-brand-500 bg-brand-50/50 text-brand-900 font-bold'
+                    : 'border-slate-300 bg-white text-slate-700'
+                }`}
+              >
+                <option value="all">All Trims ({distinctTrims.length})</option>
+                {distinctTrims.map((tr) => (
+                  <option key={tr} value={tr}>
+                    {tr}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 5. Drivetrain Filter */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                <Filter className="h-3 w-3 text-slate-400" /> Drivetrain
+              </label>
+              <select
+                value={filterDrivetrain}
+                onChange={(e) => {
+                  setFilterDrivetrain(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className={`w-full rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm focus:outline-none transition-colors ${
+                  filterDrivetrain !== 'all'
+                    ? 'border-brand-500 bg-brand-50/50 text-brand-900 font-bold'
+                    : 'border-slate-300 bg-white text-slate-700'
+                }`}
+              >
+                <option value="all">All Drivetrains ({distinctDrivetrains.length})</option>
+                {distinctDrivetrains.map((dr) => (
+                  <option key={dr} value={dr}>
+                    {dr}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 6. City / Province Filter */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                <MapPin className="h-3 w-3 text-slate-400" /> City / Prov
+              </label>
+              <select
+                value={filterCityProv}
+                onChange={(e) => {
+                  setFilterCityProv(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className={`w-full rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm focus:outline-none transition-colors ${
+                  filterCityProv !== 'all'
+                    ? 'border-brand-500 bg-brand-50/50 text-brand-900 font-bold'
+                    : 'border-slate-300 bg-white text-slate-700'
+                }`}
+              >
+                <option value="all">All Locations ({distinctLocations.length})</option>
+                {distinctLocations.map(([loc, count]) => (
+                  <option key={loc} value={loc}>
+                    {loc} ({count})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Free Text Quick Search & Active Filter Badges */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200/60">
+          <div className="relative flex-1 min-w-[220px] max-w-md">
+            <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400" />
+            <input
+              type="text"
+              value={filterText}
+              onChange={(e) => {
+                setFilterText(e.target.value);
+                setCurrentPage(1);
+              }}
+              placeholder="Search in all columns (e.g. Laramie, Red, Leather)..."
+              className="w-full rounded-lg border border-slate-300 bg-white pl-8 pr-7 py-1 text-xs focus:border-brand-500 focus:outline-none placeholder:text-slate-400 shadow-sm"
+            />
+            {filterText && (
+              <button
+                type="button"
+                onClick={() => setFilterText('')}
+                className="absolute right-2.5 top-1.5 text-slate-400 hover:text-slate-600 text-xs font-bold"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* Filter Pills */}
+          {activeFilterCount > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+              {filterYear !== 'all' && (
+                <span className="inline-flex items-center gap-1 rounded-md bg-brand-50 border border-brand-200 px-2 py-0.5 text-brand-800 font-medium">
+                  Year: {filterYear}
+                  <button onClick={() => setFilterYear('all')} className="hover:text-brand-950 font-bold">
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {filterMake !== 'all' && (
+                <span className="inline-flex items-center gap-1 rounded-md bg-brand-50 border border-brand-200 px-2 py-0.5 text-brand-800 font-medium">
+                  Make: {filterMake}
+                  <button onClick={() => setFilterMake('all')} className="hover:text-brand-950 font-bold">
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {filterModel !== 'all' && (
+                <span className="inline-flex items-center gap-1 rounded-md bg-brand-50 border border-brand-200 px-2 py-0.5 text-brand-800 font-medium">
+                  Model: {filterModel}
+                  <button onClick={() => setFilterModel('all')} className="hover:text-brand-950 font-bold">
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {filterTrim !== 'all' && (
+                <span className="inline-flex items-center gap-1 rounded-md bg-brand-50 border border-brand-200 px-2 py-0.5 text-brand-800 font-medium">
+                  Trim: {filterTrim}
+                  <button onClick={() => setFilterTrim('all')} className="hover:text-brand-950 font-bold">
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {filterDrivetrain !== 'all' && (
+                <span className="inline-flex items-center gap-1 rounded-md bg-brand-50 border border-brand-200 px-2 py-0.5 text-brand-800 font-medium">
+                  Drivetrain: {filterDrivetrain}
+                  <button onClick={() => setFilterDrivetrain('all')} className="hover:text-brand-950 font-bold">
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {filterCityProv !== 'all' && (
+                <span className="inline-flex items-center gap-1 rounded-md bg-brand-50 border border-brand-200 px-2 py-0.5 text-brand-800 font-medium">
+                  Location: {filterCityProv}
+                  <button onClick={() => setFilterCityProv('all')} className="hover:text-brand-950 font-bold">
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 bg-slate-50/75 px-4 py-3">
         <div>
