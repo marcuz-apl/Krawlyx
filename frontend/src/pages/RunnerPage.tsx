@@ -182,7 +182,7 @@ export function RunnerPage() {
                   : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60'
               }`}
             >
-              🚗 Auto-Detect (AutoTrader, Vehicles, JSON-LD, Products)
+              🔍 Auto-Detect Structured Entities (JSON-LD, Schema.org, Products)
             </button>
             <button
               type="button"
@@ -309,7 +309,7 @@ export function RunnerPage() {
           {showHelper && (
             <div className="mb-3 rounded-xl border border-brand-200 bg-brand-50/60 p-4 space-y-3 text-xs dark:border-brand-900/60 dark:bg-brand-950/40">
               <div className="font-semibold text-slate-900 dark:text-white">
-                Multi-Page URL Generator & AutoTrader Pagination
+                Multi-Page URL Generator & Pagination Helper
               </div>
               <div>
                 <label className="block text-slate-600 mb-1">Base Search URL (leave empty to use current URL):</label>
@@ -317,7 +317,7 @@ export function RunnerPage() {
                   type="text"
                   value={helperBaseUrl}
                   onChange={(e) => setHelperBaseUrl(e.target.value)}
-                  placeholder="https://www.autotrader.ca/cars/... or https://example.com/search?page=1"
+                  placeholder="https://example.com/catalog?page=1 or https://example.com/items?offset=0"
                   className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-2.5 py-1.5 text-xs focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none"
                 />
               </div>
@@ -330,7 +330,7 @@ export function RunnerPage() {
                     onChange={(e: any) => setHelperType(e.target.value)}
                     className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
                   >
-                    <option value="autotrader">AutoTrader (rcs=0, 20, 40... / rcp)</option>
+                    <option value="autotrader">Query Parameter Pagination (page=1, 2, 3...)</option>
                     <option value="page_num">Page Number (page=1, 2, 3...)</option>
                     <option value="offset">Offset (offset=0, 20, 40...)</option>
                   </select>
@@ -354,7 +354,7 @@ export function RunnerPage() {
                     className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
                   >
                     <option value={20}>20 items / page (standard)</option>
-                    <option value={100}>100 items / page (AutoTrader max)</option>
+                    <option value={100}>100 items / page</option>
                     <option value={50}>50 items / page</option>
                   </select>
                 </div>

@@ -199,7 +199,7 @@ export function DatasetsPage() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Alberta Ford Used Inventory"
+                placeholder="e.g. Product Catalog Q3"
                 className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs focus:border-brand-500 focus:outline-none"
               />
             </div>
@@ -209,7 +209,7 @@ export function DatasetsPage() {
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="e.g. Scraped weekly from AutoTrader"
+                placeholder="e.g. Extracted from public catalog search"
                 className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs focus:border-brand-500 focus:outline-none"
               />
             </div>
@@ -295,7 +295,7 @@ export function DatasetsPage() {
                 type="text"
                 value={mergeName}
                 onChange={(e) => setMergeName(e.target.value)}
-                placeholder="e.g. Master Alberta AutoTrader Inventory"
+                placeholder="e.g. Master Consolidated Catalog (Merged)"
                 className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs focus:border-brand-500 focus:outline-none"
               />
             </div>
@@ -356,10 +356,10 @@ export function DatasetsPage() {
               type="button"
               onClick={selectAllMakeDatasets}
               className="inline-flex items-center gap-1 rounded-lg border border-purple-200 dark:border-purple-900/60 bg-purple-50 dark:bg-purple-950/40 px-2.5 py-1.5 font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors shadow-sm"
-              title="Select all datasets that were partitioned by Make"
+              title="Select all partitioned sub-datasets"
             >
               <CheckSquare className="h-3.5 w-3.5" />
-              Select All Make Datasets
+              Select Partitioned Subsets
             </button>
             <button
               type="button"

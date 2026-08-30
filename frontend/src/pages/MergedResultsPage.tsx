@@ -147,7 +147,7 @@ export function MergedResultsPage() {
                 type="text"
                 value={datasetName}
                 onChange={(e) => setDatasetName(e.target.value)}
-                placeholder="e.g. Ford Inventory All Alberta (Merged)"
+                placeholder="e.g. Master Consolidated Catalog (Merged)"
                 className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs focus:border-brand-500 focus:outline-none"
               />
             </div>

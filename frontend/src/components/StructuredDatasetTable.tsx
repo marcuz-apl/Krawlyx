@@ -827,7 +827,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                   setFilterText(e.target.value);
                   setCurrentPage(1);
                 }}
-                placeholder="Search in all columns (e.g. Laramie, Red, Leather)..."
+                placeholder="Search in all columns (e.g. title, category, keywords)..."
                 className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 pl-8 pr-7 py-1 text-xs focus:border-brand-500 focus:outline-none placeholder:text-slate-400 shadow-sm"
               />
               {filterText && (

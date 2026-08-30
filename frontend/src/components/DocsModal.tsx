@@ -142,11 +142,11 @@ curl -s http://localhost:4040/api/health
     badge: "Analytics",
     description: "Auto-extract fields, filter facets, deduplicate records, and query datasets with the Universal SQL Console.",
     content: {
-      overview: "Transform unstructured crawl outputs into queryable relational records. Filter by Year, Make, Model, Trim, Drivetrain, City/Province, Price, and Mileage, or run arbitrary SQLite queries.",
+      overview: "Transform unstructured crawl outputs into queryable relational records. Filter by extracted attributes, numeric ranges, categories, and tags, or run arbitrary SQLite queries.",
       highlights: [
         { title: "Multi-Facet Filtering", desc: "Instant client-side facet counts and combined keyword search across extracted attributes." },
         { title: "Universal SQL Console", desc: "Execute SQL queries directly over datasets in the browser with CSV download capabilities." },
-        { title: "Smart Deduplication", desc: "Detect and group duplicate records based on composite unique keys (Year + Make + Model + VIN)." }
+        { title: "Smart Deduplication", desc: "Detect and group duplicate records based on composite unique keys (Title + URL + ID)." }
       ],
       codeBlock: {
         language: "sql",
@@ -163,7 +163,7 @@ GROUP BY make, model
 ORDER BY total_units DESC;`
       },
       tips: [
-        "Datasets can be split by Make into dedicated subsets with a single click.",
+        "Datasets can be partitioned by any column attribute into dedicated subsets with a single click.",
         "Saved datasets remain permanently stored in SQLite regardless of job history retention."
       ]
     }

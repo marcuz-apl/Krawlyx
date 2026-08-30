@@ -183,10 +183,10 @@ export function DatasetDetailPage() {
               setSplitModalOpen(true);
             }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-purple-300 dark:border-purple-900/60 bg-purple-50 dark:bg-purple-950/40 px-3.5 py-1.5 text-xs font-semibold text-purple-800 dark:text-purple-300 shadow-sm hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors"
-            title="Partition dataset into multiple datasets by Make or other attributes"
+            title="Partition dataset into multiple datasets by Category or other attributes"
           >
             <Scissors className="h-4 w-4 text-purple-600" />
-            Split by Make
+            Split by Attribute
           </button>
           <button
             onClick={() => setSqlConsoleOpen((o) => !o)}
@@ -290,7 +290,7 @@ export function DatasetDetailPage() {
                     onChange={(e) => setSplitAttribute(e.target.value)}
                     className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-sm focus:border-purple-500 focus:outline-none"
                   >
-                    <option value="make">🚗 Make (e.g. Dodge, Ford, Toyota)</option>
+                    <option value="category">📂 Category / Classification</option>
                     <option value="year">📅 Year (e.g. 2024, 2023, 2022)</option>
                     <option value="city">📍 City (e.g. Calgary, Edmonton)</option>
                     <option value="province">🗺️ Province (e.g. AB, BC, ON)</option>

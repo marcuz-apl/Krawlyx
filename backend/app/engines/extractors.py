@@ -37,7 +37,7 @@ def extract_structured_data(html: str, source_url: str, options: dict[str, Any] 
     # 2. Check for AutoTrader / Car marketplace data
     domain = urlparse(source_url).netloc.lower()
     if "autotrader.ca" in domain or "autotrader" in domain:
-        at_items = _extract_autotrader(soup, source_url)
+        at_items = _extract_nextjs_marketplace(soup, source_url)
         if at_items:
             return at_items
 
@@ -168,7 +168,7 @@ def _extract_autotrader(soup: BeautifulSoup, source_url: str) -> list[dict[str, 
         if not listings and page_props.get("listing"):
             listings = [page_props["listing"]]
     except Exception as exc:
-        logger.warning("failed to parse AutoTrader __NEXT_DATA__: %s", exc)
+        logger.warning("failed to parse __NEXT_DATA__: %s", exc)
         return []
 
     today = datetime.date.today().isoformat()
@@ -224,7 +224,7 @@ def _extract_autotrader(soup: BeautifulSoup, source_url: str) -> list[dict[str, 
             if rel_url.startswith("http"):
                 listing_url = rel_url
             else:
-                listing_url = f"https://www.autotrader.ca{rel_url}"
+                listing_url = urljoin(source_url, rel_url)
 
         # Clean seller type
         seller_type = "Dealer" if seller.get("dealer") or seller.get("type") == "Dealer" else "Private"
