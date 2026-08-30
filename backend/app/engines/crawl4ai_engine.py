@@ -151,6 +151,9 @@ class Crawl4AIEngine:
                     md = raw_md.raw_markdown
                 elif isinstance(raw_md, str):
                     md = raw_md
+        except Exception as exc:
+            logger.warning("Crawl4AI browser fetch timed out or failed (%s) for %s; using fast HTTP fallback", exc, target.url)
+
         if not html:
             try:
                 import httpx
