@@ -178,7 +178,7 @@ export function RunnerPage() {
               onClick={() => setSchemaMode('auto')}
               className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
                 schemaMode === 'auto'
-                  ? 'border-brand-600 bg-brand-50 text-brand-700 font-semibold'
+                  ? 'border-brand-600 dark:border-brand-500 bg-brand-50 dark:bg-brand-950/80 text-brand-700 dark:text-brand-300 font-semibold shadow-xs'
                   : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60'
               }`}
             >
@@ -189,7 +189,7 @@ export function RunnerPage() {
               onClick={() => setSchemaMode('custom')}
               className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
                 schemaMode === 'custom'
-                  ? 'border-brand-600 bg-brand-50 text-brand-700 font-semibold'
+                  ? 'border-brand-600 dark:border-brand-500 bg-brand-50 dark:bg-brand-950/80 text-brand-700 dark:text-brand-300 font-semibold shadow-xs'
                   : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60'
               }`}
             >
@@ -200,7 +200,7 @@ export function RunnerPage() {
               onClick={() => setSchemaMode('raw')}
               className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
                 schemaMode === 'raw'
-                  ? 'border-brand-600 bg-brand-50 text-brand-700 font-semibold'
+                  ? 'border-brand-600 dark:border-brand-500 bg-brand-50 dark:bg-brand-950/80 text-brand-700 dark:text-brand-300 font-semibold shadow-xs'
                   : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60'
               }`}
             >

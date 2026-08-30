@@ -24,11 +24,11 @@ export function AdminPanelPage() {
           <button
             key={key}
             onClick={() => setTab(key)}
-            className={
+            className={`px-3.5 py-2 text-sm font-semibold transition-all ${
               tab === key
-                ? 'border-b-2 border-brand-600 px-3 py-2 text-sm font-medium text-brand-700'
-                : 'px-3 py-2 text-sm text-slate-600 hover:text-slate-900'
-            }
+                ? "border-b-2 border-brand-600 dark:border-brand-400 text-brand-600 dark:text-brand-300 bg-brand-50/50 dark:bg-brand-950/30 rounded-t-lg"
+                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-slate-800/60 rounded-t-lg"
+            }`}
           >
             {label}
           </button>

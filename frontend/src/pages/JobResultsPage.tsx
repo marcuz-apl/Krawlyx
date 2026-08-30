@@ -107,7 +107,7 @@ export function JobResultsPage() {
           <button
             onClick={() => rerun.mutate()}
             disabled={rerun.isPending}
-            className="inline-flex items-center gap-1 rounded-lg border border-brand-600 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 hover:bg-brand-100 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-1 rounded-lg border border-brand-600 dark:border-brand-500 bg-brand-50 dark:bg-brand-950/60 px-3 py-1.5 text-xs font-semibold text-brand-700 dark:text-brand-300 hover:bg-brand-100 dark:hover:bg-brand-900/60 disabled:opacity-50 transition-colors"
           >
             {rerun.isPending ? 'Re-running…' : 'Re-run'}
           </button>

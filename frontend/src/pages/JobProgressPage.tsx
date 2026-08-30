@@ -58,7 +58,7 @@ export function JobProgressPage() {
           {isTerminal && (
             <Link
               to={`/jobs/${data.id}/results`}
-              className="inline-flex items-center gap-1 rounded-lg border border-brand-600 bg-brand-50 px-3.5 py-1.5 text-xs font-medium text-brand-700 hover:bg-brand-100 transition-colors"
+              className="inline-flex items-center gap-1 rounded-lg border border-brand-600 dark:border-brand-500 bg-brand-50 dark:bg-brand-950/60 px-3.5 py-1.5 text-xs font-semibold text-brand-700 dark:text-brand-300 hover:bg-brand-100 dark:hover:bg-brand-900/60 transition-colors"
             >
               View results →
             </Link>

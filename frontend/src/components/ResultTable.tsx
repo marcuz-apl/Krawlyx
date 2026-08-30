@@ -36,7 +36,7 @@ export function ResultTable({ jobId, results }: Props) {
               <td className="px-3 py-2 font-mono text-xs">
                 <Link
                   to={`/jobs/${jobId}/results/${r.id}`}
-                  className="text-brand-700 hover:underline"
+                  className="text-brand-600 dark:text-brand-400 hover:underline font-medium"
                 >
                   {hostname(r.source_url)}
                 </Link>
