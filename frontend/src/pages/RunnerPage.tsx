@@ -120,7 +120,10 @@ export function RunnerPage() {
       const generated: string[] = [];
 
       if (helperType === 'autotrader' || helperType === 'page_num') {
-        // AutoTrader Next.js backend uses page=1, page=2... (20 items/page)
+        // AutoTrader Next.js backend uses page=1, page=2... (20 distinct cars/page)
+        // Must remove search_id (which locks server cache to page 1) and legacy rcs/rcp
+        urlObj.searchParams.delete('search_id');
+        urlObj.searchParams.delete('search_type');
         urlObj.searchParams.delete('rcs');
         urlObj.searchParams.delete('rcp');
         urlObj.searchParams.delete('size');
