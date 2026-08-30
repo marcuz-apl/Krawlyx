@@ -37,7 +37,7 @@ export function JobProgressPage() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-900">
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
           Job #{data.id}
         </h1>
         <div className="flex items-center gap-2">
@@ -66,7 +66,7 @@ export function JobProgressPage() {
         </div>
       </div>
 
-      <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4">
+      <div className="mb-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
         <Counters
           counts={data.counts}
           status={data.status}
@@ -75,12 +75,12 @@ export function JobProgressPage() {
       </div>
 
       <section className="mb-6">
-        <h2 className="mb-2 text-sm font-medium text-slate-700">Targets</h2>
+        <h2 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Targets</h2>
         <TargetStatusTable targets={data.targets} />
       </section>
 
       {data.notes && (
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-600 dark:text-slate-400">
           <strong>Notes:</strong> {data.notes}
         </p>
       )}

@@ -11,8 +11,8 @@ export function AdminPanelPage() {
   const [tab, setTab] = useState<Tab>('engines');
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-semibold text-slate-900">Admin panel</h1>
-      <nav className="mb-4 flex gap-1 border-b border-slate-200">
+      <h1 className="mb-4 text-xl font-bold tracking-tight text-slate-900 dark:text-white">Admin panel</h1>
+      <nav className="mb-4 flex gap-1 border-b border-slate-200 dark:border-slate-800">
         {(
           [
             ['engines', 'Engines'],

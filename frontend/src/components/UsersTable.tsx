@@ -16,7 +16,7 @@ export function UsersTable() {
   const [creating, setCreating] = useState(false);
   const [pwFor, setPwFor] = useState<UserOut | null>(null);
 
-  if (isLoading) return <p className="text-slate-500">Loading…</p>;
+  if (isLoading) return <p className="text-slate-500 dark:text-slate-400">Loading…</p>;
   const users: UserOut[] = data ?? [];
 
   return (
@@ -51,9 +51,9 @@ export function UsersTable() {
         />
       )}
 
-      <div className="overflow-hidden rounded border border-slate-200">
+      <div className="overflow-hidden rounded border border-slate-200 dark:border-slate-800">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+          <thead className="bg-slate-50 dark:bg-slate-800/60 text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
             <tr>
               <th className="px-3 py-2">Username</th>
               <th className="px-3 py-2">Role</th>
@@ -63,19 +63,19 @@ export function UsersTable() {
           <tbody>
             {users.length === 0 && (
               <tr>
-                <td colSpan={3} className="px-3 py-4 text-center text-slate-500">
+                <td colSpan={3} className="px-3 py-4 text-center text-slate-500 dark:text-slate-400">
                   No users.
                 </td>
               </tr>
             )}
             {users.map((u) => (
               <tr key={u.id} className="border-t border-slate-100">
-                <td className="px-3 py-2 font-medium text-slate-900">{u.username}</td>
+                <td className="px-3 py-2 font-medium text-slate-900 dark:text-white">{u.username}</td>
                 <td className="px-3 py-2 text-slate-600">{u.role}</td>
                 <td className="px-3 py-2">
                   <button
                     onClick={() => setPwFor(u)}
-                    className="mr-2 rounded border border-slate-300 px-2 py-0.5 text-xs hover:bg-slate-100"
+                    className="mr-2 rounded border border-slate-300 dark:border-slate-700 px-2 py-0.5 text-xs hover:bg-slate-100"
                   >
                     Change password
                   </button>
@@ -114,35 +114,35 @@ function CreateUserForm({ onDone }: { onDone: () => void }) {
         setErr(null);
         create.mutate();
       }}
-      className="space-y-3 rounded border border-slate-200 bg-slate-50 p-4"
+      className="space-y-3 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 p-4"
     >
       <div className="grid grid-cols-3 gap-3">
         <label className="text-sm">
-          <span className="text-slate-700">Username</span>
+          <span className="text-slate-700 dark:text-slate-300">Username</span>
           <input
             required
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="mt-1 block w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1"
           />
         </label>
         <label className="text-sm">
-          <span className="text-slate-700">Password (min 8)</span>
+          <span className="text-slate-700 dark:text-slate-300">Password (min 8)</span>
           <input
             required
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             minLength={8}
-            className="mt-1 block w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1"
           />
         </label>
         <label className="text-sm">
-          <span className="text-slate-700">Role</span>
+          <span className="text-slate-700 dark:text-slate-300">Role</span>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as 'runner' | 'admin')}
-            className="mt-1 block w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1"
           >
             <option value="runner">runner</option>
             <option value="admin">admin</option>
@@ -182,20 +182,20 @@ function ChangePasswordForm({
         setErr(null);
         patch.mutate();
       }}
-      className="space-y-3 rounded border border-slate-200 bg-slate-50 p-4"
+      className="space-y-3 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 p-4"
     >
-      <p className="text-sm font-medium text-slate-700">
+      <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
         Change password for {user.username}
       </p>
       <label className="block text-sm">
-        <span className="text-slate-700">New password (min 8)</span>
+        <span className="text-slate-700 dark:text-slate-300">New password (min 8)</span>
         <input
           required
           type="password"
           minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 block w-full rounded border border-slate-300 px-2 py-1"
+          className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1"
         />
       </label>
       {err && <p className="text-xs text-red-700">{err}</p>}
@@ -203,7 +203,7 @@ function ChangePasswordForm({
         <button
           type="button"
           onClick={onDone}
-          className="rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100"
+          className="rounded border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-sm hover:bg-slate-100"
         >
           Cancel
         </button>

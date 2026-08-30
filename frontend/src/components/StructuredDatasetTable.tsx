@@ -421,7 +421,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
       {/* SQL Transformation Console */}
       {sqlConsoleOpen && (
         <div className="border-b border-slate-700 bg-slate-900 text-slate-100 p-4 shadow-lg space-y-3 font-sans">
@@ -527,7 +527,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
               value={sqlQuery}
               onChange={(e) => setSqlQuery(e.target.value)}
               placeholder="e.g. UPDATE dataset SET price = CAST(REPLACE(price, '$', '') AS INTEGER);"
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 p-2.5 font-mono text-xs text-emerald-400 focus:border-emerald-500 focus:outline-none placeholder:text-slate-600"
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 p-2.5 font-mono text-xs text-emerald-400 focus:border-emerald-500 focus:outline-none placeholder:text-slate-600 dark:text-slate-400"
             />
           </div>
 
@@ -599,11 +599,11 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
       )}
 
       {/* Interactive Faceted Vehicle & Attribute Filter Panel */}
-      <div className="border-b border-slate-200 bg-slate-50/60 p-4 space-y-3">
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60/60 p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 text-brand-600" />
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
               Dataset Filters
             </span>
             {activeFilterCount > 0 && (
@@ -612,7 +612,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
               </span>
             )}
             <span className="text-xs text-slate-500 font-medium ml-1">
-              Showing <strong className="text-slate-800">{filteredItems.length}</strong> of{' '}
+              Showing <strong className="text-slate-800 dark:text-slate-200">{filteredItems.length}</strong> of{' '}
               {activeItems.length} records
               {filteredItems.length < activeItems.length && (
                 <span className="text-slate-400"> ({activeItems.length - filteredItems.length} filtered out)</span>
@@ -644,7 +644,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
             <button
               type="button"
               onClick={() => setFilterPanelOpen((o) => !o)}
-              className="text-xs text-slate-500 hover:text-slate-800 p-1"
+              className="text-xs text-slate-500 hover:text-slate-800 dark:text-slate-200 p-1"
               title={filterPanelOpen ? 'Collapse filter panel' : 'Expand filter panel'}
             >
               {filterPanelOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -656,7 +656,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-1">
             {/* 1. Year Filter */}
             <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                 <Calendar className="h-3 w-3 text-slate-400" /> Year
               </label>
               <select
@@ -668,7 +668,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                 className={`w-full rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm focus:outline-none transition-colors ${
                   filterYear !== 'all'
                     ? 'border-brand-500 bg-brand-50/50 text-brand-900 font-bold'
-                    : 'border-slate-300 bg-white text-slate-700'
+                    : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <option value="all">All Years ({distinctYears.length})</option>
@@ -682,7 +682,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
 
             {/* 2. Make Filter */}
             <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                 <Car className="h-3 w-3 text-slate-400" /> Make
               </label>
               <select
@@ -696,7 +696,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                 className={`w-full rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm focus:outline-none transition-colors ${
                   filterMake !== 'all'
                     ? 'border-brand-500 bg-brand-50/50 text-brand-900 font-bold'
-                    : 'border-slate-300 bg-white text-slate-700'
+                    : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <option value="all">All Makes ({distinctMakes.length})</option>
@@ -710,7 +710,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
 
             {/* 3. Model Filter */}
             <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                 <Tag className="h-3 w-3 text-slate-400" /> Model
               </label>
               <select
@@ -723,7 +723,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                 className={`w-full rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm focus:outline-none transition-colors ${
                   filterModel !== 'all'
                     ? 'border-brand-500 bg-brand-50/50 text-brand-900 font-bold'
-                    : 'border-slate-300 bg-white text-slate-700'
+                    : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <option value="all">All Models ({distinctModels.length})</option>
@@ -737,7 +737,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
 
             {/* 4. Trim Filter */}
             <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                 <Sparkles className="h-3 w-3 text-slate-400" /> Trim
               </label>
               <select
@@ -749,7 +749,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                 className={`w-full rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm focus:outline-none transition-colors ${
                   filterTrim !== 'all'
                     ? 'border-brand-500 bg-brand-50/50 text-brand-900 font-bold'
-                    : 'border-slate-300 bg-white text-slate-700'
+                    : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <option value="all">All Trims ({distinctTrims.length})</option>
@@ -763,7 +763,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
 
             {/* 5. Drivetrain Filter */}
             <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                 <Filter className="h-3 w-3 text-slate-400" /> Drivetrain
               </label>
               <select
@@ -775,7 +775,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                 className={`w-full rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm focus:outline-none transition-colors ${
                   filterDrivetrain !== 'all'
                     ? 'border-brand-500 bg-brand-50/50 text-brand-900 font-bold'
-                    : 'border-slate-300 bg-white text-slate-700'
+                    : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <option value="all">All Drivetrains ({distinctDrivetrains.length})</option>
@@ -789,7 +789,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
 
             {/* 6. City / Province Filter */}
             <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                 <MapPin className="h-3 w-3 text-slate-400" /> City / Prov
               </label>
               <select
@@ -801,7 +801,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                 className={`w-full rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm focus:outline-none transition-colors ${
                   filterCityProv !== 'all'
                     ? 'border-brand-500 bg-brand-50/50 text-brand-900 font-bold'
-                    : 'border-slate-300 bg-white text-slate-700'
+                    : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <option value="all">All Locations ({distinctLocations.length})</option>
@@ -816,7 +816,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
         )}
 
         {/* Free Text Quick Search, Sort Selector & Active Filter Badges */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200/60">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200 dark:border-slate-800/60">
           <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
             <div className="relative flex-1 min-w-[200px] max-w-sm">
               <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400" />
@@ -828,13 +828,13 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                   setCurrentPage(1);
                 }}
                 placeholder="Search in all columns (e.g. Laramie, Red, Leather)..."
-                className="w-full rounded-lg border border-slate-300 bg-white pl-8 pr-7 py-1 text-xs focus:border-brand-500 focus:outline-none placeholder:text-slate-400 shadow-sm"
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 pl-8 pr-7 py-1 text-xs focus:border-brand-500 focus:outline-none placeholder:text-slate-400 shadow-sm"
               />
               {filterText && (
                 <button
                   type="button"
                   onClick={() => setFilterText('')}
-                  className="absolute right-2.5 top-1.5 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                  className="absolute right-2.5 top-1.5 text-slate-400 hover:text-slate-600 dark:text-slate-400 text-xs font-bold"
                 >
                   ✕
                 </button>
@@ -860,7 +860,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                   }
                   setCurrentPage(1);
                 }}
-                className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none"
+                className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm focus:border-brand-500 focus:outline-none"
               >
                 <option value="default">Sort: Default</option>
                 <option value="year_desc">📅 Year: Newest First</option>
@@ -936,10 +936,10 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 bg-slate-50/75 px-4 py-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60/75 px-4 py-3">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-slate-800">
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
               {isVehicle
                 ? '🚗 Extracted Vehicle Dataset'
                 : isCustom
@@ -973,7 +973,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
             className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold shadow-sm transition-colors ${
               sqlConsoleOpen
                 ? 'border-indigo-500 bg-indigo-600 text-white'
-                : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:bg-slate-800/60'
             }`}
             title="Open Universal SQL Query & Transform Console"
           >
@@ -986,7 +986,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
               onClick={toggleDedup}
               className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold shadow-sm transition-colors ${
                 dedupEnabled
-                  ? 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                  ? 'border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:bg-slate-800/60'
                   : 'border border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
               }`}
               title={dedupEnabled ? 'Show full dataset including duplicates' : 'Hide duplicate records'}
@@ -996,12 +996,12 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
             </button>
           )}
 
-          <div className="flex items-center gap-1.5 text-xs text-slate-600">
+          <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
             <span>Rows:</span>
             <select
               value={pageSize}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-              className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none"
+              className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1 text-xs font-medium text-slate-700 dark:text-slate-300 shadow-sm focus:border-brand-500 focus:outline-none"
             >
               <option value={10}>10 / page</option>
               <option value={20}>20 / page</option>
@@ -1015,18 +1015,18 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={activePage <= 1}
-              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white p-1 text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
+              className="inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800/60 hover:text-slate-900 dark:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
               title="Previous Page"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="px-2 text-xs font-medium text-slate-700">
+            <span className="px-2 text-xs font-medium text-slate-700 dark:text-slate-300">
               {activePage} / {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={activePage >= totalPages}
-              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white p-1 text-slate-600 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
+              className="inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800/60 hover:text-slate-900 dark:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
               title="Next Page"
             >
               <ChevronRight className="h-4 w-4" />
@@ -1037,7 +1037,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
-          <thead className="border-b border-slate-200 bg-slate-100/75 text-slate-600 font-semibold uppercase tracking-wider select-none">
+          <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-100/75 text-slate-600 dark:text-slate-400 font-semibold uppercase tracking-wider select-none">
             <tr>
               {isVehicle ? (
                 <>
@@ -1179,7 +1179,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                     <th
                       key={col}
                       onClick={() => handleSort(col)}
-                      className="px-3 py-2.5 font-semibold text-slate-700 cursor-pointer hover:bg-slate-200/80 transition-colors"
+                      className="px-3 py-2.5 font-semibold text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-200/80 transition-colors"
                     >
                       <div className="flex items-center gap-1">
                         <span>{col}</span>
@@ -1255,21 +1255,21 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
           </thead>
           <tbody className="divide-y divide-slate-100">
             {paginatedItems.map((row, idx) => (
-              <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
+              <tr key={idx} className="hover:bg-slate-50 dark:bg-slate-800/60/80 transition-colors">
                 {isVehicle ? (
                   <>
-                    <td className="px-3 py-2.5 font-semibold text-slate-900">{row.year || '—'}</td>
-                    <td className="px-3 py-2.5 font-medium text-slate-800">{row.make || '—'}</td>
+                    <td className="px-3 py-2.5 font-semibold text-slate-900 dark:text-white">{row.year || '—'}</td>
+                    <td className="px-3 py-2.5 font-medium text-slate-800 dark:text-slate-200">{row.make || '—'}</td>
                     <td className="px-3 py-2.5 font-semibold text-brand-700">{row.model || '—'}</td>
-                    <td className="px-3 py-2.5 text-slate-600 truncate max-w-[180px]" title={row.trim}>
+                    <td className="px-3 py-2.5 text-slate-600 dark:text-slate-400 truncate max-w-[180px]" title={row.trim}>
                       {row.trim || '—'}
                     </td>
                     <td className="px-3 py-2.5">
-                      <span className="inline-block rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-700">
+                      <span className="inline-block rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-700 dark:text-slate-300">
                         {row.drivetrain || '—'}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5 font-mono text-slate-700 font-medium">
+                    <td className="px-3 py-2.5 font-mono text-slate-700 dark:text-slate-300 font-medium">
                       {row.mileage != null
                         ? String(row.mileage)
                         : row.mileage_km != null
@@ -1297,7 +1297,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                         </span>
                       )}
                     </td>
-                    <td className="px-3 py-2.5 text-slate-600">
+                    <td className="px-3 py-2.5 text-slate-600 dark:text-slate-400">
                       {row.city || '—'} {row.province ? `, ${row.province}` : ''}
                     </td>
                     <td className="px-3 py-2.5 font-mono text-slate-500">{row.date_observed || '—'}</td>
@@ -1322,7 +1322,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                       const val = row[col];
                       const isLink = typeof val === 'string' && (val.startsWith('http://') || val.startsWith('https://'));
                       return (
-                        <td key={col} className="px-3 py-2.5 text-slate-800">
+                        <td key={col} className="px-3 py-2.5 text-slate-800 dark:text-slate-200">
                           {isLink ? (
                             <a
                               href={val}
@@ -1356,8 +1356,8 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
                   </>
                 ) : (
                   <>
-                    <td className="px-3 py-2.5 font-medium text-slate-900">{row.name || '—'}</td>
-                    <td className="px-3 py-2.5 text-slate-600">{row.brand || '—'}</td>
+                    <td className="px-3 py-2.5 font-medium text-slate-900 dark:text-white">{row.name || '—'}</td>
+                    <td className="px-3 py-2.5 text-slate-600 dark:text-slate-400">{row.brand || '—'}</td>
                     <td className="px-3 py-2.5 text-right font-semibold text-emerald-700">
                       {row.price ? `${row.currency || '$'}${row.price}` : '—'}
                     </td>
@@ -1385,7 +1385,7 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-600">
+        <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 px-4 py-2.5 text-xs text-slate-600 dark:text-slate-400">
           <div>
             Showing <span className="font-semibold">{startIndex + 1}</span> to <span className="font-semibold">{endIndex}</span> of <span className="font-semibold">{totalRows}</span> rows
           </div>
@@ -1393,31 +1393,31 @@ export function StructuredDatasetTable({ items: initialItems, onUpdateItems, dat
             <button
               onClick={() => setCurrentPage(1)}
               disabled={activePage <= 1}
-              className="rounded px-2 py-1 border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+              className="rounded px-2 py-1 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800/60 disabled:opacity-40"
             >
               First
             </button>
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={activePage <= 1}
-              className="inline-flex items-center rounded px-2 py-1 border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+              className="inline-flex items-center rounded px-2 py-1 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800/60 disabled:opacity-40"
             >
               <ChevronLeft className="h-3.5 w-3.5 mr-0.5" /> Prev
             </button>
-            <span className="px-2 font-semibold text-slate-800">
+            <span className="px-2 font-semibold text-slate-800 dark:text-slate-200">
               Page {activePage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={activePage >= totalPages}
-              className="inline-flex items-center rounded px-2 py-1 border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+              className="inline-flex items-center rounded px-2 py-1 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800/60 disabled:opacity-40"
             >
               Next <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
             </button>
             <button
               onClick={() => setCurrentPage(totalPages)}
               disabled={activePage >= totalPages}
-              className="rounded px-2 py-1 border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+              className="rounded px-2 py-1 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-800/60 disabled:opacity-40"
             >
               Last
             </button>

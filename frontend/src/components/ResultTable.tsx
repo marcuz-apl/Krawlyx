@@ -17,12 +17,12 @@ function hostname(url: string): string {
 
 export function ResultTable({ jobId, results }: Props) {
   if (results.length === 0) {
-    return <p className="text-sm text-slate-500">No results yet.</p>;
+    return <p className="text-sm text-slate-500 dark:text-slate-400">No results yet.</p>;
   }
   return (
-    <div className="overflow-hidden rounded border border-slate-200">
+    <div className="overflow-hidden rounded border border-slate-200 dark:border-slate-800">
       <table className="w-full text-sm">
-        <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+        <thead className="bg-slate-50 dark:bg-slate-800/60 text-left text-xs uppercase tracking-wide text-slate-500">
           <tr>
             <th className="px-3 py-2">Source</th>
             <th className="px-3 py-2">Status</th>
@@ -32,7 +32,7 @@ export function ResultTable({ jobId, results }: Props) {
         </thead>
         <tbody>
           {results.map((r) => (
-            <tr key={r.id} className="border-t border-slate-100 hover:bg-slate-50">
+            <tr key={r.id} className="border-t border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50">
               <td className="px-3 py-2 font-mono text-xs">
                 <Link
                   to={`/jobs/${jobId}/results/${r.id}`}
@@ -41,8 +41,8 @@ export function ResultTable({ jobId, results }: Props) {
                   {hostname(r.source_url)}
                 </Link>
               </td>
-              <td className="px-3 py-2 text-slate-600">{r.http_status ?? '—'}</td>
-              <td className="px-3 py-2 text-slate-800">
+              <td className="px-3 py-2 text-slate-600 dark:text-slate-400">{r.http_status ?? '—'}</td>
+              <td className="px-3 py-2 text-slate-800 dark:text-slate-200">
                 <Link
                   to={`/jobs/${jobId}/results/${r.id}`}
                   className="hover:underline"

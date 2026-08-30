@@ -1,6 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-
-import { api, type Capabilities, type EngineCapabilities } from '@/lib/api/client';
+import { useQuery } from "@tanstack/react-query";
+import { api, type Capabilities, type EngineCapabilities } from "@/lib/api/client";
 
 interface Props {
   engineType: string | null;
@@ -17,14 +16,14 @@ function get(
 
 export function PerEngineOptions({ engineType, options, onChange }: Props) {
   const { data } = useQuery({
-    queryKey: ['engines', 'capabilities'],
+    queryKey: ["engines", "capabilities"],
     queryFn: () => api.engines.capabilities(),
   });
   if (!engineType) return null;
   const caps = get(engineType, data?.types ?? []);
   if (!caps || !caps.deep_crawl) {
     return (
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-slate-500 dark:text-slate-400">
         This engine does not expose per-job options.
       </p>
     );
@@ -39,16 +38,16 @@ export function PerEngineOptions({ engineType, options, onChange }: Props) {
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-      <label className="flex items-center gap-2 text-sm text-slate-700">
+      <label className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-300">
         <input
           type="checkbox"
           checked={follow_links}
           onChange={(e) => set({ follow_links: e.target.checked })}
-          className="rounded border-slate-300"
+          className="rounded border-slate-300 dark:border-slate-700 text-brand-600 focus:ring-brand-500"
         />
         Follow links
       </label>
-      <label className="block text-sm text-slate-700">
+      <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
         <span>Max depth</span>
         <input
           type="number"
@@ -56,10 +55,10 @@ export function PerEngineOptions({ engineType, options, onChange }: Props) {
           max={caps.max_depth}
           value={max_depth}
           onChange={(e) => set({ max_depth: Number(e.target.value) })}
-          className="mt-1 block w-full rounded border border-slate-300 px-2 py-1"
+          className="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-brand-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-brand-400"
         />
       </label>
-      <label className="block text-sm text-slate-700">
+      <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
         <span>Max pages / URL</span>
         <input
           type="number"
@@ -67,7 +66,7 @@ export function PerEngineOptions({ engineType, options, onChange }: Props) {
           max={caps.max_pages_per_target}
           value={max_pages}
           onChange={(e) => set({ max_pages_per_target: Number(e.target.value) })}
-          className="mt-1 block w-full rounded border border-slate-300 px-2 py-1"
+          className="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-brand-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-brand-400"
         />
       </label>
     </div>

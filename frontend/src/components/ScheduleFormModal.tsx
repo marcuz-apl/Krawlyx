@@ -66,73 +66,73 @@ export function ScheduleFormModal({ schedule, onClose }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-2xl space-y-4 rounded-lg bg-white p-6 shadow-xl"
+        className="w-full max-w-2xl space-y-4 rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl"
       >
-        <h2 className="text-lg font-semibold text-slate-900">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
           {schedule ? `Edit schedule #${schedule.id}` : 'New schedule'}
         </h2>
 
         <div className="grid grid-cols-2 gap-3">
           <label className="text-sm">
-            <span className="text-slate-700">Name</span>
+            <span className="text-slate-700 dark:text-slate-300">Name</span>
             <input
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 block w-full rounded border border-slate-300 px-2 py-1"
+              className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1"
             />
           </label>
           <label className="text-sm">
-            <span className="text-slate-700">Timezone</span>
+            <span className="text-slate-700 dark:text-slate-300">Timezone</span>
             <input
               value={timezone}
               onChange={(e) => setTimezone(e.target.value)}
-              className="mt-1 block w-full rounded border border-slate-300 px-2 py-1"
+              className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1"
             />
           </label>
           <label className="col-span-2 text-sm">
-            <span className="text-slate-700">Cron expression</span>
+            <span className="text-slate-700 dark:text-slate-300">Cron expression</span>
             <input
               required
               value={cron}
               onChange={(e) => setCron(e.target.value)}
               placeholder="0 2 * * *"
-              className="mt-1 block w-full rounded border border-slate-300 px-2 py-1 font-mono"
+              className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1 font-mono"
             />
-            <span className="mt-1 inline-block text-xs text-slate-500">
+            <span className="mt-1 inline-block text-xs text-slate-500 dark:text-slate-400">
               5 fields: minute hour day-of-month month day-of-week.
             </span>
           </label>
         </div>
 
         <div>
-          <span className="text-sm font-medium text-slate-700">Engine</span>
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Engine</span>
           <div className="mt-1">
             <EngineSelector value={engineId} onChange={setEngineId} />
           </div>
         </div>
 
         <div>
-          <span className="text-sm font-medium text-slate-700">Export target (optional)</span>
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Export target (optional)</span>
           <div className="mt-1">
             <ExportTargetSelector value={exportTargetId} onChange={setExportTargetId} />
           </div>
         </div>
 
         <label className="block text-sm">
-          <span className="text-slate-700">URLs (one per line)</span>
+          <span className="text-slate-700 dark:text-slate-300">URLs (one per line)</span>
           <div className="mt-1">
             <UrlTextarea value={urlsText} onChange={setUrlsText} />
           </div>
         </label>
 
         <label className="block text-sm">
-          <span className="text-slate-700">Notes</span>
+          <span className="text-slate-700 dark:text-slate-300">Notes</span>
           <input
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             maxLength={2000}
-            className="mt-1 block w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1"
           />
         </label>
 
@@ -141,7 +141,7 @@ export function ScheduleFormModal({ schedule, onClose }: Props) {
             type="checkbox"
             checked={enabled}
             onChange={(e) => setEnabled(e.target.checked)}
-            className="rounded border-slate-300"
+            className="rounded border-slate-300 dark:border-slate-700"
           />
           <span>Enabled</span>
         </label>
@@ -152,7 +152,7 @@ export function ScheduleFormModal({ schedule, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100"
+            className="rounded border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-sm hover:bg-slate-100"
           >
             Cancel
           </button>

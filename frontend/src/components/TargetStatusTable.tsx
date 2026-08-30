@@ -2,7 +2,7 @@ import type { TargetOut } from '@/lib/api/client';
 
 function badge(status: string): string {
   const map: Record<string, string> = {
-    pending: 'bg-slate-100 text-slate-600',
+    pending: 'bg-slate-100 text-slate-600 dark:text-slate-400',
     fetching: 'bg-amber-100 text-amber-800',
     done: 'bg-emerald-100 text-emerald-800',
     error: 'bg-red-100 text-red-700',
@@ -20,9 +20,9 @@ export function TargetStatusTable({ targets }: Props) {
     return <p className="text-sm text-slate-500">No targets.</p>;
   }
   return (
-    <div className="overflow-hidden rounded border border-slate-200">
+    <div className="overflow-hidden rounded border border-slate-200 dark:border-slate-800">
       <table className="w-full text-sm">
-        <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+        <thead className="bg-slate-50 dark:bg-slate-800/60 text-left text-xs uppercase tracking-wide text-slate-500">
           <tr>
             <th className="px-3 py-2">URL</th>
             <th className="px-3 py-2">Status</th>
@@ -32,8 +32,8 @@ export function TargetStatusTable({ targets }: Props) {
         </thead>
         <tbody>
           {targets.map((t) => (
-            <tr key={t.id} className="border-t border-slate-100">
-              <td className="px-3 py-2 font-mono text-xs text-slate-800 break-all">
+            <tr key={t.id} className="border-t border-slate-100 dark:border-slate-800/60">
+              <td className="px-3 py-2 font-mono text-xs text-slate-800 dark:text-slate-200 break-all">
                 {t.url}
               </td>
               <td className="px-3 py-2">

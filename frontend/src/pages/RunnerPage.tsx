@@ -153,7 +153,7 @@ export function RunnerPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-semibold text-slate-900">New job</h1>
+      <h1 className="mb-4 text-xl font-bold tracking-tight text-slate-900 dark:text-white">New job</h1>
 
       <form
         onSubmit={(e) => {
@@ -164,14 +164,14 @@ export function RunnerPage() {
         className="max-w-3xl space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <label className="block">
-          <span className="text-sm font-medium text-slate-700">Engine</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Engine</span>
           <div className="mt-1">
             <EngineSelector value={engineId} onChange={setEngineId} />
           </div>
         </label>
 
         <div>
-          <span className="text-sm font-medium text-slate-700">Extraction Mode & Schema</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Extraction Mode & Schema</span>
           <div className="mt-1.5 flex flex-wrap gap-2">
             <button
               type="button"
@@ -212,7 +212,7 @@ export function RunnerPage() {
             <div className="mt-3 rounded-xl border border-brand-200 bg-slate-50/75 p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-800">Custom Dataset Fields</h4>
+                  <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200">Custom Dataset Fields</h4>
                   <p className="text-[11px] text-slate-500">Define custom column names and optional CSS selectors</p>
                 </div>
                 <button
@@ -282,7 +282,7 @@ export function RunnerPage() {
         </div>
 
         <div>
-          <span className="text-sm font-medium text-slate-700">Crawler Options</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Crawler Options</span>
           <div className="mt-1">
             <PerEngineOptions
               engineType={engineType}
@@ -294,7 +294,7 @@ export function RunnerPage() {
 
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-sm font-medium text-slate-700">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               URLs (one per line)
             </span>
             <button
@@ -307,8 +307,8 @@ export function RunnerPage() {
           </div>
 
           {showHelper && (
-            <div className="mb-3 rounded-xl border border-brand-200 bg-brand-50/60 p-4 space-y-3 text-xs">
-              <div className="font-semibold text-slate-900">
+            <div className="mb-3 rounded-xl border border-brand-200 bg-brand-50/60 p-4 space-y-3 text-xs dark:border-brand-900/60 dark:bg-brand-950/40">
+              <div className="font-semibold text-slate-900 dark:text-white">
                 Multi-Page URL Generator & AutoTrader Pagination
               </div>
               <div>
@@ -382,7 +382,7 @@ export function RunnerPage() {
           <UrlTextarea value={urls} onChange={setUrls} />
 
           {/* Multi-Worker Time Gap / Anti-Ban Stagger Options */}
-          <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 space-y-2.5 text-xs">
+          <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 space-y-2.5 text-xs dark:border-slate-800 dark:bg-slate-800/50">
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-800">
                 <input
@@ -442,17 +442,17 @@ export function RunnerPage() {
         </div>
 
         <label className="block">
-          <span className="text-sm font-medium text-slate-700">Notes</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Notes</span>
           <input
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             maxLength={2000}
-            className="mt-1 block w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 block w-full rounded rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-brand-400"
           />
         </label>
 
         <div>
-          <span className="text-sm font-medium text-slate-700">
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             Save results to
           </span>
           <div className="mt-1">
@@ -471,7 +471,7 @@ export function RunnerPage() {
         <button
           type="submit"
           disabled={!engineId || submit.isPending}
-          className="rounded bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          className="rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-brand-500/20 hover:bg-brand-500 transition active:scale-[0.98] disabled:opacity-60 cursor-pointer"
         >
           {submit.isPending ? 'Submitting…' : 'Run crawl'}
         </button>

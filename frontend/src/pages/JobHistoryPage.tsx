@@ -10,7 +10,7 @@ export function JobHistoryPage() {
   });
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-semibold text-slate-900">History</h1>
+      <h1 className="mb-4 text-xl font-bold tracking-tight text-slate-900 dark:text-white">History</h1>
       {isLoading ? (
         <p className="text-slate-500">Loading…</p>
       ) : (

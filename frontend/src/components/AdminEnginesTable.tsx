@@ -28,7 +28,7 @@ export function AdminEnginesTable() {
   });
   const [creating, setCreating] = useState(false);
 
-  if (isLoading) return <p className="text-slate-500">Loading…</p>;
+  if (isLoading) return <p className="text-slate-500 dark:text-slate-400">Loading…</p>;
   const engines: EngineOut[] = data ?? [];
 
   return (
@@ -52,9 +52,9 @@ export function AdminEnginesTable() {
         />
       )}
 
-      <div className="overflow-hidden rounded border border-slate-200">
+      <div className="overflow-hidden rounded border border-slate-200 dark:border-slate-800">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+          <thead className="bg-slate-50 dark:bg-slate-800/60 text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
             <tr>
               <th className="px-3 py-2">Name</th>
               <th className="px-3 py-2">Type</th>
@@ -65,18 +65,18 @@ export function AdminEnginesTable() {
           <tbody>
             {engines.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-3 py-4 text-center text-slate-500">
+                <td colSpan={4} className="px-3 py-4 text-center text-slate-500 dark:text-slate-400">
                   No engines yet.
                 </td>
               </tr>
             )}
             {engines.map((e) => (
               <tr key={e.id} className="border-t border-slate-100">
-                <td className="px-3 py-2 font-medium text-slate-900">{e.name}</td>
+                <td className="px-3 py-2 font-medium text-slate-900 dark:text-white">{e.name}</td>
                 <td className="px-3 py-2 text-slate-600">{e.type}</td>
                 <td className="px-3 py-2 text-xs">
                   {e.disabled_at ? (
-                    <span className="rounded bg-slate-200 px-2 py-0.5 text-slate-500">disabled</span>
+                    <span className="rounded bg-slate-200 px-2 py-0.5 text-slate-500 dark:text-slate-400">disabled</span>
                   ) : e.pooled ? (
                     <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-800">pooled</span>
                   ) : (
@@ -90,13 +90,13 @@ export function AdminEnginesTable() {
                   <button
                     onClick={() => test.mutate(e.id)}
                     disabled={test.isPending}
-                    className="mr-2 rounded border border-slate-300 px-2 py-0.5 text-xs hover:bg-slate-100 disabled:opacity-50"
+                    className="mr-2 rounded border border-slate-300 dark:border-slate-700 px-2 py-0.5 text-xs hover:bg-slate-100 disabled:opacity-50"
                   >
                     Test
                   </button>
                   <button
                     onClick={() => patch.mutate({ id: e.id, body: { pooled: !e.pooled } })}
-                    className="mr-2 rounded border border-slate-300 px-2 py-0.5 text-xs hover:bg-slate-100"
+                    className="mr-2 rounded border border-slate-300 dark:border-slate-700 px-2 py-0.5 text-xs hover:bg-slate-100"
                   >
                     {e.pooled ? 'Unpool' : 'Pool'}
                   </button>
@@ -142,24 +142,24 @@ function CreateForm({ onDone }: { onDone: () => void }) {
         setErr(null);
         create.mutate({ name, type, config: {}, pooled });
       }}
-      className="space-y-3 rounded border border-slate-200 bg-slate-50 p-4"
+      className="space-y-3 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 p-4"
     >
       <div className="grid grid-cols-3 gap-3">
         <label className="text-sm">
-          <span className="text-slate-700">Name</span>
+          <span className="text-slate-700 dark:text-slate-300">Name</span>
           <input
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 block w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1"
           />
         </label>
         <label className="text-sm">
-          <span className="text-slate-700">Type</span>
+          <span className="text-slate-700 dark:text-slate-300">Type</span>
           <select
             value={type}
             onChange={(e) => setType(e.target.value)}
-            className="mt-1 block w-full rounded border border-slate-300 px-2 py-1"
+            className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1"
           >
             <option value="crawl4ai">crawl4ai</option>
             <option value="scrapy">scrapy</option>
@@ -170,7 +170,7 @@ function CreateForm({ onDone }: { onDone: () => void }) {
             type="checkbox"
             checked={pooled}
             onChange={(e) => setPooled(e.target.checked)}
-            className="mr-2 rounded border-slate-300"
+            className="mr-2 rounded border-slate-300 dark:border-slate-700"
           />
           <span>Pooled</span>
         </label>

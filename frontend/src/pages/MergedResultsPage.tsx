@@ -71,15 +71,15 @@ export function MergedResultsPage() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 dark:border-slate-800 pb-5">
         <div className="space-y-1">
           <Link
             to="/history"
-            className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors"
+            className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-white transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Back to History
           </Link>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <Layers className="h-6 w-6 text-brand-600" />
             Merged Crawl Results
           </h1>
@@ -139,33 +139,33 @@ export function MergedResultsPage() {
 
       {saveOpen && (
         <div className="rounded-xl border border-brand-200 bg-brand-50/60 p-5 space-y-3">
-          <h3 className="text-sm font-semibold text-slate-900">Save Merged Table to Database</h3>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Save Merged Table to Database</h3>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">Dataset Name *</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Dataset Name *</label>
               <input
                 type="text"
                 value={datasetName}
                 onChange={(e) => setDatasetName(e.target.value)}
                 placeholder="e.g. Ford Inventory All Alberta (Merged)"
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs focus:border-brand-500 focus:outline-none"
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs focus:border-brand-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">Description (Optional)</label>
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Description (Optional)</label>
               <input
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="e.g. Combined crawl jobs"
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs focus:border-brand-500 focus:outline-none"
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs focus:border-brand-500 focus:outline-none"
               />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-1">
             <button
               onClick={() => setSaveOpen(false)}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:bg-slate-800/60"
             >
               Cancel
             </button>

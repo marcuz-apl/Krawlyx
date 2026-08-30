@@ -156,15 +156,15 @@ export function DatasetDetailPage() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 dark:border-slate-800 pb-5">
         <div className="space-y-1">
           <Link
             to="/datasets"
-            className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors"
+            className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-white transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Back to Saved Datasets
           </Link>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <Database className="h-6 w-6 text-brand-600" />
             {data.name}
           </h1>
@@ -193,7 +193,7 @@ export function DatasetDetailPage() {
             className={`inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-1.5 text-xs font-semibold shadow-sm transition-colors ${
               sqlConsoleOpen
                 ? 'border-indigo-500 bg-indigo-600 text-white'
-                : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:bg-slate-800/60'
             }`}
           >
             <Code2 className="h-4 w-4" />
@@ -221,20 +221,20 @@ export function DatasetDetailPage() {
       {/* Split Dataset Modal */}
       {splitModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
                 <div className="rounded-lg bg-purple-100 p-2 text-purple-700">
                   <Scissors className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">Split Dataset Into Multiple</h3>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Split Dataset Into Multiple</h3>
                   <p className="text-xs text-slate-500">Partition "{data.name}" by attribute values</p>
                 </div>
               </div>
               <button
                 onClick={() => setSplitModalOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-300"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -251,7 +251,7 @@ export function DatasetDetailPage() {
                     {splitResults.map((res) => (
                       <li key={res.dataset_id} className="py-2 flex items-center justify-between">
                         <div>
-                          <span className="font-semibold text-slate-900">{res.name}</span>
+                          <span className="font-semibold text-slate-900 dark:text-white">{res.name}</span>
                           <span className="ml-2 rounded bg-emerald-200/80 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
                             {res.row_count} rows
                           </span>
@@ -282,13 +282,13 @@ export function DatasetDetailPage() {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Split By Attribute:
                   </label>
                   <select
                     value={splitAttribute}
                     onChange={(e) => setSplitAttribute(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 shadow-sm focus:border-purple-500 focus:outline-none"
+                    className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-sm focus:border-purple-500 focus:outline-none"
                   >
                     <option value="make">🚗 Make (e.g. Dodge, Ford, Toyota)</option>
                     <option value="year">📅 Year (e.g. 2024, 2023, 2022)</option>
@@ -307,13 +307,13 @@ export function DatasetDetailPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
                     Preview of Resulting Datasets ({Object.keys(splitPreview).length} new datasets):
                   </label>
-                  <div className="max-h-48 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs divide-y divide-slate-200/60">
+                  <div className="max-h-48 overflow-auto rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 p-2 text-xs divide-y divide-slate-200/60">
                     {Object.entries(splitPreview).map(([grp, count]) => (
                       <div key={grp} className="py-1.5 flex items-center justify-between">
-                        <span className="font-mono text-slate-800 font-semibold">{data.name} - {grp}</span>
+                        <span className="font-mono text-slate-800 dark:text-slate-200 font-semibold">{data.name} - {grp}</span>
                         <span className="rounded bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-800">
                           {count} rows
                         </span>
@@ -326,7 +326,7 @@ export function DatasetDetailPage() {
                   <button
                     type="button"
                     onClick={() => setSplitModalOpen(false)}
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                    className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:bg-slate-800/60"
                   >
                     Cancel
                   </button>
@@ -449,7 +449,7 @@ export function DatasetDetailPage() {
               value={sqlQuery}
               onChange={(e) => setSqlQuery(e.target.value)}
               placeholder="e.g. UPDATE dataset SET price = CAST(REPLACE(price, '$', '') AS INTEGER);"
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 p-3 font-mono text-xs text-emerald-400 focus:border-emerald-500 focus:outline-none placeholder:text-slate-600"
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 p-3 font-mono text-xs text-emerald-400 focus:border-emerald-500 focus:outline-none placeholder:text-slate-600 dark:text-slate-400"
             />
           </div>
 
@@ -541,7 +541,7 @@ export function DatasetDetailPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search within dataset..."
-            className="w-full rounded-lg border border-slate-300 bg-white pl-8 pr-3 py-1.5 text-xs focus:border-brand-500 focus:outline-none"
+            className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 pl-8 pr-3 py-1.5 text-xs focus:border-brand-500 focus:outline-none"
           />
         </div>
         {search && (

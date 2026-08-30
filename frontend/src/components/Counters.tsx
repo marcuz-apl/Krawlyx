@@ -15,21 +15,21 @@ interface Props {
 export function Counters({ counts, status, elapsedS }: Props) {
   return (
     <div className="flex flex-wrap items-center gap-3 text-sm">
-      <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
+      <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 font-medium text-slate-700 dark:text-slate-300">
         {status}
       </span>
       <span className="text-slate-700">
-        <strong className="text-emerald-700">{counts.done}</strong> done
+        <strong className="text-emerald-700 dark:text-emerald-400">{counts.done}</strong> done
       </span>
       <span className="text-slate-700">
-        <strong className="text-amber-700">{counts.fetching}</strong> running
+        <strong className="text-amber-700 dark:text-amber-400">{counts.fetching}</strong> running
       </span>
       <span className="text-slate-700">
-        <strong className="text-slate-500">{counts.pending}</strong> pending
+        <strong className="text-slate-500 dark:text-slate-400">{counts.pending}</strong> pending
       </span>
       {counts.error > 0 && (
         <span className="text-slate-700">
-          <strong className="text-red-700">{counts.error}</strong> errors
+          <strong className="text-red-700 dark:text-red-400">{counts.error}</strong> errors
         </span>
       )}
       {counts.skipped > 0 && (

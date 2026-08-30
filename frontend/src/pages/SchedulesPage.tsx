@@ -24,13 +24,13 @@ export function SchedulesPage() {
   const [editing, setEditing] = useState<ScheduleOut | null>(null);
   const [creating, setCreating] = useState(false);
 
-  if (isLoading) return <p className="text-slate-500">Loading…</p>;
+  if (isLoading) return <p className="text-slate-500 dark:text-slate-400">Loading…</p>;
   const schedules: ScheduleOut[] = data ?? [];
 
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-900">Schedules</h1>
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Schedules</h1>
         <button
           onClick={() => setCreating(true)}
           className="rounded bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700"
@@ -40,11 +40,11 @@ export function SchedulesPage() {
       </div>
 
       {schedules.length === 0 ? (
-        <p className="text-slate-500">No schedules yet.</p>
+        <p className="text-slate-500 dark:text-slate-400">No schedules yet.</p>
       ) : (
-        <div className="overflow-hidden rounded border border-slate-200">
+        <div className="overflow-hidden rounded border border-slate-200 dark:border-slate-800">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
               <tr>
                 <th className="px-3 py-2">Name</th>
                 <th className="px-3 py-2">Cron</th>
@@ -57,15 +57,15 @@ export function SchedulesPage() {
             <tbody>
               {schedules.map((s) => (
                 <tr key={s.id} className="border-t border-slate-100">
-                  <td className="px-3 py-2 font-medium text-slate-900">{s.name}</td>
+                  <td className="px-3 py-2 font-medium text-slate-900 dark:text-white">{s.name}</td>
                   <td className="px-3 py-2 text-xs text-slate-600">
                     <div>{humanizeCron(s.cron, s.timezone)}</div>
                     <div className="font-mono text-slate-400">{s.cron} · {s.timezone}</div>
                   </td>
-                  <td className="px-3 py-2 text-xs text-slate-500">
+                  <td className="px-3 py-2 text-xs text-slate-500 dark:text-slate-400">
                     {s.last_run_at ? new Date(s.last_run_at).toLocaleString() : '—'}
                   </td>
-                  <td className="px-3 py-2 text-xs text-slate-500">
+                  <td className="px-3 py-2 text-xs text-slate-500 dark:text-slate-400">
                     {s.next_run_at ? new Date(s.next_run_at).toLocaleString() : '—'}
                   </td>
                   <td className="px-3 py-2 text-xs">
@@ -78,7 +78,7 @@ export function SchedulesPage() {
                         enabled
                       </span>
                     ) : (
-                      <span className="rounded bg-slate-200 px-2 py-0.5 text-slate-500">
+                      <span className="rounded bg-slate-200 px-2 py-0.5 text-slate-500 dark:text-slate-400">
                         disabled
                       </span>
                     )}
@@ -93,7 +93,7 @@ export function SchedulesPage() {
                     </button>
                     <button
                       onClick={() => setEditing(s)}
-                      className="mr-2 rounded border border-slate-300 px-2 py-0.5 text-xs hover:bg-slate-100"
+                      className="mr-2 rounded border border-slate-300 dark:border-slate-700 px-2 py-0.5 text-xs hover:bg-slate-100"
                     >
                       Edit
                     </button>

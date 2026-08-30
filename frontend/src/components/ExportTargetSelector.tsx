@@ -1,46 +1,43 @@
-import { useQuery } from '@tanstack/react-query';
-
-import { api, type ExportTargetOut } from '@/lib/api/client';
+import { useQuery } from "@tanstack/react-query";
+import { api, type ExportTargetOut } from "@/lib/api/client";
 
 interface Props {
   value: number | null;
-  onChange: (id: number | null) => void;
+  onChange: (targetId: number | null) => void;
 }
 
-/** A folder-target dropdown for the runner form.
-
-  Shows only `enabled && runner_selectable && mode === 'folder'` targets.
-  `null` means "database only" (M3 default).
-*/
 export function ExportTargetSelector({ value, onChange }: Props) {
   const { data, isLoading } = useQuery({
-    queryKey: ['export-targets'],
+    queryKey: ["export-targets"],
     queryFn: () => api.exportTargets.list(),
   });
+
   if (isLoading) {
-    return <p className="text-xs text-slate-500">Loading export targets…</p>;
-  }
-  const selectable: ExportTargetOut[] = (data ?? []).filter(
-    (t) => t.enabled && t.runner_selectable && t.mode === 'folder',
-  );
-  if (selectable.length === 0) {
     return (
-      <p className="text-xs text-slate-500">
-        No folder export targets are available to runners. Ask an admin
-        to create one and mark it <strong>runner-selectable</strong>.
-      </p>
+      <select
+        disabled
+        className="block w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
+      >
+        <option>Loading destinations…</option>
+      </select>
     );
   }
+
+  const targets: ExportTargetOut[] = data ?? [];
+
   return (
     <select
-      value={value ?? ''}
-      onChange={(e) => onChange(e.target.value === '' ? null : Number(e.target.value))}
-      className="block w-full rounded border border-slate-300 px-3 py-2 text-slate-900 focus:border-brand-500 focus:outline-none"
+      value={value ?? ""}
+      onChange={(e) => {
+        const v = e.target.value;
+        onChange(v === "" ? null : Number(v));
+      }}
+      className="block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-brand-400 transition"
     >
-      <option value="">Database only (no folder export)</option>
-      {selectable.map((t) => (
+      <option value="">Default (download via browser from Results page)</option>
+      {targets.map((t) => (
         <option key={t.id} value={t.id}>
-          {t.name} ({t.format}, split {t.split_size_mb} MB)
+          {t.name} ({t.format ? t.format.toUpperCase() : "Default"}{t.path ? ` · ${t.path}` : ""})
         </option>
       ))}
     </select>

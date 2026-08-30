@@ -54,20 +54,20 @@ export function SettingsReadOnlyCard() {
     },
   });
 
-  if (isLoading) return <p className="text-slate-500">Loading…</p>;
+  if (isLoading) return <p className="text-slate-500 dark:text-slate-400">Loading…</p>;
   if (!data) return <p className="text-red-700">Failed to load settings.</p>;
   const s: SettingsOut = data;
 
   return (
     <div className="space-y-6">
       {/* Database Health & Maintenance */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white p-5 shadow-sm space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
             <Database className="h-5 w-5 text-brand-600" />
             <div>
-              <h3 className="text-sm font-bold text-slate-900">SQLite Database Storage & Maintenance</h3>
-              <p className="text-xs text-slate-500">Active storage engine metrics and WAL maintenance</p>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">SQLite Database Storage & Maintenance</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Active storage engine metrics and WAL maintenance</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -107,31 +107,31 @@ export function SettingsReadOnlyCard() {
 
         {dbStats && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
-              <span className="text-[11px] font-medium text-slate-500 block">Database File Size</span>
-              <span className="text-base font-bold text-slate-900 font-mono">{dbStats.db_size_formatted}</span>
+            <div className="rounded-lg border border-slate-100 bg-slate-50 dark:bg-slate-800/50 p-3">
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block">Database File Size</span>
+              <span className="text-base font-bold text-slate-900 dark:text-white font-mono">{dbStats.db_size_formatted}</span>
               <span className="text-[10px] text-slate-400 block truncate" title={dbStats.db_path}>
                 {dbStats.db_path}
               </span>
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
-              <span className="text-[11px] font-medium text-slate-500 block">WAL Journal Size</span>
-              <span className="text-base font-bold text-slate-900 font-mono">{dbStats.wal_size_formatted}</span>
+            <div className="rounded-lg border border-slate-100 bg-slate-50 dark:bg-slate-800/50 p-3">
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block">WAL Journal Size</span>
+              <span className="text-base font-bold text-slate-900 dark:text-white font-mono">{dbStats.wal_size_formatted}</span>
               <span className="text-[10px] text-emerald-600 font-semibold block">
                 Mode: {dbStats.journal_mode.toUpperCase()}
               </span>
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
-              <span className="text-[11px] font-medium text-slate-500 block">Page Allocation</span>
-              <span className="text-base font-bold text-slate-900 font-mono">
+            <div className="rounded-lg border border-slate-100 bg-slate-50 dark:bg-slate-800/50 p-3">
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block">Page Allocation</span>
+              <span className="text-base font-bold text-slate-900 dark:text-white font-mono">
                 {dbStats.page_count} pages
               </span>
               <span className="text-[10px] text-slate-400 block">
                 {dbStats.page_size} bytes / page
               </span>
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
-              <span className="text-[11px] font-medium text-slate-500 block">Total Stored Rows</span>
+            <div className="rounded-lg border border-slate-100 bg-slate-50 dark:bg-slate-800/50 p-3">
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block">Total Stored Rows</span>
               <span className="text-base font-bold text-brand-600 font-mono">
                 {dbStats.total_dataset_rows} dataset rows
               </span>
@@ -145,7 +145,7 @@ export function SettingsReadOnlyCard() {
 
       {/* Global Config Settings */}
       <div className="space-y-3">
-        <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+        <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
           Runtime Configuration Settings
         </h3>
         <Row label="Max concurrent jobs" value={String(s.max_concurrent_jobs)} />
@@ -168,9 +168,9 @@ export function SettingsReadOnlyCard() {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between rounded border border-slate-200 bg-white px-3 py-2 text-sm">
-      <span className="text-slate-700">{label}</span>
-      <span className="font-mono text-slate-900">{value}</span>
+    <div className="flex items-center justify-between rounded border border-slate-200 dark:border-slate-800 bg-white px-3 py-2 text-sm">
+      <span className="text-slate-700 dark:text-slate-300">{label}</span>
+      <span className="font-mono text-slate-900 dark:text-white">{value}</span>
     </div>
   );
 }
