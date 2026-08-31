@@ -245,8 +245,10 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
 
             opts = dict(job.options or {})
             stagger_enabled = bool(opts.get("stagger_workers", False)) if len(pending) > 1 else False
-            stagger_min_s = float(opts.get("stagger_min_seconds", 60.0))
-            stagger_max_s = float(opts.get("stagger_max_seconds", 240.0))
+            raw_min = float(opts.get("stagger_min_seconds", 30.0))
+            raw_max = float(opts.get("stagger_max_seconds", 240.0))
+            stagger_min_s = max(30.0, min(600.0, raw_min))
+            stagger_max_s = max(stagger_min_s, min(600.0, raw_max))
 
             tasks = []
             cumulative_delay = 0.0
