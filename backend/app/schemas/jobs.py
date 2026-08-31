@@ -68,6 +68,12 @@ class TargetOut(BaseModel):
     status: str
     attempts: int
     error: str | None
+    session_num: int | None = None
+    stagger_gap_s: float | None = None
+    stagger_gap_min: float | None = None
+    stagger_delay_s: float | None = None
+    stagger_gap_display: str | None = None
+    countdown_s: int | None = None
 
 
 class JobResultOut(BaseModel):

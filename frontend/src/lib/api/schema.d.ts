@@ -1721,6 +1721,8 @@ export interface components {
             username: string;
             /** Role */
             role: string;
+            /** Created At */
+            created_at?: string | null;
         };
         /** UserUpdate */
         UserUpdate: {

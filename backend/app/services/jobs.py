@@ -57,6 +57,7 @@ class JobHandle:
     cancel_event: asyncio.Event = field(default_factory=asyncio.Event)
     target_tasks: set[asyncio.Task] = field(default_factory=set)
     started_at: float = field(default_factory=time.monotonic)
+    target_delays: dict[int, dict[str, Any]] = field(default_factory=dict)
     # Set by `_run_job` after the engine is validated. `_run_target`
     # uses it to stream rows; the worker closes it before releasing the
     # pool slot. `None` when the job has no folder export target.
@@ -112,6 +113,9 @@ def shutdown() -> None:
 
 def is_active(job_id: int) -> bool:
     return job_id in _active or job_id in _queue
+
+def get_job_handle(job_id: int) -> JobHandle | None:
+    return _active.get(job_id)
 
 
 # ---- public API used by the routers ----
@@ -239,22 +243,45 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
             # Include targets in pending (or left in fetching)
             pending = [t for t in targets if t.status in {"pending", "fetching"}]
 
-            opts = job.options or {}
+            opts = dict(job.options or {})
             stagger_enabled = bool(opts.get("stagger_workers", False)) if len(pending) > 1 else False
             stagger_min_s = float(opts.get("stagger_min_seconds", 60.0))
             stagger_max_s = float(opts.get("stagger_max_seconds", 240.0))
 
             tasks = []
             cumulative_delay = 0.0
+            stagger_schedule: dict[str, Any] = {}
             import random
 
+            now_mono = time.monotonic()
             for idx, t in enumerate(pending):
+                session_num = idx + 1
                 if idx == 0 or not stagger_enabled:
+                    gap_s = 0.0
                     delay = 0.0
                 else:
-                    gap = random.uniform(stagger_min_s, stagger_max_s)
-                    cumulative_delay += gap
-                    delay = cumulative_delay
+                    gap_s = round(random.uniform(stagger_min_s, stagger_max_s), 1)
+                    cumulative_delay += gap_s
+                    delay = round(cumulative_delay, 1)
+
+                gap_min = round(gap_s / 60.0, 2)
+                delay_min = round(delay / 60.0, 2)
+                if gap_s == 0.0:
+                    gap_display = "Immediate (0s)"
+                else:
+                    gap_display = f"+{round(gap_s / 60.0, 1)} min ({int(gap_s)}s)"
+
+                target_sched = {
+                    "session_num": session_num,
+                    "gap_s": gap_s,
+                    "gap_min": gap_min,
+                    "delay_s": delay,
+                    "delay_min": delay_min,
+                    "gap_display": gap_display,
+                    "start_mono": now_mono + delay,
+                }
+                stagger_schedule[str(t.id)] = target_sched
+                handle.target_delays[t.id] = target_sched
 
                 tasks.append(
                     asyncio.create_task(
@@ -268,6 +295,10 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
                         )
                     )
                 )
+
+            opts["_stagger_schedule"] = stagger_schedule
+            job.options = opts
+            db.commit()
             handle.target_tasks = set(tasks)
             await asyncio.gather(*tasks, return_exceptions=True)
 

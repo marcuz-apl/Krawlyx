@@ -12,6 +12,7 @@ export function RunnerPage() {
   const [engineId, setEngineId] = useState<number | null>(null);
   const [exportTargetId, setExportTargetId] = useState<number | null>(null);
   const [urls, setUrls] = useState('');
+  const urlLinesCount = urls.split('\n').map(u => u.trim()).filter(Boolean).length;
   const [options, setOptions] = useState<Record<string, unknown>>({});
   const [notes, setNotes] = useState('');
   const [errorMessages, setErrorMessages] = useState<
@@ -403,39 +404,67 @@ export function RunnerPage() {
             </p>
 
             {staggerEnabled && (
-              <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-slate-200">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-slate-600 font-medium">Random Gap between:</span>
-                  <input
-                    type="number"
-                    min={0.1}
-                    max={60}
-                    step={0.5}
-                    value={staggerMinMinutes}
-                    onChange={(e) => setStaggerMinMinutes(Math.max(0.1, Number(e.target.value)))}
-                    className="w-16 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 py-1 text-center font-bold text-slate-800 dark:text-slate-100"
-                  />
-                  <span className="text-slate-600">min</span>
+              <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-700 dark:text-slate-300 font-semibold">Random Gap Between:</span>
+                    <input
+                      type="number"
+                      min={0.1}
+                      max={60}
+                      step={0.5}
+                      value={staggerMinMinutes}
+                      onChange={(e) => setStaggerMinMinutes(Math.max(0.1, Number(e.target.value)))}
+                      className="w-16 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 py-1 text-center font-bold text-slate-800 dark:text-slate-100"
+                    />
+                    <span className="text-slate-600 dark:text-slate-400">min ({Math.round(staggerMinMinutes * 60)}s)</span>
+                  </div>
+
+                  <span className="text-slate-400 font-bold">and</span>
+
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="number"
+                      min={0.5}
+                      max={120}
+                      step={0.5}
+                      value={staggerMaxMinutes}
+                      onChange={(e) => setStaggerMaxMinutes(Math.max(1, Number(e.target.value)))}
+                      className="w-16 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 py-1 text-center font-bold text-slate-800 dark:text-slate-100"
+                    />
+                    <span className="text-slate-600 dark:text-slate-400">minutes ({Math.round(staggerMaxMinutes * 60)}s)</span>
+                  </div>
                 </div>
 
-                <span className="text-slate-400">and</span>
-
-                <div className="flex items-center gap-1.5">
-                  <input
-                    type="number"
-                    min={0.5}
-                    max={120}
-                    step={0.5}
-                    value={staggerMaxMinutes}
-                    onChange={(e) => setStaggerMaxMinutes(Math.max(1, Number(e.target.value)))}
-                    className="w-16 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 py-1 text-center font-bold text-slate-800 dark:text-slate-100"
-                  />
-                  <span className="text-slate-600">minutes</span>
-                </div>
-
-                <span className="text-slate-500 text-[11px] font-mono">
-                  (approx. {Math.round(staggerMinMinutes * 60)}s – {Math.round(staggerMaxMinutes * 60)}s per worker)
-                </span>
+                {/* Session Timeline Schedule Preview */}
+                {urlLinesCount > 1 && (
+                  <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] space-y-1.5">
+                    <div className="flex items-center justify-between font-semibold text-slate-800 dark:text-slate-200">
+                      <span>⏱️ Multi-Worker Session Timeline Preview ({urlLinesCount} Sessions):</span>
+                      <span className="text-indigo-600 dark:text-indigo-400 font-mono">
+                        Estimated Span: ~{Math.round((urlLinesCount - 1) * staggerMinMinutes * 10) / 10}m – {Math.round((urlLinesCount - 1) * staggerMaxMinutes * 10) / 10}m
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5 pt-1 text-[11px] font-mono text-slate-600 dark:text-slate-400">
+                      <div className="px-2 py-1 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                        <strong>Session 1:</strong> Immediate (0s)
+                      </div>
+                      <div className="px-2 py-1 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                        <strong>Session 2:</strong> +{staggerMinMinutes}–{staggerMaxMinutes}m ({Math.round(staggerMinMinutes * 60)}s–{Math.round(staggerMaxMinutes * 60)}s gap)
+                      </div>
+                      {urlLinesCount > 2 && (
+                        <div className="px-2 py-1 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                          <strong>Session 3:</strong> +{Math.round(staggerMinMinutes * 2 * 10) / 10}–{Math.round(staggerMaxMinutes * 2 * 10) / 10}m ({Math.round(staggerMinMinutes * 120)}s–{Math.round(staggerMaxMinutes * 120)}s)
+                        </div>
+                      )}
+                      {urlLinesCount > 3 && (
+                        <div className="px-2 py-1 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 col-span-full text-slate-500">
+                          ... and remaining {urlLinesCount - 3} worker session(s) staggered subsequently.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

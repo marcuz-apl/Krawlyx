@@ -111,7 +111,13 @@ export interface TargetOut {
   url: string;
   status: string;
   attempts: number;
-  error: string | null;
+  error?: string | null;
+  session_num?: number | null;
+  stagger_gap_s?: number | null;
+  stagger_gap_min?: number | null;
+  stagger_delay_s?: number | null;
+  stagger_gap_display?: string | null;
+  countdown_s?: number | null;
 }
 
 export interface JobDetailOut extends JobOut {

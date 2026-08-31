@@ -7,6 +7,8 @@ re-run a job; non-owner non-admins get 403.
 
 from __future__ import annotations
 
+import time
+
 import csv
 import io
 import json
@@ -89,16 +91,50 @@ def _job_to_out(db: Session, job: Job) -> JobOut:
 
 
 def _targets_for(db: Session, job_id: int) -> list[TargetOut]:
-    return [
-        TargetOut(
-            id=t.id,
-            url=t.url,
-            status=t.status,
-            attempts=t.attempts,
-            error=t.error,
+    job = db.get(Job, job_id)
+    opts = job.options or {} if job else {}
+    stagger_sched = opts.get("_stagger_schedule") or {}
+    handle = jobs_svc.get_job_handle(job_id)
+    now_mono = time.monotonic()
+
+    result = []
+    for t in db.scalars(select(Target).where(Target.job_id == job_id).order_by(Target.id)):
+        sched = stagger_sched.get(str(t.id))
+        session_num = None
+        stagger_gap_s = None
+        stagger_gap_min = None
+        stagger_delay_s = None
+        stagger_gap_display = None
+        countdown_s = None
+
+        if sched:
+            session_num = sched.get("session_num")
+            stagger_gap_s = sched.get("gap_s")
+            stagger_gap_min = sched.get("gap_min")
+            stagger_delay_s = sched.get("delay_s")
+            stagger_gap_display = sched.get("gap_display")
+
+            if handle and t.id in handle.target_delays and t.status in ("pending", "fetching"):
+                target_mono = handle.target_delays[t.id].get("start_mono", 0)
+                remaining = int(target_mono - now_mono)
+                countdown_s = max(0, remaining) if remaining > 0 else 0
+
+        result.append(
+            TargetOut(
+                id=t.id,
+                url=t.url,
+                status=t.status,
+                attempts=t.attempts,
+                error=t.error,
+                session_num=session_num,
+                stagger_gap_s=stagger_gap_s,
+                stagger_gap_min=stagger_gap_min,
+                stagger_delay_s=stagger_delay_s,
+                stagger_gap_display=stagger_gap_display,
+                countdown_s=countdown_s,
+            )
         )
-        for t in db.scalars(select(Target).where(Target.job_id == job_id).order_by(Target.id))
-    ]
+    return result
 
 
 def _ensure_can_act(user: User, job: Job) -> None:
