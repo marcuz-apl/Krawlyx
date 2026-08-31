@@ -313,7 +313,7 @@ export function RunnerPage() {
                 Multi-Page URL Generator & Pagination Helper
               </div>
               <div>
-                <label className="block text-slate-600 mb-1">Base Search URL (leave empty to use current URL):</label>
+                <label className="block text-slate-600 dark:text-slate-400 mb-1">Base Search URL (leave empty to use current URL):</label>
                 <input
                   type="text"
                   value={helperBaseUrl}
@@ -325,11 +325,11 @@ export function RunnerPage() {
 
               <div className="grid gap-3 sm:grid-cols-3">
                 <div>
-                  <label className="block text-slate-600 mb-1">Pagination Mode:</label>
+                  <label className="block text-slate-600 dark:text-slate-400 mb-1">Pagination Mode:</label>
                   <select
                     value={helperType}
                     onChange={(e: any) => setHelperType(e.target.value)}
-                    className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
+                    className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-2 py-1.5 text-xs focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none"
                   >
                     <option value="autotrader">Query Parameter Pagination (page=1, 2, 3...)</option>
                     <option value="page_num">Page Number (page=1, 2, 3...)</option>
@@ -337,22 +337,22 @@ export function RunnerPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-slate-600 mb-1">Total Pages to Scrape:</label>
+                  <label className="block text-slate-600 dark:text-slate-400 mb-1">Total Pages to Scrape:</label>
                   <input
                     type="number"
                     min={1}
                     max={50}
                     value={helperPages}
                     onChange={(e) => setHelperPages(Math.max(1, Number(e.target.value)))}
-                    className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-2.5 py-1.5 text-xs"
+                    className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-2.5 py-1.5 text-xs focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-600 mb-1">Step / Items Per Page:</label>
+                  <label className="block text-slate-600 dark:text-slate-400 mb-1">Step / Items Per Page:</label>
                   <select
                     value={helperStep}
                     onChange={(e) => setHelperStep(Number(e.target.value))}
-                    className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
+                    className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-2 py-1.5 text-xs focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none"
                   >
                     <option value={20}>20 items / page (standard)</option>
                     <option value={100}>100 items / page</option>
@@ -385,7 +385,7 @@ export function RunnerPage() {
           {/* Multi-Worker Time Gap / Anti-Ban Stagger Options */}
           <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 space-y-2.5 text-xs dark:border-slate-800 dark:bg-slate-800/50">
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-800">
+              <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-800 dark:text-slate-100">
                 <input
                   type="checkbox"
                   checked={staggerEnabled}
@@ -394,12 +394,12 @@ export function RunnerPage() {
                 />
                 <span>⏱️ Multi-Worker Time Gap (Anti-Ban / Rate-Limit Guard)</span>
               </label>
-              <span className="rounded bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 text-[10px]">
+              <span className="rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border dark:border-emerald-800/40 font-semibold px-2 py-0.5 text-[10px]">
                 Recommended for Multi-Page
               </span>
             </div>
 
-            <p className="text-[11px] text-slate-500">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
               Introduces a randomized delay between workers so paginated requests don't hit target sites at the same time and avoid bot detection/banning. (Page 1 starts immediately).
             </p>
 

@@ -1,17 +1,21 @@
 import { useState, useMemo } from 'react';
-import { ExternalLink, ChevronLeft, ChevronRight, Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
+import { ExternalLink, ChevronLeft, ChevronRight, Search, SlidersHorizontal, ArrowUpDown, X, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface Props {
   items: Array<Record<string, any>>;
   totalTargets?: number;
 }
 
+interface SortCriterion {
+  field: string;
+  dir: 'asc' | 'desc';
+}
+
 export function StructuredDatasetTable({ items, totalTargets }: Props) {
   const [searchTerm, setSearchTerm] = useState('');
   const [pageSize, setPageSize] = useState<number>(50);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortField, setSortField] = useState<string | null>(null);
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortCriteria, setSortCriteria] = useState<SortCriterion[]>([]);
 
   if (!items || items.length === 0) {
     return (
@@ -51,22 +55,55 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
     );
   }, [items, searchTerm]);
 
-  // Sort items
+  // Multi-column sorting comparator
   const sortedItems = useMemo(() => {
-    if (!sortField) return filteredItems;
+    if (sortCriteria.length === 0) return filteredItems;
+
     return [...filteredItems].sort((a, b) => {
-      let valA = a[sortField];
-      let valB = b[sortField];
-      if (valA == null) return 1;
-      if (valB == null) return -1;
-      if (typeof valA === 'number' && typeof valB === 'number') {
-        return sortAsc ? valA - valB : valB - valA;
+      for (const { field, dir } of sortCriteria) {
+        let valA = a[field];
+        let valB = b[field];
+
+        // Fallbacks for combined make_model fields
+        if (valA == null) {
+          if (field === 'make' && a.make_model) valA = String(a.make_model).split(' ')[0];
+          if (field === 'model' && a.make_model) valA = String(a.make_model).split(' ').slice(1).join(' ');
+          if (field === 'mileage_km' && a.mileage != null) valA = a.mileage;
+        }
+        if (valB == null) {
+          if (field === 'make' && b.make_model) valB = String(b.make_model).split(' ')[0];
+          if (field === 'model' && b.make_model) valB = String(b.make_model).split(' ').slice(1).join(' ');
+          if (field === 'mileage_km' && b.mileage != null) valB = b.mileage;
+        }
+
+        if (valA === valB) continue;
+        if (valA == null) return 1;
+        if (valB == null) return -1;
+
+        let cmp = 0;
+        if (typeof valA === 'number' && typeof valB === 'number') {
+          cmp = valA - valB;
+        } else {
+          // Check for numeric strings (e.g. prices "$25,000" or year strings "2021")
+          const cleanA = typeof valA === 'string' ? valA.replace(/[^0-9.-]+/g, '') : '';
+          const cleanB = typeof valB === 'string' ? valB.replace(/[^0-9.-]+/g, '') : '';
+          const numA = Number(cleanA);
+          const numB = Number(cleanB);
+
+          if (cleanA && cleanB && !isNaN(numA) && !isNaN(numB) && (field === 'price' || field === 'year' || field === 'mileage' || field === 'mileage_km')) {
+            cmp = numA - numB;
+          } else {
+            cmp = String(valA).localeCompare(String(valB), undefined, { numeric: true, sensitivity: 'base' });
+          }
+        }
+
+        if (cmp !== 0) {
+          return dir === 'asc' ? cmp : -cmp;
+        }
       }
-      return sortAsc
-        ? String(valA).localeCompare(String(valB))
-        : String(valB).localeCompare(String(valA));
+      return 0;
     });
-  }, [filteredItems, sortField, sortAsc]);
+  }, [filteredItems, sortCriteria]);
 
   const totalRows = sortedItems.length;
   const effectivePageSize = pageSize === 0 ? totalRows : pageSize;
@@ -77,13 +114,45 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
   const endIndex = Math.min(startIndex + effectivePageSize, totalRows);
   const currentRows = sortedItems.slice(startIndex, endIndex);
 
+  // Multi-column sort click handler: none -> asc -> desc -> remove
   const handleSort = (field: string) => {
-    if (sortField === field) {
-      setSortAsc(!sortAsc);
-    } else {
-      setSortField(field);
-      setSortAsc(true);
+    setSortCriteria((prev) => {
+      const existingIndex = prev.findIndex((c) => c.field === field);
+      if (existingIndex === -1) {
+        // Add new sort level
+        return [...prev, { field, dir: 'asc' }];
+      } else {
+        const current = prev[existingIndex];
+        if (current.dir === 'asc') {
+          // Toggle to desc
+          const updated = [...prev];
+          updated[existingIndex] = { field, dir: 'desc' };
+          return updated;
+        } else {
+          // Remove from sort stack
+          return prev.filter((c) => c.field !== field);
+        }
+      }
+    });
+  };
+
+  const removeSortField = (field: string) => {
+    setSortCriteria((prev) => prev.filter((c) => c.field !== field));
+  };
+
+  // Helper to render sort badge in column headers
+  const renderSortIndicator = (field: string) => {
+    const index = sortCriteria.findIndex((c) => c.field === field);
+    if (index === -1) {
+      return <ArrowUpDown className="h-3 w-3 opacity-30 group-hover:opacity-70 transition-opacity" />;
     }
+    const criterion = sortCriteria[index];
+    return (
+      <span className="inline-flex items-center gap-0.5 font-mono text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 rounded px-1 py-0.2">
+        {criterion.dir === 'asc' ? <ArrowUp className="h-3 w-3 inline" /> : <ArrowDown className="h-3 w-3 inline" />}
+        {sortCriteria.length > 1 && <span>{index + 1}</span>}
+      </span>
+    );
   };
 
   return (
@@ -140,6 +209,40 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
         </div>
       </div>
 
+      {/* Multi-Column Sorting Active Breadcrumbs */}
+      {sortCriteria.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs animate-in fade-in">
+          <span className="text-slate-500 dark:text-slate-400 font-semibold px-1 text-[11px]">Multi-Column Sort Order:</span>
+          {sortCriteria.map((c, i) => (
+            <div
+              key={c.field}
+              className="inline-flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-lg px-2.5 py-1 text-xs font-medium shadow-sm"
+            >
+              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300">
+                #{i + 1}
+              </span>
+              <span className="capitalize font-semibold">{c.field.replace(/_/g, ' ')}</span>
+              <span className="font-mono text-[11px] font-bold">
+                {c.dir === 'asc' ? '▲ ASC' : '▼ DESC'}
+              </span>
+              <button
+                onClick={() => removeSortField(c.field)}
+                className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-0.5 rounded transition-colors"
+                title={`Remove ${c.field} from sort`}
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={() => setSortCriteria([])}
+            className="text-[11px] text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 underline font-medium ml-1"
+          >
+            Reset Sort
+          </button>
+        </div>
+      )}
+
       {/* Structured Table Container */}
       <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         <div className="overflow-x-auto max-h-[680px]">
@@ -150,41 +253,84 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
                   <th className="px-3 py-3 w-12 text-center">#</th>
                   <th
                     onClick={() => handleSort('year')}
-                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
                   >
-                    <span className="inline-flex items-center gap-1">
-                      Year <ArrowUpDown className="h-3 w-3 opacity-60" />
+                    <span className="inline-flex items-center gap-1.5">
+                      Year {renderSortIndicator('year')}
                     </span>
                   </th>
                   <th
                     onClick={() => handleSort('make')}
-                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
                   >
-                    <span className="inline-flex items-center gap-1">
-                      Make / Model <ArrowUpDown className="h-3 w-3 opacity-60" />
+                    <span className="inline-flex items-center gap-1.5">
+                      Make {renderSortIndicator('make')}
                     </span>
                   </th>
-                  <th className="px-3 py-3">Trim</th>
-                  <th className="px-3 py-3">Drivetrain</th>
+                  <th
+                    onClick={() => handleSort('model')}
+                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      Model {renderSortIndicator('model')}
+                    </span>
+                  </th>
+                  <th
+                    onClick={() => handleSort('trim')}
+                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      Trim {renderSortIndicator('trim')}
+                    </span>
+                  </th>
+                  <th
+                    onClick={() => handleSort('drivetrain')}
+                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      Drivetrain {renderSortIndicator('drivetrain')}
+                    </span>
+                  </th>
                   <th
                     onClick={() => handleSort('mileage_km')}
-                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
                   >
-                    <span className="inline-flex items-center gap-1">
-                      Mileage <ArrowUpDown className="h-3 w-3 opacity-60" />
+                    <span className="inline-flex items-center gap-1.5">
+                      Mileage {renderSortIndicator('mileage_km')}
                     </span>
                   </th>
                   <th
                     onClick={() => handleSort('price')}
-                    className="px-3 py-3 text-right cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+                    className="px-3 py-3 text-right cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
                   >
-                    <span className="inline-flex items-center justify-end gap-1">
-                      Price <ArrowUpDown className="h-3 w-3 opacity-60" />
+                    <span className="inline-flex items-center justify-end gap-1.5">
+                      Price {renderSortIndicator('price')}
                     </span>
                   </th>
-                  <th className="px-3 py-3">Seller</th>
-                  <th className="px-3 py-3">Location</th>
-                  <th className="px-3 py-3">Observed</th>
+                  <th
+                    onClick={() => handleSort('seller_type')}
+                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      Seller {renderSortIndicator('seller_type')}
+                    </span>
+                  </th>
+                  <th
+                    onClick={() => handleSort('city')}
+                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      Location {renderSortIndicator('city')}
+                    </span>
+                  </th>
+                  <th
+                    onClick={() => handleSort('date_observed')}
+                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      Observed {renderSortIndicator('date_observed')}
+                    </span>
+                  </th>
                   <th className="px-3 py-3 text-right">Link</th>
                 </tr>
               ) : isCustom ? (
@@ -194,23 +340,58 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
                     <th
                       key={col}
                       onClick={() => handleSort(col)}
-                      className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+                      className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
                     >
-                      <span className="inline-flex items-center gap-1 capitalize">
-                        {col.replace(/_/g, ' ')} <ArrowUpDown className="h-3 w-3 opacity-60" />
+                      <span className="inline-flex items-center gap-1.5 capitalize">
+                        {col.replace(/_/g, ' ')} {renderSortIndicator(col)}
                       </span>
                     </th>
                   ))}
-                  <th className="px-3 py-3">Observed</th>
+                  <th
+                    onClick={() => handleSort('date_observed')}
+                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      Observed {renderSortIndicator('date_observed')}
+                    </span>
+                  </th>
                   <th className="px-3 py-3 text-right">Link</th>
                 </tr>
               ) : (
                 <tr>
                   <th className="px-3 py-3 w-12 text-center">#</th>
-                  <th className="px-3 py-3">Product Name</th>
-                  <th className="px-3 py-3">Brand</th>
-                  <th className="px-3 py-3 text-right">Price</th>
-                  <th className="px-3 py-3">Observed</th>
+                  <th
+                    onClick={() => handleSort('name')}
+                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      Product Name {renderSortIndicator('name')}
+                    </span>
+                  </th>
+                  <th
+                    onClick={() => handleSort('brand')}
+                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      Brand {renderSortIndicator('brand')}
+                    </span>
+                  </th>
+                  <th
+                    onClick={() => handleSort('price')}
+                    className="px-3 py-3 text-right cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
+                  >
+                    <span className="inline-flex items-center justify-end gap-1.5">
+                      Price {renderSortIndicator('price')}
+                    </span>
+                  </th>
+                  <th
+                    onClick={() => handleSort('date_observed')}
+                    className="px-3 py-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors group select-none"
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      Observed {renderSortIndicator('date_observed')}
+                    </span>
+                  </th>
                   <th className="px-3 py-3 text-right">Link</th>
                 </tr>
               )}
@@ -232,10 +413,11 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
                         <td className="px-3 py-2.5 font-semibold text-slate-900 dark:text-white font-mono">
                           {row.year || '—'}
                         </td>
-                        <td className="px-3 py-2.5">
-                          <span className="font-semibold text-slate-900 dark:text-white">
-                            {row.make || ''} {row.model || '—'}
-                          </span>
+                        <td className="px-3 py-2.5 font-semibold text-slate-900 dark:text-white">
+                          {row.make || (row.make_model ? String(row.make_model).split(' ')[0] : '—')}
+                        </td>
+                        <td className="px-3 py-2.5 font-semibold text-slate-900 dark:text-white">
+                          {row.model || (row.make_model ? String(row.make_model).split(' ').slice(1).join(' ') : '—')}
                         </td>
                         <td className="px-3 py-2.5 text-slate-600 dark:text-slate-400">
                           {row.trim || '—'}
