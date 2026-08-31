@@ -7,9 +7,19 @@ results in SQLite or as auto-splitting CSV/XLSX files in a shared folder.
 Free and open source (MIT) — every dependency is open source and runs locally;
 no paid APIs or third-party cloud lock-in.
 
+---
+
+## Overview
+
+![MyKrawl Crawl Runner & Anti-Ban Workbench](docs/assets/ui-1-newjob.png)
+
+> 📖 **Looking for a full tour?** Explore the [**Interactive UI & Feature Gallery (5 Modules)**](docs/0008-get-started-quickly.md#7-workbench-visual-tour) in the Quick Start Guide.
+
+---
+
 ## Status
 
-M6 Hardening & Workbench Enhancements complete (`v1.6.8`). See [`PRD.md`](PRD.md) §12 and commit log. Key additions: SuperAdmin role hierarchy, SQLite database browser & SQL query console, multi-worker anti-ban session time gaps, SSRF guard, per-host throttle, per-job rotating logs, and full Docker deployment suite.
+M6 Hardening & Workbench Enhancements complete (`v1.7.1`). See [`PRD.md`](PRD.md) §12 and commit log. Key additions: SuperAdmin role hierarchy, SQLite database browser & SQL query console, unified full-dataset view with single-tier row pagination, multi-worker anti-ban session time gaps, SSRF guard, per-host throttle, per-job rotating logs, and full Docker deployment suite.
 
 ## Quick test (final product)
 

@@ -78,13 +78,27 @@ python -m pytest tests/test_scrapy_engine.py -v
 
 No live network in tests: engine adapters use monkeypatched fixtures / canned payloads (`tests/fixtures/`). Scrapy health/template tests monkeypatch `sys.modules["scrapy"]`.
 
-## 7. Key M6 artifacts
+## 7. Workbench Visual Tour
 
-- `app/core/doctor.py`: environment diagnostic (`python -m app.core.doctor`).
-- `app/core/logging_config.py`: structured rotating logs (`data/logs/app.log`) + secret scrubber (`JobLogFilter`).
-- Per-job logs: `data/logs/jobs/{job_id}.log` (created by `services/jobs.py` during `_run_job`, detached in `finally`).
-- `app/engines/ssrf.py`: `_matches_allow_list()` + `resolve_safe()` with settings override.
-- `docs/m6-hardening.md`: full M6 implementation notes (SSRF logic, throttle, logs, UA, docs, Docker deferred).
+### 1. Multi-Worker Anti-Ban Crawl Runner
+![Crawl Runner](assets/ui-1-newjob.png)
+Configure batch target URLs, toggle randomized multi-worker session gaps (0.5m–10m), choose between Crawl4AI and Scrapy, or define custom structured extraction schemas.
+
+### 2. Job History & Live Telemetry
+![Job History](assets/ui-2-history.png)
+Monitor running crawler sessions in real-time with granular execution metrics, status counters, and one-click re-runs.
+
+### 3. Unified Dataset View & SQL Console
+![Structured Dataset](assets/ui-3-dataset.png)
+Browse extracted tabular records with single-tier row pagination, instant search filtering, Excel-compatible CSV exports, and dynamic in-browser SQL querying.
+
+### 4. SuperAdmin SQLite Database Browser & Terminal
+![Admin Database Browser](assets/ui-4-admin.png)
+Directly explore database tables, inspect row schemas, run raw SQL queries, and perform database maintenance (WAL flush, VACUUM, PRAGMA integrity check).
+
+### 5. In-App Documentation & Architecture Guides
+![In-App Documentation](assets/ui-5-docs.png)
+Explore interactive architectural documentation, milestone records, Docker/Synology deployment guides, and OpenAPI schema contracts directly from the top navigation.
 
 ## 8. Things never committed
 
@@ -92,8 +106,3 @@ No live network in tests: engine adapters use monkeypatched fixtures / canned pa
 - `data/logs/app.log` and `data/logs/jobs/*.log` — runtime artifacts (`.gitignore`: `data/logs/`).
 - `.env` — secrets (`.env.example` only).
 - `frontend/dist/` — built SPA (`.gitignore`).
-
-## 9. Next steps / deferred
-
-- `Dockerfile` — deferred per PRD §4.7 (`M6` scope does not require it).
-- `docs/` — `m6-hardening.md` added; `m1-skeleton.md`, `m2-engines.md`, `m3-runner.md`, `m4-export.md`, `m5-scheduler.md` added for milestone traceability.
