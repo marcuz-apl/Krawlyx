@@ -97,16 +97,12 @@ class Crawl4AIEngine:
                 await asyncio.sleep(wait)
             self._last_fetch[host] = time.monotonic()
 
+        has_crawl4ai = True
         try:
             from crawl4ai import AsyncWebCrawler  # lazy import — see module doc
         except (ImportError, OSError) as exc:
-            yield CrawlRecord(
-                target_id=target.target_id,
-                source_url=target.url,
-                status="error",
-                error=f"crawl4ai import failed: {exc}",
-            )
-            return
+            has_crawl4ai = False
+            logger.warning("crawl4ai not available (%s); falling back to direct HTTP fetching", exc)
 
         # NFR-05: identifiable User-Agent. The engine's per-adapter UA prefix
         # is `crawl4ai`; the contact comes from Settings.
@@ -119,40 +115,41 @@ class Crawl4AIEngine:
         md = None
         status_code = 200
 
-        try:
-            import asyncio
-            import sys
+        if has_crawl4ai:
+            try:
+                import asyncio
+                import sys
 
-            def _sync_fetch():
-                if sys.platform == "win32":
-                    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                try:
-                    async def _inner():
-                        async with AsyncWebCrawler() as crawler:
-                            return await crawler.arun(
-                                url=target.url,
-                                headless=self.config.headless,
-                                page_timeout=min(self.config.browser_timeout_s, 20) * 1000,
-                                user_agent=ua,
-                            )
+                def _sync_fetch():
+                    if sys.platform == "win32":
+                        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    try:
+                        async def _inner():
+                            async with AsyncWebCrawler() as crawler:
+                                return await crawler.arun(
+                                    url=target.url,
+                                    headless=self.config.headless,
+                                    page_timeout=min(self.config.browser_timeout_s, 20) * 1000,
+                                    user_agent=ua,
+                                )
 
-                    return loop.run_until_complete(_inner())
-                finally:
-                    loop.close()
+                        return loop.run_until_complete(_inner())
+                    finally:
+                        loop.close()
 
-            result = await asyncio.wait_for(asyncio.to_thread(_sync_fetch), timeout=25.0)
-            html = getattr(result, "html", None) or getattr(result, "cleaned_html", None) or ""
-            status_code = getattr(result, "status_code", None) or 200
-            raw_md = getattr(result, "markdown", None)
-            if raw_md:
-                if hasattr(raw_md, "raw_markdown"):
-                    md = raw_md.raw_markdown
-                elif isinstance(raw_md, str):
-                    md = raw_md
-        except Exception as exc:
-            logger.warning("Crawl4AI browser fetch timed out or failed (%s) for %s; using fast HTTP fallback", exc, target.url)
+                result = await asyncio.wait_for(asyncio.to_thread(_sync_fetch), timeout=25.0)
+                html = getattr(result, "html", None) or getattr(result, "cleaned_html", None) or ""
+                status_code = getattr(result, "status_code", None) or 200
+                raw_md = getattr(result, "markdown", None)
+                if raw_md:
+                    if hasattr(raw_md, "raw_markdown"):
+                        md = raw_md.raw_markdown
+                    elif isinstance(raw_md, str):
+                        md = raw_md
+            except Exception as exc:
+                logger.warning("Crawl4AI browser fetch timed out or failed (%s) for %s; using fast HTTP fallback", exc, target.url)
 
         if not html:
             try:
