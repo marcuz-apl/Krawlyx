@@ -5,11 +5,11 @@ admin-curated pool, run batch crawls on demand or on a cron schedule, and land
 results in SQLite or as auto-splitting CSV/XLSX files in a shared folder.
 
 Free and open source (MIT) — every dependency is open source and runs locally;
-no paid APIs.
+no paid APIs or third-party cloud lock-in.
 
 ## Status
 
-M6 Hardening complete (`v1.1.8-2608293`). See [`PRD.md`](PRD.md) §12 and commit log. Key M6 additions: SSRF allow-list (`MYKRAWL_SSRF_ALLOW_LIST`), per-host throttle (`FR-SET-02`), per-job rotating logs (`data/logs/jobs/`), identifiable User-Agent (`NFR-05`), `app/core/doctor.py`, and `app/core/logging_config.py`.
+M6 Hardening & Workbench Enhancements complete (`v1.6.8`). See [`PRD.md`](PRD.md) §12 and commit log. Key additions: SuperAdmin role hierarchy, SQLite database browser & SQL query console, multi-worker anti-ban session time gaps, SSRF guard, per-host throttle, per-job rotating logs, and full Docker deployment suite.
 
 ## Quick test (final product)
 
@@ -23,10 +23,10 @@ uvicorn app.main:app --port 4040 --reload
 # 3. Run the full test suite (no live network required for core tests)
 pytest -m "not integration" -q
 
-# 4. Check M6 features are configured
+# 4. Check settings are configured
 curl -H "Cookie: session=..." http://localhost:4040/api/settings | jq '.ssrf_guard_enabled, .ssrf_allow_list, .admin_contact_email'
 ```
-[`AGENTS.md`](AGENTS.md) for the engineering contract used by AI agents and humans.
+See [`AGENTS.md`](AGENTS.md) for the engineering contract used by AI agents and humans.
 
 ## Planned stack
 
@@ -41,8 +41,22 @@ curl -H "Cookie: session=..." http://localhost:4040/api/settings | jq '.ssrf_gua
 
 MyKrawl provides two built-in crawl engines tailored for different scraping tasks:
 
-- **🤖 Crawl4AI**: Headless Chromium browser engine with full JavaScript execution, Next.js/React hydration support, LLM-ready markdown extraction, and automatic HTTP fallback. Best for dynamic, JS-rendered SPAs.
-- **⚡ Scrapy**: Ultra-fast, lightweight asynchronous HTTP engine running in an isolated subprocess. Best for large-scale bulk scraping, server-rendered HTML, and deep link crawling.
+- **🤖 [Crawl4AI](https://github.com/unclecode/crawl4ai)**: Headless Chromium browser engine with full JavaScript execution, Next.js/React hydration support, LLM-ready markdown extraction, and automatic HTTP fallback. Best for dynamic, JS-rendered SPAs.
+- **⚡ [Scrapy](https://github.com/scrapy/scrapy)**: Ultra-fast, lightweight asynchronous HTTP engine running in an isolated subprocess. Best for large-scale bulk scraping, server-rendered HTML, and deep link crawling.
+
+## SuperAdmin Password Recovery
+
+If you ever forget the password for the SuperAdmin (`admin`) account:
+
+```bash
+# Interactive password reset (prompts for new password securely):
+python scripts/reset_admin_password.py
+
+# Or specify the new password directly:
+python scripts/reset_admin_password.py myNewSecurePassword123
+```
+
+This utility updates the database credentials immediately, restores full `superadmin` privileges, and allows instant sign-in without server downtime.
 
 ## Documentation
 
@@ -58,12 +72,14 @@ All project documentation, architectural decision records, implementation plans,
 - `0007` — [M6: Security, SSRF Guard & Diagnostics Hardening](docs/0007-m6-hardening.md)
 - `0008` — [🚀 Get Started Quickly Guide](docs/0008-get-started-quickly.md)
 
-### Universal Workbench Features & Guides
-- `0009` — [Universal Custom Schema & Persistent Datasets](docs/0009-custom-schema-and-datasets.md) — Plan & Walkthrough for arbitrary schema extraction and SQLite persistence.
-- `0010` — [Universal SQL Query & Transform Console](docs/0010-universal-sql-console.md) — Plan & Walkthrough for in-browser dynamic SQL transforms and data cleaning.
-- `0011` — [Multi-Worker Rate Limiting & Engine Hardening](docs/0011-rate-limiting-and-crawler-hardening.md) — Plan & Walkthrough for anti-ban stagger, 25s timeouts, and HTTP fallbacks.
-- `0012` — [Multi-Job Dataset Merger](docs/0012-multi-job-merger.md) — Plan & Walkthrough for multi-job selection, column union, and unified export.
+### Universal Workbench Features & Deployment Guides
+- `0009` — [Universal Custom Schema & Persistent Datasets](docs/0009-custom-schema-and-datasets.md) — Arbitrary schema extraction and SQLite persistence.
+- `0010` — [Universal SQL Query & Transform Console](docs/0010-universal-sql-console.md) — In-browser dynamic SQL transforms and data cleaning.
+- `0011` — [Multi-Worker Rate Limiting & Engine Hardening](docs/0011-rate-limiting-and-crawler-hardening.md) — Anti-ban stagger, 25s timeouts, and HTTP fallbacks.
+- `0012` — [Multi-Job Dataset Merger](docs/0012-multi-job-merger.md) — Multi-job selection, column union, and unified export.
 - `0013` — [⚙️ Crawl Engines Comparison: Crawl4AI vs. Scrapy](docs/0013-engines-comparison.md) — Deep dive into engine differences, speeds, and use cases.
+- `0014` — [Dataset Filters, Splitting, Sorting & Maintenance](docs/0014-dataset-filters-splitting-sorting-maintenance.md) — Dataset browser operations and maintenance.
+- `0015` — [🐳 Production Deployment Guide (Docker, Compose & Synology NAS)](docs/0015-production-deployment-guide.md) — Complete 1-click Docker, Compose, and DSM Reverse Proxy guide.
 
 ## Versioning
 
@@ -75,3 +91,17 @@ after cloning with:
 ```sh
 git config core.hooksPath .githooks
 ```
+
+## Credits & Acknowledgements
+
+MyKrawl is built upon outstanding open-source projects:
+
+- **[Crawl4AI](https://github.com/unclecode/crawl4ai)** by [@unclecode](https://github.com/unclecode) — The leading open-source LLM-friendly web crawler & browser extraction engine.
+- **[Scrapy](https://github.com/scrapy/scrapy)** — The battle-tested fast high-level web crawling and scraping framework for Python.
+- **[Playwright for Python](https://github.com/microsoft/playwright-python)** — Reliable end-to-end browser automation for Chromium.
+- **[FastAPI](https://github.com/fastapi/fastapi)** — Modern, fast (high-performance) web framework for building APIs.
+- **[shadcn/ui](https://ui.shadcn.com/)** & **[Tailwind CSS](https://tailwindcss.com/)** — UI components and responsive styling.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE). Free to use, modify, and distribute for personal and commercial applications.
