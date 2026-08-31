@@ -85,13 +85,13 @@ def test_cannot_delete_last_admin(client: TestClient) -> None:
     """The last admin cannot be deleted. We delete down to one and
     confirm the next delete is refused. (The dev DB may already have
     an extra admin; the test is robust to that.)"""
-    csrf = auth_as(client, "admin4", "admin")
+    csrf = auth_as(client, "admin4", "superadmin")
     cookie_csrf = client.cookies.get("zc_csrf")
     with SessionLocal() as db:
         admin_ids = [
             u.id
             for u in db.scalars(
-                __import__("sqlalchemy").select(UserRow).where(UserRow.role == "admin")
+                __import__("sqlalchemy").select(UserRow).where(UserRow.role.in_(["admin", "superadmin"]))
             )
         ]
     # Delete down to exactly one admin.
@@ -101,7 +101,7 @@ def test_cannot_delete_last_admin(client: TestClient) -> None:
     # Now there's exactly one admin. Try to delete that one.
     with SessionLocal() as db:
         last_admin_id = db.scalar(
-            __import__("sqlalchemy").select(UserRow.id).where(UserRow.role == "admin")
+            __import__("sqlalchemy").select(UserRow.id).where(UserRow.role.in_(["admin", "superadmin"]))
         )
     r = client.delete(f"/api/users/{last_admin_id}", headers={"X-CSRF-Token": csrf})
     assert r.status_code == 400

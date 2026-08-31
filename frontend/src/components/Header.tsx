@@ -207,8 +207,8 @@ export function Header() {
             {navLink("/", "New Job", PlusCircle)}
             {navLink("/history", "History", History)}
             {navLink("/datasets", "Datasets", Database)}
-            {me.data?.role === "admin" && navLink("/schedules", "Schedules", Calendar)}
-            {me.data?.role === "admin" && navLink("/admin", "Admin", Shield)}
+            {(me.data?.role === "admin" || me.data?.role === "superadmin") && navLink("/schedules", "Schedules", Calendar)}
+            {(me.data?.role === "admin" || me.data?.role === "superadmin") && navLink("/admin", "Admin", Shield)}
           </nav>
           </div>
         </div>

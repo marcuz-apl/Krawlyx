@@ -8,10 +8,13 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=128)
 
 
+from datetime import datetime
+
 class UserOut(BaseModel):
     id: int
     username: str
     role: str
+    created_at: datetime | None = None
 
     model_config = {"from_attributes": True}
 

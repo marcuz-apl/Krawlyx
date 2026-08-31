@@ -1,0 +1,30 @@
+services:
+  mykrawl:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mykrawl:latest
+    container_name: mykrawl
+    restart: unless-stopped
+    ports:
+      - "4040:4040"
+    volumes:
+      # Persistent storage for SQLite database & exported crawl files
+      - ./data:/app/data
+    environment:
+      - MYKRAWL_SECRET_KEY=change-this-to-a-secure-random-secret-key
+      - MYKRAWL_ADMIN_USER=admin
+      - MYKRAWL_ADMIN_PASSWORD=admin123
+      - MYKRAWL_COOKIE_SECURE=false # Set to true if deploying behind an HTTPS reverse proxy
+      - MYKRAWL_MAX_CONCURRENT_JOBS=4
+      - MYKRAWL_MAX_PARALLEL_TARGETS_PER_JOB=10
+      - MYKRAWL_DEFAULT_SPLIT_SIZE_MB=40
+      - MYKRAWL_ROBOTS_TXT_ENABLED=true
+      - MYKRAWL_PER_DOMAIN_INTERVAL_S=1.0
+      - MYKRAWL_SSRF_GUARD_ENABLED=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4040/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s

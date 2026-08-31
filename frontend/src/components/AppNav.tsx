@@ -29,8 +29,8 @@ export function AppNav() {
           {link('/', 'New job')}
           {link('/history', 'History')}
           {link('/datasets', 'Datasets')}
-          {me.data?.role === 'admin' && link('/schedules', 'Schedules')}
-          {me.data?.role === 'admin' && link('/admin', 'Admin')}
+          {(me.data?.role === 'admin' || me.data?.role === 'superadmin') && link('/schedules', 'Schedules')}
+          {(me.data?.role === 'admin' || me.data?.role === 'superadmin') && link('/admin', 'Admin')}
         </nav>
       </div>
       <div className="flex items-center gap-3 text-sm text-slate-600">

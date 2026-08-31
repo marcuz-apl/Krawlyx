@@ -154,7 +154,7 @@ def _extract_custom_schema(soup: BeautifulSoup, source_url: str, schema: dict[st
 
 
 
-def _extract_autotrader(soup: BeautifulSoup, source_url: str) -> list[dict[str, Any]]:
+def _extract_nextjs_marketplace(soup: BeautifulSoup, source_url: str) -> list[dict[str, Any]]:
     """Extract vehicle listing rows from AutoTrader.ca HTML."""
     next_data_el = soup.find("script", id="__NEXT_DATA__")
     if not next_data_el or not next_data_el.string:
@@ -239,7 +239,7 @@ def _extract_autotrader(soup: BeautifulSoup, source_url: str) -> list[dict[str, 
                 "drivetrain": drivetrain,
                 "mileage": mileage_km,
                 "mileage_km": mileage_km,
-                "price": pr.get("priceRaw") or pr.get("priceFormatted"),
+                "price": (pr.get("priceRaw") or pr.get("priceFormatted") or pr.get("price") or pr.get("amount") or pr.get("value")) if isinstance(pr, dict) else (pr or l.get("price")),
                 "seller_type": seller_type,
                 "city": loc.get("city"),
                 "province": loc.get("provinceCode"),

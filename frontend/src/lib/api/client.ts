@@ -3,12 +3,13 @@
 // openapi-typescript. The stub here keeps the app buildable before the API
 // exists; the production path is fully typed via OpenAPI codegen.
 
-export type Role = 'runner' | 'admin';
+export type Role = 'runner' | 'admin' | 'superadmin';
 
 export interface UserOut {
   id: number;
   username: string;
   role: Role;
+  created_at?: string | null;
 }
 
 export interface LoginRequest {
@@ -254,12 +255,12 @@ export interface NextFiresOut {
 export interface UserCreateBody {
   username: string;
   password: string;
-  role?: 'runner' | 'admin';
+  role?: Role;
 }
 
 export interface UserUpdateBody {
   password?: string;
-  role?: 'runner' | 'admin';
+  role?: Role;
 }
 
 // ---- datasets & merge ----
@@ -520,6 +521,103 @@ export const api = {
     delete: (id: number) => request<void>(`/api/users/${id}`, { method: 'DELETE' }),
   },
 
+
+  database: {
+    tables: () => request<Array<{
+      name: string;
+      type: string;
+      row_count: number;
+      column_count: number;
+      columns: Array<{
+        cid: number;
+        name: string;
+        type: string;
+        notnull: boolean;
+        dflt_value: any;
+        pk: boolean;
+      }>;
+      sql: string;
+    }>>('/api/database/tables'),
+
+    tableRows: (tableName: string, params?: {
+      page?: number;
+      page_size?: number;
+      sort_col?: string | null;
+      sort_dir?: 'asc' | 'desc';
+      search?: string;
+    }) => {
+      const sp = new URLSearchParams();
+      if (params?.page) sp.set('page', String(params.page));
+      if (params?.page_size) sp.set('page_size', String(params.page_size));
+      if (params?.sort_col) sp.set('sort_col', params.sort_col);
+      if (params?.sort_dir) sp.set('sort_dir', params.sort_dir);
+      if (params?.search) sp.set('search', params.search);
+      const q = sp.toString() ? `?${sp.toString()}` : '';
+      return request<{
+        table_name: string;
+        total_rows: number;
+        filtered_rows: number;
+        page: number;
+        page_size: number;
+        total_pages: number;
+        columns: Array<{ name: string; type: string; pk: boolean }>;
+        rows: Array<Record<string, any>>;
+      }>(`/api/database/tables/${encodeURIComponent(tableName)}/rows${q}`);
+    },
+
+    query: (sql: string) =>
+      request<{
+        success: boolean;
+        columns?: string[];
+        rows?: Array<Record<string, any>>;
+        row_count?: number;
+        rows_affected?: number;
+        duration_ms?: number;
+        is_read_only?: boolean;
+        error?: string;
+      }>('/api/database/query', {
+        method: 'POST',
+        body: JSON.stringify({ sql }),
+      }),
+
+    stats: () =>
+      request<{
+        db_path: string;
+        file_size_bytes: number;
+        file_size_formatted: string;
+        wal_size_bytes: number;
+        wal_size_formatted: string;
+        page_size: number;
+        page_count: number;
+        freelist_count: number;
+        schema_version: number;
+        integrity_status: string;
+        integrity_ok: boolean;
+      }>('/api/database/stats'),
+
+    maintenance: (action: 'vacuum' | 'checkpoint' | 'optimize' | 'integrity_check') =>
+      request<{
+        success: boolean;
+        action: string;
+        message: string;
+        stats: {
+          db_path: string;
+          file_size_bytes: number;
+          file_size_formatted: string;
+          wal_size_bytes: number;
+          wal_size_formatted: string;
+          page_size: number;
+          page_count: number;
+          freelist_count: number;
+          schema_version: number;
+          integrity_status: string;
+          integrity_ok: boolean;
+        };
+      }>('/api/database/maintenance', {
+        method: 'POST',
+        body: JSON.stringify({ action }),
+      }),
+  },
   settings: {
     get: () => request<SettingsOut>('/api/settings'),
     getDbStats: () =>
