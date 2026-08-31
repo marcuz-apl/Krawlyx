@@ -36,6 +36,7 @@ from app.schemas import (
     JobResultsPage,
     JobSubmitAck,
     TargetOut,
+    JobRecordsOut,
 )
 from app.services import jobs as jobs_svc
 from app.services.urls import parse as parse_urls
@@ -404,6 +405,59 @@ def get_result_json(
         content=body,
         media_type="application/json; charset=utf-8",
         headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+    )
+
+
+
+@router.get("/{job_id}/records", response_model=JobRecordsOut)
+def get_job_records(
+    job_id: int,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> JobRecordsOut:
+    """Return all extracted structured records for the entire job without outer target pagination."""
+    if db.get(Job, job_id) is None:
+        raise HTTPException(status_code=404, detail="job not found")
+        
+    rows: Iterable[tuple[Any, Any]] = db.execute(
+        select(JobResult, Target.url)
+        .join(Target, Target.id == JobResult.target_id)
+        .where(Target.job_id == job_id)
+        .order_by(JobResult.id)
+    ).all()
+    
+    all_records = []
+    all_columns = set()
+    total_targets = 0
+    
+    for r, url in rows:
+        total_targets += 1
+        meta = r.metadata_json or {}
+        items = meta.get("items") or []
+        if isinstance(items, list):
+            for it in items:
+                if isinstance(it, dict):
+                    row_data = dict(it)
+                    if "source_url" not in row_data:
+                        row_data["source_url"] = url
+                    all_records.append(row_data)
+                    all_columns.update(k for k in row_data.keys() if k != "type")
+
+    preferred_order = [
+        "year", "make", "model", "trim", "drivetrain", "mileage_km", "mileage", "price",
+        "seller_type", "city", "province", "dealer_name", "date_observed",
+        "listing_url", "source_url", "name", "brand", "currency", "transmission", "fuel"
+    ]
+    sorted_cols = [c for c in preferred_order if c in all_columns] + sorted(
+        c for c in all_columns if c not in preferred_order
+    )
+    
+    return JobRecordsOut(
+        job_id=job_id,
+        total_records=len(all_records),
+        total_targets=total_targets,
+        columns=sorted_cols,
+        records=all_records,
     )
 
 

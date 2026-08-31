@@ -120,6 +120,14 @@ export interface TargetOut {
   countdown_s?: number | null;
 }
 
+export interface JobRecordsOut {
+  job_id: number;
+  total_records: number;
+  total_targets: number;
+  columns: string[];
+  records: Array<Record<string, any>>;
+}
+
 export interface JobDetailOut extends JobOut {
   targets: TargetOut[];
 }
@@ -382,6 +390,7 @@ export const api = {
     get: (id: number) => request<JobDetailOut>(`/api/jobs/${id}`),
     cancel: (id: number) =>
       request<void>(`/api/jobs/${id}/cancel`, { method: 'POST' }),
+    records: (id: number) => request<JobRecordsOut>(`/api/jobs/${id}/records`),
     results: (id: number, page = 1, pageSize = 50) =>
       request<JobResultsPage>(
         `/api/jobs/${id}/results?page=${page}&page_size=${pageSize}`,

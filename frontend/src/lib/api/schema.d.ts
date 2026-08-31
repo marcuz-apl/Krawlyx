@@ -1683,6 +1683,18 @@ export interface components {
             attempts: number;
             /** Error */
             error: string | null;
+            /** Session Num */
+            session_num?: number | null;
+            /** Stagger Gap S */
+            stagger_gap_s?: number | null;
+            /** Stagger Gap Min */
+            stagger_gap_min?: number | null;
+            /** Stagger Delay S */
+            stagger_delay_s?: number | null;
+            /** Stagger Gap Display */
+            stagger_gap_display?: string | null;
+            /** Countdown S */
+            countdown_s?: number | null;
         };
         /** UpdateDatasetIn */
         UpdateDatasetIn: {

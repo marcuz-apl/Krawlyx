@@ -98,3 +98,11 @@ class JobResultsPage(BaseModel):
     page_size: int
     total: int
     items: list[JobResultOut]
+
+
+class JobRecordsOut(BaseModel):
+    job_id: int
+    total_records: int
+    total_targets: int
+    columns: list[str]
+    records: list[dict[str, Any]]

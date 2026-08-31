@@ -24,6 +24,7 @@ from app.schemas.jobs import (
     JobResultsPage,
     JobSubmitAck,
     TargetOut,
+    JobRecordsOut,
 )
 from app.schemas.schedules import (
     NextFiresOut,
@@ -46,6 +47,7 @@ __all__ = [
     "ExportTargetTestResult",
     "ExportTargetUpdate",
     "JobCounts",
+    "JobRecordsOut",
     "JobCreate",
     "JobDetailOut",
     "JobOut",
