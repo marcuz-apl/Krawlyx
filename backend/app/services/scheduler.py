@@ -158,11 +158,30 @@ async def run_now(schedule_id: int) -> int | None:
 # ---- cron helpers ----
 
 
-def _make_trigger(cron: str, tz: str) -> CronTrigger:
+import re
+
+
+def _resolve_timezone(tz: str) -> ZoneInfo:
+    raw = (tz or "UTC").strip()
+    if raw.upper() in ("UTC", "Z", "GMT"):
+        return ZoneInfo("UTC")
+    m = re.match(r"^(?:UTC|GMT)?\s*([+-])\s*(\d{1,2})(?::?(\d{2}))?$", raw, re.IGNORECASE)
+    if m:
+        sign, hours, mins = m.group(1), int(m.group(2)), int(m.group(3) or 0)
+        if mins == 0 and hours <= 14:
+            inv_sign = "-" if sign == "+" else "+"
+            try:
+                return ZoneInfo(f"Etc/GMT{inv_sign}{hours}")
+            except Exception:
+                pass
     try:
-        zone = ZoneInfo(tz)
+        return ZoneInfo(raw)
     except ZoneInfoNotFoundError as exc:
         raise ValueError(f"unknown timezone {tz!r}") from exc
+
+
+def _make_trigger(cron: str, tz: str) -> CronTrigger:
+    zone = _resolve_timezone(tz)
     return CronTrigger.from_crontab(cron, timezone=zone)
 
 

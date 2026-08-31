@@ -244,10 +244,26 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
             pending = [t for t in targets if t.status in {"pending", "fetching"}]
 
             opts = dict(job.options or {})
-            stagger_enabled = bool(opts.get("stagger_workers", False)) if len(pending) > 1 else False
-            raw_min = float(opts.get("stagger_min_seconds", 30.0))
-            raw_max = float(opts.get("stagger_max_seconds", 240.0))
-            stagger_min_s = max(30.0, min(600.0, raw_min))
+            is_stagger = opts.get("stagger_workers")
+            if is_stagger is None:
+                is_stagger = opts.get("stagger_enabled", False)
+            stagger_enabled = bool(is_stagger) if len(pending) > 1 else False
+
+            if "stagger_min_seconds" in opts:
+                raw_min = float(opts["stagger_min_seconds"])
+            elif "stagger_min_minutes" in opts:
+                raw_min = float(opts["stagger_min_minutes"]) * 60.0
+            else:
+                raw_min = 30.0
+
+            if "stagger_max_seconds" in opts:
+                raw_max = float(opts["stagger_max_seconds"])
+            elif "stagger_max_minutes" in opts:
+                raw_max = float(opts["stagger_max_minutes"]) * 60.0
+            else:
+                raw_max = 240.0
+
+            stagger_min_s = max(10.0, min(600.0, raw_min))
             stagger_max_s = max(stagger_min_s, min(600.0, raw_max))
 
             tasks = []
