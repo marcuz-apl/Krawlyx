@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -264,18 +264,14 @@ def delete_schedule(
     row = db.get(Schedule, schedule_id)
     if row is None:
         raise HTTPException(status_code=404, detail="schedule not found")
-    # Refuse to drop a schedule referenced by a non-terminal job.
-    referenced = db.scalar(
-        select(Job.id)
+
+    # Unlink any historical or active jobs referencing this schedule so foreign key constraints are not violated
+    db.execute(
+        update(Job)
         .where(Job.schedule_id == schedule_id)
-        .where(Job.status.in_(("queued", "running")))
-        .limit(1)
+        .values(schedule_id=None)
     )
-    if referenced is not None:
-        raise HTTPException(
-            status_code=400,
-            detail="schedule is referenced by an in-flight job; disable it instead",
-        )
+
     scheduler_svc.remove_job(schedule_id)
     db.delete(row)
     db.commit()
