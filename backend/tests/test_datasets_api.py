@@ -2,17 +2,13 @@
 
 from __future__ import annotations
 
-import json
 from fastapi.testclient import TestClient
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 from app.engines.extractors import extract_structured_data
+from app.main import create_app
 from app.models import EngineInstance, Job, JobResult, Target, User
 from tests._helpers import auth_as
-
-
-from app.main import create_app
 
 
 def test_custom_schema_extractor():
@@ -113,7 +109,9 @@ def test_multi_job_merge_and_save_dataset():
         headers = {"X-CSRF-Token": csrf}
 
         with SessionLocal() as db_session:
-            user = db_session.scalars(select(User).where(User.username == "admin_user_merge")).first()
+            user = db_session.scalars(
+                select(User).where(User.username == "admin_user_merge")
+            ).first()
             assert user is not None
 
             # Create dummy engine and jobs
@@ -134,8 +132,20 @@ def test_multi_job_merge_and_save_dataset():
                 content_text="page 1",
                 metadata_json={
                     "items": [
-                        {"make": "Ford", "model": "F-150", "year": "2022", "price": 45000, "listing_url": "https://example.com/car1"},
-                        {"make": "Ford", "model": "Explorer", "year": "2021", "price": 38000, "listing_url": "https://example.com/car2"},
+                        {
+                            "make": "Ford",
+                            "model": "F-150",
+                            "year": "2022",
+                            "price": 45000,
+                            "listing_url": "https://example.com/car1",
+                        },
+                        {
+                            "make": "Ford",
+                            "model": "Explorer",
+                            "year": "2021",
+                            "price": 38000,
+                            "listing_url": "https://example.com/car2",
+                        },
                     ]
                 },
             )
@@ -154,7 +164,13 @@ def test_multi_job_merge_and_save_dataset():
                 content_text="page 2",
                 metadata_json={
                     "items": [
-                        {"make": "Toyota", "model": "RAV4", "year": "2023", "price": 35000, "listing_url": "https://example.com/car3"},
+                        {
+                            "make": "Toyota",
+                            "model": "RAV4",
+                            "year": "2023",
+                            "price": 35000,
+                            "listing_url": "https://example.com/car3",
+                        },
                     ]
                 },
             )
@@ -172,7 +188,9 @@ def test_multi_job_merge_and_save_dataset():
         assert "model" in data["columns"]
 
         # Test merge CSV export
-        res = client.post("/api/jobs/merge/export.csv", json={"job_ids": [j1_id, j2_id]}, headers=headers)
+        res = client.post(
+            "/api/jobs/merge/export.csv", json={"job_ids": [j1_id, j2_id]}, headers=headers
+        )
         assert res.status_code == 200
         assert "text/csv" in res.headers["content-type"]
         assert "F-150" in res.text
@@ -212,4 +230,3 @@ def test_multi_job_merge_and_save_dataset():
         makes = {c["key"]: c["row_count"] for c in created}
         assert makes["Ford"] == 2
         assert makes["Toyota"] == 1
-

@@ -132,6 +132,7 @@ class Crawl4AIEngine:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 try:
+
                     async def _inner():
                         async with AsyncWebCrawler() as crawler:
                             return await crawler.arun(
@@ -155,17 +156,24 @@ class Crawl4AIEngine:
                 elif isinstance(raw_md, str):
                     md = raw_md
         except Exception as exc:
-            logger.warning("Crawl4AI browser fetch timed out or failed (%s) for %s; using fast HTTP fallback", exc, target.url)
+            logger.warning(
+                "Crawl4AI browser fetch timed out or failed (%s) for %s; using fast HTTP fallback",
+                exc,
+                target.url,
+            )
 
         if not html:
             try:
                 import httpx
+
                 http_headers = {
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
                     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
                     "Accept-Language": "en-CA,en-US;q=0.9,en;q=0.8",
                 }
-                async with httpx.AsyncClient(headers=http_headers, follow_redirects=True, timeout=15.0) as client:
+                async with httpx.AsyncClient(
+                    headers=http_headers, follow_redirects=True, timeout=15.0
+                ) as client:
                     resp = await client.get(target.url)
                     html = resp.text
                     status_code = resp.status_code

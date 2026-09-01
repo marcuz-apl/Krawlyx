@@ -4,15 +4,15 @@ from __future__ import annotations
 
 import csv
 import io
-import json
 from typing import Annotated, Any
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
-from app.models import Dataset, DatasetRow, Job, JobResult, Target, User
+from app.models import Dataset, DatasetRow, JobResult, Target, User
 
 router = APIRouter(prefix="/api/datasets", tags=["datasets"])
 
@@ -51,9 +51,9 @@ def list_datasets(
     datasets = db.scalars(select(Dataset).order_by(Dataset.created_at.desc())).all()
     results = []
     for d in datasets:
-        count = db.scalar(
-            select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == d.id)
-        ) or 0
+        count = (
+            db.scalar(select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == d.id)) or 0
+        )
         results.append(
             DatasetOut(
                 id=d.id,
@@ -126,9 +126,22 @@ def create_dataset(
 
     # Sort columns cleanly
     preferred_order = [
-        "year", "make", "model", "trim", "drivetrain", "mileage_km", "mileage", "price",
-        "seller_type", "city", "province", "dealer_name", "date_observed",
-        "listing_url", "title", "url"
+        "year",
+        "make",
+        "model",
+        "trim",
+        "drivetrain",
+        "mileage_km",
+        "mileage",
+        "price",
+        "seller_type",
+        "city",
+        "province",
+        "dealer_name",
+        "date_observed",
+        "listing_url",
+        "title",
+        "url",
     ]
     dataset.columns = [c for c in preferred_order if c in all_columns] + sorted(
         c for c in all_columns if c not in preferred_order
@@ -137,9 +150,9 @@ def create_dataset(
     db.commit()
     db.refresh(dataset)
 
-    count = db.scalar(
-        select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == dataset.id)
-    ) or 0
+    count = (
+        db.scalar(select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == dataset.id)) or 0
+    )
 
     return DatasetOut(
         id=dataset.id,
@@ -177,9 +190,9 @@ def patch_dataset(
     db.commit()
     db.refresh(dataset)
 
-    count = db.scalar(
-        select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == dataset.id)
-    ) or 0
+    count = (
+        db.scalar(select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == dataset.id)) or 0
+    )
 
     return DatasetOut(
         id=dataset.id,
@@ -205,9 +218,7 @@ def merge_datasets(
     db: Annotated[Session, Depends(get_db)],
 ) -> DatasetOut:
     """Merge multiple existing saved datasets into a new combined dataset."""
-    datasets = db.scalars(
-        select(Dataset).where(Dataset.id.in_(payload.dataset_ids))
-    ).all()
+    datasets = db.scalars(select(Dataset).where(Dataset.id.in_(payload.dataset_ids))).all()
     if not datasets:
         raise HTTPException(status_code=404, detail="no matching datasets found")
 
@@ -228,9 +239,7 @@ def merge_datasets(
     seen_urls = set()
     for d in datasets:
         rows = db.scalars(
-            select(DatasetRow)
-            .where(DatasetRow.dataset_id == d.id)
-            .order_by(DatasetRow.id)
+            select(DatasetRow).where(DatasetRow.dataset_id == d.id).order_by(DatasetRow.id)
         ).all()
         for r in rows:
             url_key = r.source_url or f"{d.id}_{r.id}"
@@ -246,9 +255,22 @@ def merge_datasets(
             db.add(new_row)
 
     preferred_order = [
-        "year", "make", "model", "trim", "drivetrain", "mileage_km", "mileage", "price",
-        "seller_type", "city", "province", "dealer_name", "date_observed",
-        "listing_url", "title", "url"
+        "year",
+        "make",
+        "model",
+        "trim",
+        "drivetrain",
+        "mileage_km",
+        "mileage",
+        "price",
+        "seller_type",
+        "city",
+        "province",
+        "dealer_name",
+        "date_observed",
+        "listing_url",
+        "title",
+        "url",
     ]
     new_dataset.columns = [c for c in preferred_order if c in combined_columns] + sorted(
         c for c in combined_columns if c not in preferred_order
@@ -257,9 +279,10 @@ def merge_datasets(
     db.commit()
     db.refresh(new_dataset)
 
-    count = db.scalar(
-        select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == new_dataset.id)
-    ) or 0
+    count = (
+        db.scalar(select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == new_dataset.id))
+        or 0
+    )
 
     return DatasetOut(
         id=new_dataset.id,
@@ -291,7 +314,9 @@ class SplitDatasetOut(BaseModel):
     total_rows_split: int
 
 
-@router.post("/{dataset_id}/split", response_model=SplitDatasetOut, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{dataset_id}/split", response_model=SplitDatasetOut, status_code=status.HTTP_201_CREATED
+)
 def split_dataset(
     dataset_id: int,
     payload: SplitDatasetIn,
@@ -325,14 +350,43 @@ def split_dataset(
         if (val is None or str(val).strip() == "") and attr == "make":
             title = str(data.get("title") or "")
             import re
+
             common_makes = [
-                "dodge", "ford", "chevrolet", "chevy", "toyota", "honda", "nissan", "ram",
-                "jeep", "gmc", "bmw", "mercedes-benz", "audi", "hyundai", "kia", "volkswagen",
-                "subaru", "mazda", "lexus", "cadillac", "buick", "chrysler", "acura", "infiniti",
-                "lincoln", "volvo", "porsche", "tesla", "land rover", "jaguar", "genesis", "mitsubishi"
+                "dodge",
+                "ford",
+                "chevrolet",
+                "chevy",
+                "toyota",
+                "honda",
+                "nissan",
+                "ram",
+                "jeep",
+                "gmc",
+                "bmw",
+                "mercedes-benz",
+                "audi",
+                "hyundai",
+                "kia",
+                "volkswagen",
+                "subaru",
+                "mazda",
+                "lexus",
+                "cadillac",
+                "buick",
+                "chrysler",
+                "acura",
+                "infiniti",
+                "lincoln",
+                "volvo",
+                "porsche",
+                "tesla",
+                "land rover",
+                "jaguar",
+                "genesis",
+                "mitsubishi",
             ]
             for cm in common_makes:
-                if re.search(r'\b' + re.escape(cm) + r'\b', title, re.IGNORECASE):
+                if re.search(r"\b" + re.escape(cm) + r"\b", title, re.IGNORECASE):
                     val = cm.capitalize()
                     break
 
@@ -396,9 +450,9 @@ def get_dataset(
     if not dataset:
         raise HTTPException(status_code=404, detail="dataset not found")
 
-    count = db.scalar(
-        select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == dataset.id)
-    ) or 0
+    count = (
+        db.scalar(select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == dataset.id)) or 0
+    )
 
     rows = db.scalars(
         select(DatasetRow)
@@ -448,9 +502,7 @@ def export_dataset_csv(
         raise HTTPException(status_code=404, detail="dataset not found")
 
     rows = db.scalars(
-        select(DatasetRow)
-        .where(DatasetRow.dataset_id == dataset.id)
-        .order_by(DatasetRow.id.asc())
+        select(DatasetRow).where(DatasetRow.dataset_id == dataset.id).order_by(DatasetRow.id.asc())
     ).all()
 
     output = io.StringIO()
@@ -488,9 +540,7 @@ def deduplicate_dataset(
         raise HTTPException(status_code=404, detail="dataset not found")
 
     rows = db.scalars(
-        select(DatasetRow)
-        .where(DatasetRow.dataset_id == dataset.id)
-        .order_by(DatasetRow.id)
+        select(DatasetRow).where(DatasetRow.dataset_id == dataset.id).order_by(DatasetRow.id)
     ).all()
 
     seen = set()
@@ -528,9 +578,9 @@ def deduplicate_dataset(
         db.execute(delete(DatasetRow).where(DatasetRow.id.in_(to_delete)))
         db.commit()
 
-    count = db.scalar(
-        select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == dataset.id)
-    ) or 0
+    count = (
+        db.scalar(select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == dataset.id)) or 0
+    )
 
     return {
         "dataset_id": dataset.id,
@@ -558,9 +608,7 @@ def execute_dataset_sql(
         raise HTTPException(status_code=404, detail="dataset not found")
 
     rows = db.scalars(
-        select(DatasetRow)
-        .where(DatasetRow.dataset_id == dataset.id)
-        .order_by(DatasetRow.id)
+        select(DatasetRow).where(DatasetRow.dataset_id == dataset.id).order_by(DatasetRow.id)
     ).all()
 
     # Discover all column names across all rows
@@ -584,7 +632,7 @@ def execute_dataset_sql(
 
     # Define dynamic table
     col_defs = ", ".join([f'"{c}" TEXT' for c in cols])
-    mem_conn.execute(f'CREATE TABLE dataset (_row_id INTEGER PRIMARY KEY, {col_defs})')
+    mem_conn.execute(f"CREATE TABLE dataset (_row_id INTEGER PRIMARY KEY, {col_defs})")
 
     row_id_map = {}
     for idx, r in enumerate(rows, start=1):
@@ -602,7 +650,7 @@ def execute_dataset_sql(
                     val = row_dict.get("mileage_km")
             vals.append(val)
         mem_conn.execute(
-            f'INSERT INTO dataset (_row_id, {col_names}) VALUES (?, {placeholders})',
+            f"INSERT INTO dataset (_row_id, {col_names}) VALUES (?, {placeholders})",
             [idx] + vals,
         )
 
@@ -666,9 +714,12 @@ def execute_dataset_sql(
             dataset.columns = new_cols
             db.commit()
 
-            count = db.scalar(
-                select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == dataset.id)
-            ) or 0
+            count = (
+                db.scalar(
+                    select(func.count(DatasetRow.id)).where(DatasetRow.dataset_id == dataset.id)
+                )
+                or 0
+            )
 
             return {
                 "type": "mutation",
@@ -713,7 +764,7 @@ def execute_raw_sql(
     mem_conn.row_factory = sqlite3.Row
 
     col_defs = ", ".join([f'"{c}" TEXT' for c in cols])
-    mem_conn.execute(f'CREATE TABLE dataset (_row_id INTEGER PRIMARY KEY, {col_defs})')
+    mem_conn.execute(f"CREATE TABLE dataset (_row_id INTEGER PRIMARY KEY, {col_defs})")
 
     for idx, r in enumerate(rows, start=1):
         col_names = ", ".join([f'"{c}"' for c in cols])
@@ -729,7 +780,7 @@ def execute_raw_sql(
                     val = row_dict.get("mileage_km")
             vals.append(val)
         mem_conn.execute(
-            f'INSERT INTO dataset (_row_id, {col_names}) VALUES (?, {placeholders})',
+            f"INSERT INTO dataset (_row_id, {col_names}) VALUES (?, {placeholders})",
             [idx] + vals,
         )
 
@@ -785,4 +836,3 @@ def execute_raw_sql(
         raise HTTPException(status_code=400, detail=f"SQL Error: {exc}")
     finally:
         mem_conn.close()
-

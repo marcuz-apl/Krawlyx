@@ -266,11 +266,7 @@ def delete_schedule(
         raise HTTPException(status_code=404, detail="schedule not found")
 
     # Unlink any historical or active jobs referencing this schedule so foreign key constraints are not violated
-    db.execute(
-        update(Job)
-        .where(Job.schedule_id == schedule_id)
-        .values(schedule_id=None)
-    )
+    db.execute(update(Job).where(Job.schedule_id == schedule_id).values(schedule_id=None))
 
     scheduler_svc.remove_job(schedule_id)
     db.delete(row)

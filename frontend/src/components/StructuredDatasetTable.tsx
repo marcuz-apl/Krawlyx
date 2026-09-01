@@ -16,23 +16,13 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
   const [pageSize, setPageSize] = useState<number>(50);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortCriteria, setSortCriteria] = useState<SortCriterion[]>([]);
-
-  if (!items || items.length === 0) {
-    return (
-      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center text-slate-500 dark:text-slate-400">
-        No structured records found in this dataset.
-      </div>
-    );
-  }
-
-  // Detect schemas
-  const firstItem = items[0] || {};
+  const firstItem = (items && items[0]) || {};
   const isVehicle = 'make' in firstItem || 'model' in firstItem || 'mileage' in firstItem || 'mileage_km' in firstItem;
   const isCustom = !isVehicle && !('name' in firstItem && 'price' in firstItem);
 
   // Dynamic columns for custom schema
   const customColumns = useMemo(() => {
-    if (!isCustom) return [];
+    if (!isCustom || !items || items.length === 0) return [];
     const keys = new Set<string>();
     for (const it of items.slice(0, 100)) {
       for (const k of Object.keys(it)) {
@@ -46,6 +36,7 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
 
   // Filter items
   const filteredItems = useMemo(() => {
+    if (!items || items.length === 0) return [];
     if (!searchTerm.trim()) return items;
     const term = searchTerm.toLowerCase().trim();
     return items.filter((it) =>
@@ -154,6 +145,14 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
       </span>
     );
   };
+
+  if (!items || items.length === 0) {
+    return (
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center text-slate-500 dark:text-slate-400">
+        No structured records found in this dataset.
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">

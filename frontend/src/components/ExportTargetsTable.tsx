@@ -30,12 +30,12 @@ export function ExportTargetsTable() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-600 dark:text-slate-400">
           {targets.length} target{targets.length === 1 ? '' : 's'}.
         </p>
         <button
           onClick={() => setCreating((v) => !v)}
-          className="rounded bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700"
+          className="rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-indigo-500 shadow-sm transition-colors"
         >
           {creating ? 'Cancel' : 'New target'}
         </button>
@@ -73,7 +73,7 @@ export function ExportTargetsTable() {
             {targets.map((t) => (
               <tr key={t.id} className="border-t border-slate-100 dark:border-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                 <td className="px-3 py-2 font-medium text-slate-900 dark:text-white">{t.name}</td>
-                <td className="px-3 py-2 text-slate-600">
+                <td className="px-3 py-2 text-slate-600 dark:text-slate-300">
                   {t.mode} {t.format ? `· ${t.format}` : ''}
                 </td>
                 <td className="px-3 py-2 font-mono text-xs text-slate-500 dark:text-slate-400">
@@ -82,36 +82,38 @@ export function ExportTargetsTable() {
                 <td className="px-3 py-2 text-slate-700 dark:text-slate-300 font-mono text-xs">{t.split_size_mb} MB</td>
                 <td className="px-3 py-2 text-xs">
                   {t.enabled ? (
-                    <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-800">
+                    <span className="rounded-md bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 text-xs text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/60">
                       enabled
                     </span>
                   ) : (
-                    <span className="rounded bg-slate-200 px-2 py-0.5 text-slate-500 dark:text-slate-400">
+                    <span className="rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       disabled
                     </span>
                   )}
                   {t.runner_selectable && (
-                    <span className="ml-1 rounded bg-amber-100 px-2 py-0.5 text-amber-800">
+                    <span className="ml-1 rounded-md bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 text-xs text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60">
                       runner-selectable
                     </span>
                   )}
                 </td>
                 <td className="px-3 py-2">
-                  <button
-                    onClick={() => test.mutate(t.id)}
-                    disabled={test.isPending}
-                    className="mr-2 rounded border border-slate-300 dark:border-slate-700 px-2 py-0.5 text-xs hover:bg-slate-100 disabled:opacity-50"
-                  >
-                    Test
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm(`Delete target ${t.name}?`)) remove.mutate(t.id);
-                    }}
-                    className="rounded border border-red-300 px-2 py-0.5 text-xs text-red-700 hover:bg-red-50"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => test.mutate(t.id)}
+                      disabled={test.isPending}
+                      className="rounded border border-slate-300 dark:border-slate-700 px-2 py-0.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors"
+                    >
+                      Test
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Delete target ${t.name}?`)) remove.mutate(t.id);
+                      }}
+                      className="rounded border border-red-300 dark:border-red-900/60 px-2 py-0.5 text-xs text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -122,7 +124,7 @@ export function ExportTargetsTable() {
       {test.data && (
         <p
           className={`text-xs ${
-            test.data.ok ? 'text-emerald-700' : 'text-red-700'
+            test.data.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
           }`}
         >
           Test result: {test.data.detail}
@@ -163,24 +165,25 @@ function CreateForm({ onDone }: { onDone: () => void }) {
         setErr(null);
         create.mutate();
       }}
-      className="space-y-3 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 p-4"
+      className="space-y-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-4 shadow-sm"
     >
-      <div className="grid grid-cols-2 gap-3">
-        <label className="text-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label className="text-xs font-semibold">
           <span className="text-slate-700 dark:text-slate-300">Name</span>
           <input
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1"
+            placeholder="e.g. Network Share Export"
+            className="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2.5 py-1.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           />
         </label>
-        <label className="text-sm">
+        <label className="text-xs font-semibold">
           <span className="text-slate-700 dark:text-slate-300">Mode</span>
           <select
             value={mode}
             onChange={(e) => setMode(e.target.value as ExportMode)}
-            className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1"
+            className="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2.5 py-1.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           >
             <option value="folder">folder (CSV/XLSX)</option>
             <option value="database">database only</option>
@@ -188,28 +191,28 @@ function CreateForm({ onDone }: { onDone: () => void }) {
         </label>
         {mode === 'folder' && (
           <>
-            <label className="text-sm col-span-2">
+            <label className="text-xs font-semibold sm:col-span-2">
               <span className="text-slate-700 dark:text-slate-300">Path</span>
               <input
                 required
                 value={path}
                 onChange={(e) => setPath(e.target.value)}
                 placeholder="C:\share\crawls  (or \\\\server\\share\\crawls)"
-                className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1 font-mono text-xs"
+                className="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2.5 py-1.5 font-mono text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
             </label>
-            <label className="text-sm">
+            <label className="text-xs font-semibold">
               <span className="text-slate-700 dark:text-slate-300">Format</span>
               <select
                 value={format}
                 onChange={(e) => setFormat(e.target.value as ExportFormat)}
-                className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1"
+                className="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2.5 py-1.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               >
                 <option value="csv">CSV</option>
                 <option value="xlsx">XLSX</option>
               </select>
             </label>
-            <label className="text-sm">
+            <label className="text-xs font-semibold">
               <span className="text-slate-700 dark:text-slate-300">Split MB</span>
               <input
                 type="number"
@@ -217,40 +220,49 @@ function CreateForm({ onDone }: { onDone: () => void }) {
                 max={2048}
                 value={splitSizeMb}
                 onChange={(e) => setSplitSizeMb(Number(e.target.value))}
-                className="mt-1 block w-full rounded border border-slate-300 dark:border-slate-700 px-2 py-1"
+                className="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2.5 py-1.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
             </label>
           </>
         )}
       </div>
-      <div className="flex items-center gap-4 text-sm">
+      <div className="flex items-center gap-4 text-xs font-semibold pt-1">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={runnerSelectable}
             onChange={(e) => setRunnerSelectable(e.target.checked)}
-            className="rounded border-slate-300 dark:border-slate-700"
+            className="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-slate-950"
           />
-          <span>Runner-selectable</span>
+          <span className="text-slate-700 dark:text-slate-300">Runner-selectable</span>
         </label>
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={enabled}
             onChange={(e) => setEnabled(e.target.checked)}
-            className="rounded border-slate-300 dark:border-slate-700"
+            className="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-slate-950"
           />
-          <span>Enabled</span>
+          <span className="text-slate-700 dark:text-slate-300">Enabled</span>
         </label>
       </div>
-      {err && <p className="text-xs text-red-700">{err}</p>}
-      <button
-        type="submit"
-        disabled={create.isPending}
-        className="rounded bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-      >
-        {create.isPending ? 'Creating…' : 'Create'}
-      </button>
+      {err && <p className="text-xs text-red-600 dark:text-red-400">{err}</p>}
+      <div className="flex justify-end gap-2 pt-1">
+        <button
+          type="button"
+          onClick={onDone}
+          className="rounded-lg border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={create.isPending}
+          className="rounded-lg bg-indigo-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-indigo-500 shadow-md shadow-indigo-600/20 disabled:opacity-50"
+        >
+          {create.isPending ? 'Creating…' : 'Create Target'}
+        </button>
+      </div>
     </form>
   );
 }

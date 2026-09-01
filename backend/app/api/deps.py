@@ -27,7 +27,9 @@ def require_admin(user: User = Depends(get_current_user)) -> User:
 
 def require_superadmin(user: User = Depends(get_current_user)) -> User:
     # Bootstrap user "admin" or role "superadmin" is superadmin
-    if user.role != "superadmin" and not (user.username == "admin" and user.role in ("admin", "superadmin")):
+    if user.role != "superadmin" and not (
+        user.username == "admin" and user.role in ("admin", "superadmin")
+    ):
         raise HTTPException(status_code=403, detail="SuperAdmin role required")
     return user
 

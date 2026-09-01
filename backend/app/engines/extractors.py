@@ -13,7 +13,9 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger("mykrawl.engines.extractors")
 
 
-def extract_structured_data(html: str, source_url: str, options: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+def extract_structured_data(
+    html: str, source_url: str, options: dict[str, Any] | None = None
+) -> list[dict[str, Any]]:
     """Extract structured records from HTML (Custom Schema, AutoTrader, JSON-LD, Microdata)."""
     if not html:
         return []
@@ -70,6 +72,7 @@ def _clean_numeric(val: Any) -> int | None:
     if isinstance(val, (int, float)):
         return int(val)
     import re
+
     clean = re.sub(r"[^\d]", "", str(val))
     if clean:
         try:
@@ -79,7 +82,9 @@ def _clean_numeric(val: Any) -> int | None:
     return None
 
 
-def _extract_custom_schema(soup: BeautifulSoup, source_url: str, schema: dict[str, Any]) -> list[dict[str, Any]]:
+def _extract_custom_schema(
+    soup: BeautifulSoup, source_url: str, schema: dict[str, Any]
+) -> list[dict[str, Any]]:
     """Extract rows using user-defined custom fields (up to 20 fields)."""
     raw_fields = schema.get("fields") or []
     # Cap at 20 fields max
@@ -96,7 +101,11 @@ def _extract_custom_schema(soup: BeautifulSoup, source_url: str, schema: dict[st
 
     if containers:
         for card in containers:
-            row: dict[str, Any] = {"type": "custom_schema", "date_observed": today, "source_url": source_url}
+            row: dict[str, Any] = {
+                "type": "custom_schema",
+                "date_observed": today,
+                "source_url": source_url,
+            }
             for f in fields:
                 fname = f["name"].strip()
                 selector = (f.get("selector") or "").strip()
@@ -118,7 +127,12 @@ def _extract_custom_schema(soup: BeautifulSoup, source_url: str, schema: dict[st
                             val = " ".join(el.get_text().split())
                 else:
                     # Heuristic search by field name within the card
-                    el = card.find(lambda e: fname.lower() in (e.get("class", []) or "") or fname.lower() in (e.get("id", "") or ""))
+                    el = card.find(
+                        lambda e: (
+                            fname.lower() in (e.get("class", []) or "")
+                            or fname.lower() in (e.get("id", "") or "")
+                        )
+                    )
                     if el:
                         val = " ".join(el.get_text().split())
 
@@ -151,7 +165,6 @@ def _extract_custom_schema(soup: BeautifulSoup, source_url: str, schema: dict[st
         rows.append(row)
 
     return rows
-
 
 
 def _extract_nextjs_marketplace(soup: BeautifulSoup, source_url: str) -> list[dict[str, Any]]:
@@ -187,9 +200,21 @@ def _extract_nextjs_marketplace(soup: BeautifulSoup, source_url: str) -> list[di
         # Robust drivetrain detection
         drivetrain = veh.get("drivetrain") or "Unknown"
         if drivetrain == "Unknown" or not drivetrain:
-            if any(k in combined_text for k in ["4WD", "4X4", "FOUR WHEEL DRIVE", "FOUR-WHEEL DRIVE"]):
+            if any(
+                k in combined_text for k in ["4WD", "4X4", "FOUR WHEEL DRIVE", "FOUR-WHEEL DRIVE"]
+            ):
                 drivetrain = "4WD"
-            elif any(k in combined_text for k in ["AWD", "ALL WHEEL DRIVE", "ALL-WHEEL DRIVE", "XDRIVE", "4MATIC", "QUATTRO"]):
+            elif any(
+                k in combined_text
+                for k in [
+                    "AWD",
+                    "ALL WHEEL DRIVE",
+                    "ALL-WHEEL DRIVE",
+                    "XDRIVE",
+                    "4MATIC",
+                    "QUATTRO",
+                ]
+            ):
                 drivetrain = "AWD"
             elif any(k in combined_text for k in ["RWD", "REAR WHEEL DRIVE", "REAR-WHEEL DRIVE"]):
                 drivetrain = "RWD"
@@ -200,6 +225,7 @@ def _extract_nextjs_marketplace(soup: BeautifulSoup, source_url: str) -> list[di
         year = veh.get("modelYear")
         if not year:
             import re
+
             m = re.search(r"\b(19\d\d|20[0-3]\d)\b", f"{title} {source_url}")
             if m:
                 year = int(m.group(1))
@@ -227,7 +253,9 @@ def _extract_nextjs_marketplace(soup: BeautifulSoup, source_url: str) -> list[di
                 listing_url = urljoin(source_url, rel_url)
 
         # Clean seller type
-        seller_type = "Dealer" if seller.get("dealer") or seller.get("type") == "Dealer" else "Private"
+        seller_type = (
+            "Dealer" if seller.get("dealer") or seller.get("type") == "Dealer" else "Private"
+        )
 
         rows.append(
             {
@@ -239,7 +267,15 @@ def _extract_nextjs_marketplace(soup: BeautifulSoup, source_url: str) -> list[di
                 "drivetrain": drivetrain,
                 "mileage": mileage_km,
                 "mileage_km": mileage_km,
-                "price": (pr.get("priceRaw") or pr.get("priceFormatted") or pr.get("price") or pr.get("amount") or pr.get("value")) if isinstance(pr, dict) else (pr or l.get("price")),
+                "price": (
+                    pr.get("priceRaw")
+                    or pr.get("priceFormatted")
+                    or pr.get("price")
+                    or pr.get("amount")
+                    or pr.get("value")
+                )
+                if isinstance(pr, dict)
+                else (pr or l.get("price")),
                 "seller_type": seller_type,
                 "city": loc.get("city"),
                 "province": loc.get("provinceCode"),
@@ -253,7 +289,6 @@ def _extract_nextjs_marketplace(soup: BeautifulSoup, source_url: str) -> list[di
         )
 
     return rows
-
 
 
 def _extract_json_ld(soup: BeautifulSoup, source_url: str) -> list[dict[str, Any]]:
@@ -279,10 +314,16 @@ def _extract_json_ld(soup: BeautifulSoup, source_url: str) -> list[dict[str, Any
                     {
                         "type": str(item_type).lower(),
                         "name": item.get("name"),
-                        "brand": item.get("brand", {}).get("name") if isinstance(item.get("brand"), dict) else item.get("brand"),
+                        "brand": item.get("brand", {}).get("name")
+                        if isinstance(item.get("brand"), dict)
+                        else item.get("brand"),
                         "model": item.get("model"),
-                        "price": item.get("offers", {}).get("price") if isinstance(item.get("offers"), dict) else None,
-                        "currency": item.get("offers", {}).get("priceCurrency") if isinstance(item.get("offers"), dict) else None,
+                        "price": item.get("offers", {}).get("price")
+                        if isinstance(item.get("offers"), dict)
+                        else None,
+                        "currency": item.get("offers", {}).get("priceCurrency")
+                        if isinstance(item.get("offers"), dict)
+                        else None,
                         "date_observed": today,
                         "url": item.get("url") or source_url,
                     }

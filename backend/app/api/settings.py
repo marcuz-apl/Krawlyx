@@ -120,9 +120,8 @@ def run_db_checkpoint(
     db_path = str(s.db_path)
     wal_path = f"{db_path}-wal"
 
-    before_total = (
-        (os.path.getsize(db_path) if os.path.exists(db_path) else 0)
-        + (os.path.getsize(wal_path) if os.path.exists(wal_path) else 0)
+    before_total = (os.path.getsize(db_path) if os.path.exists(db_path) else 0) + (
+        os.path.getsize(wal_path) if os.path.exists(wal_path) else 0
     )
 
     try:
@@ -134,9 +133,8 @@ def run_db_checkpoint(
             detail=f"Checkpoint failed: {e}",
         )
 
-    after_total = (
-        (os.path.getsize(db_path) if os.path.exists(db_path) else 0)
-        + (os.path.getsize(wal_path) if os.path.exists(wal_path) else 0)
+    after_total = (os.path.getsize(db_path) if os.path.exists(db_path) else 0) + (
+        os.path.getsize(wal_path) if os.path.exists(wal_path) else 0
     )
     freed = max(0, before_total - after_total)
 
@@ -162,9 +160,8 @@ def run_db_vacuum(
     db_path = str(s.db_path)
     wal_path = f"{db_path}-wal"
 
-    before_total = (
-        (os.path.getsize(db_path) if os.path.exists(db_path) else 0)
-        + (os.path.getsize(wal_path) if os.path.exists(wal_path) else 0)
+    before_total = (os.path.getsize(db_path) if os.path.exists(db_path) else 0) + (
+        os.path.getsize(wal_path) if os.path.exists(wal_path) else 0
     )
 
     try:
@@ -176,9 +173,8 @@ def run_db_vacuum(
             detail=f"VACUUM failed: {e}",
         )
 
-    after_total = (
-        (os.path.getsize(db_path) if os.path.exists(db_path) else 0)
-        + (os.path.getsize(wal_path) if os.path.exists(wal_path) else 0)
+    after_total = (os.path.getsize(db_path) if os.path.exists(db_path) else 0) + (
+        os.path.getsize(wal_path) if os.path.exists(wal_path) else 0
     )
     freed = max(0, before_total - after_total)
 

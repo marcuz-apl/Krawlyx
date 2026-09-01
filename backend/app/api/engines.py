@@ -146,3 +146,17 @@ def test_engine(
         raise HTTPException(status_code=404, detail="engine not found")
     ok, detail, latency = engines_svc.test_engine(row)
     return EngineTestResult(ok=ok, detail=detail, latency_ms=latency)
+
+
+@router.post(
+    "/api/engines/bootstrap",
+    response_model=list[EngineOut],
+    dependencies=[Depends(verify_csrf)],
+)
+def restore_default_engines(
+    _admin: Annotated[User, Depends(require_admin)],
+    db: Annotated[Session, Depends(get_db)],
+) -> list[EngineOut]:
+    engines_svc.bootstrap_default_engines(db)
+    rows = engines_svc.list_engines(db)
+    return [_to_out(r) for r in rows]

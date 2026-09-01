@@ -7,15 +7,12 @@ and SQLite database maintenance tools exclusively for SuperAdmin ("admin").
 from __future__ import annotations
 
 import logging
-import os
-import re
 import sqlite3
 import time
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.api.deps import require_superadmin, verify_csrf
@@ -59,13 +56,13 @@ def get_tables(
                ORDER BY name"""
         )
         tables_meta = cursor.fetchall()
-        
+
         result = []
         for row in tables_meta:
             tname = row["name"]
             ttype = row["type"]
             tsql = row["sql"] or ""
-            
+
             cursor.execute(f'PRAGMA table_info("{tname}")')
             col_rows = cursor.fetchall()
             columns = [
@@ -79,13 +76,13 @@ def get_tables(
                 }
                 for c in col_rows
             ]
-            
+
             try:
                 cursor.execute(f'SELECT COUNT(*) FROM "{tname}"')
                 row_count = cursor.fetchone()[0]
             except Exception:
                 row_count = 0
-                
+
             result.append(
                 {
                     "name": tname,
@@ -117,8 +114,11 @@ def get_table_rows(
 
     with _get_sqlite_connection() as conn:
         cursor = conn.cursor()
-        
-        cursor.execute("SELECT name FROM sqlite_master WHERE type IN ('table', 'view') AND name = ?", (table_name,))
+
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type IN ('table', 'view') AND name = ?",
+            (table_name,),
+        )
         if not cursor.fetchone():
             raise HTTPException(status_code=404, detail=f"Table {table_name!r} not found")
 
@@ -148,7 +148,7 @@ def get_table_rows(
         if sort_col and sort_col in col_names:
             order_sql = f'ORDER BY "{sort_col}" {sort_dir.upper()}'
         elif "id" in col_names:
-            order_sql = f'ORDER BY "id" DESC'
+            order_sql = 'ORDER BY "id" DESC'
 
         query_sql = f'SELECT * FROM "{table_name}" {where_sql} {order_sql} LIMIT ? OFFSET ?'
         cursor.execute(query_sql, params + [page_size, offset])
@@ -245,7 +245,7 @@ def get_database_stats(
     """Return database storage size, WAL stats, page allocation, and integrity check."""
     cfg = get_settings()
     db_path = cfg.db_path
-    
+
     file_size_bytes = db_path.stat().st_size if db_path.exists() else 0
     wal_path = db_path.with_name(f"{db_path.name}-wal")
     wal_size_bytes = wal_path.stat().st_size if wal_path.exists() else 0
@@ -298,7 +298,9 @@ def run_maintenance(
             msg = "WAL checkpoint (TRUNCATE) completed successfully. WAL log committed to main database file."
         elif action == "optimize":
             cursor.execute("PRAGMA optimize")
-            msg = "PRAGMA optimize completed successfully. SQLite query planner statistics refreshed."
+            msg = (
+                "PRAGMA optimize completed successfully. SQLite query planner statistics refreshed."
+            )
         elif action == "integrity_check":
             cursor.execute("PRAGMA integrity_check(10)")
             checks = [r[0] for r in cursor.fetchall()]

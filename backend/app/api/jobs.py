@@ -7,12 +7,11 @@ re-run a job; non-owner non-admins get 403.
 
 from __future__ import annotations
 
-import time
-
 import csv
 import io
 import json
 import logging
+import time
 import zipfile
 from collections.abc import Iterable
 from datetime import UTC, datetime
@@ -32,11 +31,11 @@ from app.schemas import (
     JobCreate,
     JobDetailOut,
     JobOut,
+    JobRecordsOut,
     JobResultOut,
     JobResultsPage,
     JobSubmitAck,
     TargetOut,
-    JobRecordsOut,
 )
 from app.services import jobs as jobs_svc
 from app.services.urls import parse as parse_urls
@@ -59,7 +58,6 @@ def _elapsed_s(job: Job, now: datetime) -> int:
     elif start.tzinfo is not None and end.tzinfo is None:
         start = start.replace(tzinfo=None)
     return max(0, int((end - start).total_seconds()))
-
 
 
 def _counts(db: Session, job_id: int) -> JobCounts:
@@ -408,7 +406,6 @@ def get_result_json(
     )
 
 
-
 @router.get("/{job_id}/records", response_model=JobRecordsOut)
 def get_job_records(
     job_id: int,
@@ -418,18 +415,18 @@ def get_job_records(
     """Return all extracted structured records for the entire job without outer target pagination."""
     if db.get(Job, job_id) is None:
         raise HTTPException(status_code=404, detail="job not found")
-        
+
     rows: Iterable[tuple[Any, Any]] = db.execute(
         select(JobResult, Target.url)
         .join(Target, Target.id == JobResult.target_id)
         .where(Target.job_id == job_id)
         .order_by(JobResult.id)
     ).all()
-    
+
     all_records = []
     all_columns = set()
     total_targets = 0
-    
+
     for r, url in rows:
         total_targets += 1
         meta = r.metadata_json or {}
@@ -441,17 +438,34 @@ def get_job_records(
                     if "source_url" not in row_data:
                         row_data["source_url"] = url
                     all_records.append(row_data)
-                    all_columns.update(k for k in row_data.keys() if k != "type")
+                    all_columns.update(k for k in row_data if k != "type")
 
     preferred_order = [
-        "year", "make", "model", "trim", "drivetrain", "mileage_km", "mileage", "price",
-        "seller_type", "city", "province", "dealer_name", "date_observed",
-        "listing_url", "source_url", "name", "brand", "currency", "transmission", "fuel"
+        "year",
+        "make",
+        "model",
+        "trim",
+        "drivetrain",
+        "mileage_km",
+        "mileage",
+        "price",
+        "seller_type",
+        "city",
+        "province",
+        "dealer_name",
+        "date_observed",
+        "listing_url",
+        "source_url",
+        "name",
+        "brand",
+        "currency",
+        "transmission",
+        "fuel",
     ]
     sorted_cols = [c for c in preferred_order if c in all_columns] + sorted(
         c for c in all_columns if c not in preferred_order
     )
-    
+
     return JobRecordsOut(
         job_id=job_id,
         total_records=len(all_records),
@@ -531,30 +545,69 @@ def get_all_results_export_csv(
 
     if all_structured_items:
         preferred_order = [
-            "year", "make", "model", "trim", "drivetrain", "mileage_km", "mileage", "price",
-            "seller_type", "city", "province", "dealer_name", "date_observed",
-            "listing_url", "transmission", "fuel", "name", "brand", "currency"
+            "year",
+            "make",
+            "model",
+            "trim",
+            "drivetrain",
+            "mileage_km",
+            "mileage",
+            "price",
+            "seller_type",
+            "city",
+            "province",
+            "dealer_name",
+            "date_observed",
+            "listing_url",
+            "transmission",
+            "fuel",
+            "name",
+            "brand",
+            "currency",
         ]
         all_keys = set()
         for it, _ in all_structured_items:
             all_keys.update(k for k in it.keys() if k != "type")
-        headers = [k for k in preferred_order if k in all_keys] + sorted(k for k in all_keys if k not in preferred_order)
+        headers = [k for k in preferred_order if k in all_keys] + sorted(
+            k for k in all_keys if k not in preferred_order
+        )
 
         writer.writerow(headers)
         for it, _ in all_structured_items:
             writer.writerow([it.get(h, "") for h in headers])
         filename = f"job-{job_id}-dataset.csv"
     else:
-        writer.writerow([
-            "id", "target_id", "source_url", "final_url", "http_status",
-            "title", "duration_ms", "fetched_at", "content_markdown", "content_text", "error"
-        ])
+        writer.writerow(
+            [
+                "id",
+                "target_id",
+                "source_url",
+                "final_url",
+                "http_status",
+                "title",
+                "duration_ms",
+                "fetched_at",
+                "content_markdown",
+                "content_text",
+                "error",
+            ]
+        )
         for r, url in rows:
-            writer.writerow([
-                r.id, r.target_id, url, r.final_url or "", r.http_status or "",
-                r.title or "", r.duration_ms or "", r.fetched_at.isoformat() if r.fetched_at else "",
-                r.content_markdown or "", r.content_text or "", r.error or ""
-            ])
+            writer.writerow(
+                [
+                    r.id,
+                    r.target_id,
+                    url,
+                    r.final_url or "",
+                    r.http_status or "",
+                    r.title or "",
+                    r.duration_ms or "",
+                    r.fetched_at.isoformat() if r.fetched_at else "",
+                    r.content_markdown or "",
+                    r.content_text or "",
+                    r.error or "",
+                ]
+            )
         filename = f"job-{job_id}-results.csv"
 
     return Response(
@@ -562,7 +615,6 @@ def get_all_results_export_csv(
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
-
 
 
 @router.get("/{job_id}/export.zip", response_class=Response)
@@ -601,7 +653,6 @@ def get_all_results_export_zip(
         media_type="application/zip",
         headers={"Content-Disposition": f'attachment; filename="job-{job_id}-markdown.zip"'},
     )
-
 
 
 @router.post(
@@ -762,9 +813,23 @@ def merge_jobs(
                 all_columns.update(row_data.keys())
 
     preferred_order = [
-        "year", "make", "model", "trim", "drivetrain", "mileage_km", "mileage", "price",
-        "seller_type", "city", "province", "dealer_name", "date_observed",
-        "listing_url", "_job_id", "title", "url"
+        "year",
+        "make",
+        "model",
+        "trim",
+        "drivetrain",
+        "mileage_km",
+        "mileage",
+        "price",
+        "seller_type",
+        "city",
+        "province",
+        "dealer_name",
+        "date_observed",
+        "listing_url",
+        "_job_id",
+        "title",
+        "url",
     ]
     sorted_cols = [c for c in preferred_order if c in all_columns] + sorted(
         c for c in all_columns if c not in preferred_order
@@ -862,5 +927,3 @@ def bulk_delete_jobs(
                 db.query(Target).filter(Target.job_id == jid).delete(synchronize_session=False)
             db.delete(job)
     db.commit()
-
-

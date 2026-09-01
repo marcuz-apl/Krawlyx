@@ -163,7 +163,6 @@ def normalize_record(
     )
 
 
-
 def normalize_many(records: Iterable[dict[str, Any]]) -> list[CrawlRecord]:
     """Adapter-friendly entry point: each dict carries the engine-specific
     payload already extracted by the concrete adapter (HTML/text/links)."""

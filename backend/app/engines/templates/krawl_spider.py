@@ -24,7 +24,6 @@ from urllib.parse import urlparse
 from scrapy import Spider
 from scrapy.crawler import CrawlerProcess
 
-
 if hasattr(sys.stdout, "reconfigure"):
     try:
         sys.stdout.reconfigure(encoding="utf-8")
@@ -59,7 +58,6 @@ def emit(item: dict) -> None:
     data = (json.dumps(item, ensure_ascii=False) + "\n").encode("utf-8")
     sys.stdout.buffer.write(data)
     sys.stdout.buffer.flush()
-
 
 
 class ZenSpider(Spider):

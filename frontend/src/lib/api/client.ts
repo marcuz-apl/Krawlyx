@@ -332,8 +332,32 @@ export interface SettingsOut {
 
 const BASE = '';
 
+let inMemoryCsrf: string | null = null;
+
+export function setStoredCsrfToken(token: string | null) {
+  inMemoryCsrf = token;
+  if (token) {
+    try {
+      sessionStorage.setItem('zc_csrf', token);
+    } catch {}
+  } else {
+    try {
+      sessionStorage.removeItem('zc_csrf');
+    } catch {}
+  }
+}
+
+export function getStoredCsrfToken(): string | null {
+  if (inMemoryCsrf) return inMemoryCsrf;
+  try {
+    return sessionStorage.getItem('zc_csrf');
+  } catch {
+    return null;
+  }
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const csrf = getCookie('zc_csrf');
+  const csrf = getCookie('zc_csrf') || getStoredCsrfToken();
   const headers = new Headers(init.headers);
   if (init.method && init.method !== 'GET' && csrf) {
     headers.set('X-CSRF-Token', csrf);
@@ -342,7 +366,14 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE}${path}`, { ...init, headers, credentials: 'include' });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`${res.status} ${res.statusText}: ${text}`);
+    let detail = text;
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed.detail) {
+        detail = typeof parsed.detail === 'string' ? parsed.detail : JSON.stringify(parsed.detail);
+      }
+    } catch {}
+    throw new Error(detail || `${res.status} ${res.statusText}`);
   }
   if (res.status === 204) {
     return undefined as T;
@@ -357,9 +388,20 @@ function getCookie(name: string): string | null {
 
 export const api = {
   health: () => request<HealthResponse>('/api/health'),
-  login: (body: LoginRequest) =>
-    request<LoginResponse>('/api/auth/login', { method: 'POST', body: JSON.stringify(body) }),
-  logout: () => request<void>('/api/auth/logout', { method: 'POST' }),
+  login: async (body: LoginRequest) => {
+    const res = await request<LoginResponse>('/api/auth/login', { method: 'POST', body: JSON.stringify(body) });
+    if (res?.csrf_token) {
+      setStoredCsrfToken(res.csrf_token);
+    }
+    return res;
+  },
+  logout: async () => {
+    try {
+      await request<void>('/api/auth/logout', { method: 'POST' });
+    } finally {
+      setStoredCsrfToken(null);
+    }
+  },
   me: () => request<UserOut>('/api/auth/me'),
 
   engines: {
@@ -375,6 +417,8 @@ export const api = {
     delete: (id: number) => request<void>(`/api/engines/${id}`, { method: 'DELETE' }),
     test: (id: number) =>
       request<EngineTestResult>(`/api/engines/${id}/test`, { method: 'POST' }),
+    bootstrap: () =>
+      request<EngineOut[]>('/api/engines/bootstrap', { method: 'POST' }),
   },
 
   jobs: {

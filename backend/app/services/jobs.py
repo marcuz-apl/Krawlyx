@@ -28,6 +28,7 @@ import collections
 import logging
 import time
 from dataclasses import dataclass, field
+from typing import Any
 
 from pydantic import ValidationError
 from sqlalchemy import select, update
@@ -113,6 +114,7 @@ def shutdown() -> None:
 
 def is_active(job_id: int) -> bool:
     return job_id in _active or job_id in _queue
+
 
 def get_job_handle(job_id: int) -> JobHandle | None:
     return _active.get(job_id)
@@ -476,7 +478,9 @@ async def _run_target(
             # M4: stream the just-persisted result to the export file
             _export_result(handle, row, db)
         except Exception as exc:
-            job_logger_local.exception("unexpected error processing target %d: %s", target_row.id, exc)
+            job_logger_local.exception(
+                "unexpected error processing target %d: %s", target_row.id, exc
+            )
             try:
                 row = db.get(TargetRow, target_row.id)
                 if row and row.status == "fetching":

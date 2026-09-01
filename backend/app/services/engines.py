@@ -13,7 +13,7 @@ import logging
 from datetime import UTC, datetime
 from typing import Any
 
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -57,8 +57,8 @@ def decrypt_config(blob: str | None) -> dict[str, Any]:
         return {}
     try:
         return json.loads(_fernet().decrypt(blob.encode("utf-8")))
-    except (ValueError, OSError) as exc:
-        logger.warning("failed to decrypt engine config: %s", exc)
+    except (ValueError, OSError, InvalidToken, Exception) as exc:
+        logger.warning("failed to decrypt engine config (key mismatch or malformed): %s", exc)
         return {}
 
 
@@ -173,8 +173,11 @@ def bootstrap_default_engines(db: Session) -> None:
             pooled=True,
         )
         db.add(c4ai)
-    elif c4ai.name in {"e", "crawl4ai", "Crawl4AI"}:
-        c4ai.name = "Crawl4AI (Browser & JS Dynamic)"
+    else:
+        if c4ai.name in {"e", "crawl4ai", "Crawl4AI"}:
+            c4ai.name = "Crawl4AI (Browser & JS Dynamic)"
+        if not c4ai.pooled and c4ai.disabled_at is None:
+            c4ai.pooled = True
 
     scrapy = db.scalar(select(EngineInstance).where(EngineInstance.type == "scrapy"))
     if not scrapy:
@@ -185,7 +188,10 @@ def bootstrap_default_engines(db: Session) -> None:
             pooled=True,
         )
         db.add(scrapy)
-    elif scrapy.name in {"scrapy", "Scrapy (Fast)"}:
-        scrapy.name = "Scrapy (High-Speed HTML)"
+    else:
+        if scrapy.name in {"scrapy", "Scrapy (Fast)", "Scrapy (Hi-Speed HTML)"}:
+            scrapy.name = "Scrapy (High-Speed HTML)"
+        if not scrapy.pooled and scrapy.disabled_at is None:
+            scrapy.pooled = True
 
     db.commit()

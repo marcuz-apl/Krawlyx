@@ -7,6 +7,7 @@ if _venv_site.is_dir() and str(_venv_site) not in sys.path:
 
 if sys.platform == "win32":
     import asyncio
+
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 from contextlib import asynccontextmanager
@@ -16,7 +17,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api import auth, database, datasets, engines, export_targets, health, jobs, schedules, users
+from app.api import (
+    auth,
+    database,
+    datasets,
+    engines,
+    export_targets,
+    health,
+    jobs,
+    schedules,
+    users,
+)
 from app.api import settings as settings_api
 from app.core.config import get_settings
 from app.core.db import SessionLocal, upgrade_db
@@ -53,7 +64,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title=cfg.app_name, lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
-        allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
+        allow_origin_regex=r"https?://.*",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

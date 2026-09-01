@@ -7,6 +7,16 @@
     @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased transition-colors duration-150;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   }
+
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='button']):not([type='submit']),
+  select,
+  textarea {
+    @apply bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100;
+  }
+
+  option {
+    @apply bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100;
+  }
 }
 
 /* Custom scrollbar for dark mode */
