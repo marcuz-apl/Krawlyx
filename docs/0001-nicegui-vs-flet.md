@@ -4,13 +4,13 @@
 | --- | --- |
 | **Status** | Reference / ADR companion to PRD §4.4 |
 | **Date** | 2026-08-26 |
-| **Decision on record** | MyKrawl ships a React + TypeScript SPA (PRD §4.4). This doc evaluates the pure-Python alternatives for completeness. |
+| **Decision on record** | Krawlyx ships a React + TypeScript SPA (PRD §4.4). This doc evaluates the pure-Python alternatives for completeness. |
 
 ## TL;DR
 
 Both let you build a UI without writing JavaScript. For a web-only admin tool
-like MyKrawl, **NiceGUI is the stronger fit**; Flet's differentiator (one codebase
-→ desktop + mobile binaries) solves a problem MyKrawl doesn't have. Neither was
+like Krawlyx, **NiceGUI is the stronger fit**; Flet's differentiator (one codebase
+→ desktop + mobile binaries) solves a problem Krawlyx doesn't have. Neither was
 chosen: the typed-client maintainability of the React path won.
 
 ## The two contenders
@@ -20,7 +20,7 @@ chosen: the typed-client maintainability of the React path won.
 Write the entire UI in Python; it renders through Vue 3 + Quasar and talks to the
 browser over WebSocket/socket.io, so state changes push live without you writing
 any client code. It runs *on FastAPI* — same server, same process model as
-MyKrawl's backend.
+Krawlyx's backend.
 
 - 100+ built-in components (Quasar-based Material Design), plus Tailwind support.
 - `ui.refreshable` and `ui.timer` make live job progress nearly free.
@@ -41,7 +41,7 @@ packaged as a web app, Windows/macOS/Linux desktop app, or iOS/Android app via
 - Web output is canvas, not DOM → text selection, accessibility, and
   Playwright-selector-based testing are weaker.
 
-## Comparison for MyKrawl's needs
+## Comparison for Krawlyx's needs
 
 | Dimension | NiceGUI | Flet |
 | --- | --- | --- |
@@ -58,7 +58,7 @@ packaged as a web app, Windows/macOS/Linux desktop app, or iOS/Android app via
 
 ## Verdict
 
-- **If MyKrawl were pure-Python UI:** choose **NiceGUI** — it shares the FastAPI
+- **If Krawlyx were pure-Python UI:** choose **NiceGUI** — it shares the FastAPI
   backbone, makes live progress effortless, and stays testable as real DOM.
 - **Choose Flet only if** distributing installable desktop/mobile apps ever becomes
   a requirement; wait for 1.0 first.
@@ -71,7 +71,7 @@ packaged as a web app, Windows/macOS/Linux desktop app, or iOS/Android app via
 ## Revisit triggers
 
 1. Stakeholder decides JavaScript maintenance burden outweighs type-safety benefits → re-evaluate NiceGUI.
-2. Desktop/mobile distribution of MyKrawl becomes a goal → evaluate Flet ≥ 1.0.
+2. Desktop/mobile distribution of Krawlyx becomes a goal → evaluate Flet ≥ 1.0.
 3. NiceGUI 4.0 breaking release lands → re-check migration cost if it's ever adopted.
 
 ## Sources

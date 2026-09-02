@@ -60,7 +60,7 @@ the JVM app shells out to Python for ⅔ of its core functionality. **Decision: 
 Correct call for this scope: single-node, low write concurrency, file-based backup
 (copy the `.db` file). Conditions applied:
 
-- The database file lives at **`./data/mykrawl.db`** (overridable via settings/env);
+- The database file lives at **`./data/krawlyx.db`** (overridable via settings/env);
   Krawlyx creates `./data/` on first run. The folder is tracked in git; only the
   transient `-wal`/`-shm` SQLite sidecars are ignored.
 - Enable **WAL mode** so readers (UI polling results) don't block the crawl writer.
@@ -359,7 +359,7 @@ edit config with masked secrets) · **Schedules** (table + cron editor) ·
 
 | Risk | Mitigation |
 | --- | --- |
-| Patchright browser install friction on Windows | Document `playwright install chromium`; ship doctor command `python -m mykrawl.doctor` |
+| Patchright browser install friction on Windows | Document `patchright install chromium`; ship doctor command `python -m app.core.doctor` |
 | Scrapy subprocess IPC fragility | Strict JSONL contract + timeout + stderr capture; contract tests |
 | XLSX size estimates drift | Adaptive measurement + conservative 90 % clamp; manifest records actual sizes |
 | Engine scope creep | Adapter contract isolates engines; adding one requires only a module + contract tests |

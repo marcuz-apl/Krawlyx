@@ -13,8 +13,8 @@ This guide details how to deploy **Krawlyx** in production environments, includi
 ### 1-Command Deployment
 1. Clone the repository and navigate to the project root:
    ```bash
-   git clone https://github.com/marcuz-apl/MyKrawl.git
-   cd MyKrawl
+   git clone https://github.com/marcuz-apl/krawlyx.git
+   cd krawlyx
    ```
 2. Copy and configure the environment variables:
    ```bash
@@ -30,7 +30,7 @@ This guide details how to deploy **Krawlyx** in production environments, includi
 ### Inspecting Logs & Health
 ```bash
 # View live application logs
-docker compose logs -f mykrawl
+docker compose logs -f krawlyx
 
 # Check container health status
 docker compose ps
@@ -44,24 +44,24 @@ Deploying Krawlyx on Synology NAS provides automatic restarts, persistent storag
 
 ### Step 1: Storage Setup in File Station
 Create a directory structure on your storage pool:
-- `/volume1/docker/mykrawl`
-- `/volume1/docker/mykrawl/data` (holds `mykrawl.db` and exports)
+- `/volume1/docker/krawlyx`
+- `/volume1/docker/krawlyx/data` (holds `krawlyx.db` and exports)
 
 ### Step 2: Launch via Synology Container Manager
 1. Open **Container Manager** in DSM.
 2. Go to **Project** -> **Create**.
-3. Set Project Name: `mykrawl`.
-4. Path: `/docker/mykrawl`.
+3. Set Project Name: `krawlyx`.
+4. Path: `/docker/krawlyx`.
 5. Source: Select **Create docker-compose.yml** and paste the following:
 
 ```yaml
 services:
-  mykrawl:
+  krawlyx:
     build:
       context: .
       dockerfile: Dockerfile
-    image: mykrawl:latest
-    container_name: mykrawl
+    image: krawlyx:latest
+    container_name: krawlyx
     restart: unless-stopped
     ports:
       - "4040:4040"
@@ -94,7 +94,7 @@ To access Krawlyx securely over the internet without exposing raw ports:
    - **General Tab**:
      - **Source**:
        - Protocol: `HTTPS`
-       - Hostname: `mykrawl.your-domain.com` (or your Synology DDNS: `*.synology.me`)
+       - Hostname: `krawlyx.your-domain.com` (or your Synology DDNS: `*.synology.me`)
        - Port: `443`
        - Enable HSTS: Checked
      - **Destination**:
@@ -104,10 +104,10 @@ To access Krawlyx securely over the internet without exposing raw ports:
    - **Custom Header Tab**:
      - Click **Create** -> **WebSocket**.
      - This automatically adds `Upgrade: $http_upgrade` and `Connection: $connection_upgrade`, which is required for live crawl progress streaming and log views.
-3. Assign a free Let's Encrypt SSL Certificate to `mykrawl.your-domain.com` in **Security** -> **Certificate**.
+3. Assign a free Let's Encrypt SSL Certificate to `krawlyx.your-domain.com` in **Security** -> **Certificate**.
 
 ### Access URLs:
-- **Via HTTPS Reverse Proxy**: `https://mykrawl.your-domain.com`
+- **Via HTTPS Reverse Proxy**: `https://krawlyx.your-domain.com`
 - **Via Local Home Network (Direct LAN)**: `http://<SYNOLOGY_LOCAL_IP>:4040` (e.g. `http://192.168.1.100:4040`)
 
 ---
@@ -115,13 +115,13 @@ To access Krawlyx securely over the internet without exposing raw ports:
 ## 3. Docker Storage & Persistence
 
 The container maps the host directory `./data` to `/app/data`:
-- **`data/mykrawl.db`**: SQLite database storing jobs, schedules, users, and saved datasets.
+- **`data/krawlyx.db`**: SQLite database storing jobs, schedules, users, and saved datasets.
 - **`data/exports/`**: CSV and XLSX export files generated from crawls and datasets.
-- **WAL Journals**: SQLite Write-Ahead Log (`mykrawl.db-wal`) is automatically preserved.
+- **WAL Journals**: SQLite Write-Ahead Log (`krawlyx.db-wal`) is automatically preserved.
 - **Backup Command**:
   ```bash
   # Backup SQLite database cleanly while running:
-  sqlite3 data/mykrawl.db ".backup 'data/backup-$(date +%Y%m%d).db'"
+  sqlite3 data/krawlyx.db ".backup 'data/backup-$(date +%Y%m%d).db'"
   ```
 
 ---
@@ -148,7 +148,7 @@ For non-containerized Linux hosts:
    playwright install-deps chromium
    ```
 
-3. **Create Systemd Unit (`/etc/systemd/system/mykrawl.service`)**:
+3. **Create Systemd Unit (`/etc/systemd/system/krawlyx.service`)**:
    ```ini
    [Unit]
    Description=Krawlyx Web Scraping Workbench
@@ -157,9 +157,9 @@ For non-containerized Linux hosts:
    [Service]
    Type=simple
    User=www-data
-   WorkingDirectory=/var/www/MyKrawl/backend
-   EnvironmentFile=/var/www/MyKrawl/.env
-   ExecStart=/var/www/MyKrawl/backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 4040
+   WorkingDirectory=/var/www/krawlyx/backend
+   EnvironmentFile=/var/www/krawlyx/.env
+   ExecStart=/var/www/krawlyx/backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 4040
    Restart=always
    RestartSec=5
 
@@ -170,7 +170,7 @@ For non-containerized Linux hosts:
 4. **Enable & Start**:
    ```bash
    sudo systemctl daemon-reload
-   sudo systemctl enable --now mykrawl
+   sudo systemctl enable --now krawlyx
    ```
 
 ---
@@ -181,16 +181,16 @@ For non-containerized Linux hosts:
 ```nginx
 server {
     listen 80;
-    server_name mykrawl.example.com;
+    server_name krawlyx.example.com;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name mykrawl.example.com;
+    server_name krawlyx.example.com;
 
-    ssl_certificate /etc/letsencrypt/live/mykrawl.example.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/mykrawl.example.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/krawlyx.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/krawlyx.example.com/privkey.pem;
 
     location / {
         proxy_pass http://127.0.0.1:4040;
@@ -211,7 +211,7 @@ server {
 
 ### Caddy Example
 ```caddy
-mykrawl.example.com {
+krawlyx.example.com {
     reverse_proxy 127.0.0.1:4040 {
         flush_interval -1
     }

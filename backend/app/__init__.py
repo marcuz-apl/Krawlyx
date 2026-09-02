@@ -1,1 +1,1 @@
-"""MyKrawl backend application package."""
+"""Krawlyx backend application package."""

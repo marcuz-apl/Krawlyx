@@ -188,9 +188,9 @@ def test_target(
     try:
         directory = Path(row.path).expanduser().resolve()
         directory.mkdir(parents=True, exist_ok=True)
-        probe = directory / f"MyKrawl_probe_{uuid.uuid4().hex[:8]}.txt"
+        probe = directory / f"Krawlyx_probe_{uuid.uuid4().hex[:8]}.txt"
         probe.write_text(
-            f"MyKrawl probe at {datetime.now(UTC).isoformat(timespec='seconds')}\n",
+            f"Krawlyx probe at {datetime.now(UTC).isoformat(timespec='seconds')}\n",
             encoding="utf-8",
         )
         probe.unlink()

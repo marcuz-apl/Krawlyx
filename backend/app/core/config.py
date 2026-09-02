@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     app_name: str = "Krawlyx"
     # Required for any real deployment; the default keeps local dev frictionless.
     secret_key: str = "dev-insecure-secret-key"
-    db_path: Path = ROOT_DIR / "data" / "mykrawl.db"
+    db_path: Path = ROOT_DIR / "data" / "krawlyx.db"
     session_ttl_s: int = 60 * 60 * 12
     cookie_secure: bool = False
     admin_user: str | None = None
@@ -43,8 +43,8 @@ class Settings(BaseSettings):
     # is non-empty, only targets whose host matches an entry (suffix
     # match) are accepted. Empty list = block-by-default.
     ssrf_allow_list: list[str] = []
-    # NFR-05: identifiable User-Agent `MyKrawl/0.1 (+{admin_contact_email})`.
-    # Empty contact is allowed — the UA degrades to `MyKrawl/0.1`.
+    # NFR-05: identifiable User-Agent `Krawlyx/0.1 (+{admin_contact_email})`.
+    # Empty contact is allowed — the UA degrades to `Krawlyx/0.1`.
     admin_contact_email: str = ""
 
     @field_validator("ssrf_allow_list", mode="before")

@@ -17,7 +17,7 @@ MYKRAWL_ADMIN_USER=admin
 MYKRAWL_ADMIN_PASSWORD=<strong-password>
 ```
 
-First run bootstraps the SQLite DB (`data/mykrawl.db`) and admin user.
+First run bootstraps the SQLite DB (`data/krawlyx.db`) and admin user.
 
 ## 2. Verify environment
 
@@ -79,6 +79,10 @@ No live network in tests: engine adapters use monkeypatched fixtures / canned pa
 
 ## 7. Workbench Visual Tour
 
+### 0. Authentication & Patchtroy Stealth Engine Showcase
+![Authentication & Stealth Engine Showcase](assets/ui-0-login.png)
+Secure role-based authentication interface highlighting Krawlyx's Patchtroy anti-bot stealth engine, headless Chromium automation, and single-node self-hosted architecture.
+
 ### 1. Multi-Worker Anti-Ban Crawl Runner
 ![Crawl Runner](assets/ui-1-newjob.png)
 Configure batch target URLs, toggle randomized multi-worker session gaps (0.5m–10m), choose between Patchtroy and Scrapy, or define custom structured extraction schemas.
@@ -87,21 +91,25 @@ Configure batch target URLs, toggle randomized multi-worker session gaps (0.5m�
 ![Job History](assets/ui-2-history.png)
 Monitor running crawler sessions in real-time with granular execution metrics, status counters, and one-click re-runs.
 
-### 3. Unified Dataset View & SQL Console
+### 3. Unified Dataset View & Data Explorer
 ![Structured Dataset](assets/ui-3-dataset.png)
-Browse extracted tabular records with single-tier row pagination, instant search filtering, Excel-compatible CSV exports, and dynamic in-browser SQL querying.
+Browse extracted tabular records with single-tier row pagination, instant search filtering, Excel-compatible CSV exports, and dynamic in-browser data exploration.
 
-### 4. SuperAdmin SQLite Database Browser & Terminal
-![Admin Database Browser](assets/ui-4-admin.png)
+### 4. Cron Schedules & Worker Automation
+![Cron Schedules](assets/ui-4-schedule.png)
+Manage recurring crawling schedules with customizable cron expressions, active/paused toggles, worker concurrency tuning, and unattended file export dispatch.
+
+### 5. SuperAdmin SQLite Database Browser & Terminal
+![Admin Database Browser](assets/ui-5-admin.png)
 Directly explore database tables, inspect row schemas, run raw SQL queries, and perform database maintenance (WAL flush, VACUUM, PRAGMA integrity check).
 
-### 5. In-App Documentation & Architecture Guides
-![In-App Documentation](assets/ui-5-docs.png)
+### 6. In-App Documentation & Architecture Guides
+![In-App Documentation](assets/ui-6-docs.png)
 Explore interactive architectural documentation, milestone records, Docker/Synology deployment guides, and OpenAPI schema contracts directly from the top navigation.
 
 ## 8. Things never committed
 
-- `data/mykrawl.db` — SQLite system of record (`.gitignore`: `data/*.db`).
+- `data/krawlyx.db` — SQLite system of record (`.gitignore`: `data/*.db`).
 - `data/logs/app.log` and `data/logs/jobs/*.log` — runtime artifacts (`.gitignore`: `data/logs/`).
 - `.env` — secrets (`.env.example` only).
 - `frontend/dist/` — built SPA (`.gitignore`).

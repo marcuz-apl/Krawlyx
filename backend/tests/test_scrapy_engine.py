@@ -71,7 +71,7 @@ def test_scrapy_env_uses_configured_values() -> None:
     assert env["MYKRAWL_TARGET_URL"] == "https://example.com/"
     # M6: user_agent comes from the global Settings (NFR-05); engine
     # config user_agent is no longer echoed directly into the env.
-    assert env["MYKRAWL_USER_AGENT"] == "MyKrawl/0.1 via scrapy"
+    assert env["MYKRAWL_USER_AGENT"] == "Krawlyx/0.1 via scrapy"
     assert env["MYKRAWL_CONCURRENCY"] == "4"
     assert env["MYKRAWL_DOWNLOAD_DELAY"] == "1.0"  # M6: admin floor wins
     assert env["MYKRAWL_AUTOTHROTTLE"] == "0"

@@ -1,6 +1,6 @@
 # 0014: Dataset Filtering, Splitting, Sorting, and SQLite Maintenance
 
-This document summarizes the general-purpose dataset operations and database management capabilities in MyKrawl.
+This document summarizes the general-purpose dataset operations and database management capabilities in Krawlyx.
 
 ---
 
@@ -61,7 +61,7 @@ Accessible in **Admin Panel → Settings**:
 - **⚡ Run WAL Checkpoint**: Runs `PRAGMA wal_checkpoint(TRUNCATE)` to flush the Write-Ahead Log back into the main database file and truncate the log file down to `0 B`.
 - **🧹 Run Database Vacuum**: Executes `VACUUM` to defragment B-Trees, compact allocated pages, and return unused space to disk.
 - **Live Storage Metrics**:
-  - Database file path & size (`data/mykrawl.db`).
+  - Database file path & size (`data/krawlyx.db`).
   - WAL journal size & mode.
   - Page count and page size.
   - Live row counts across datasets, jobs, and crawler results.

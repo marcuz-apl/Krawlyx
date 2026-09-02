@@ -11,9 +11,9 @@ no paid APIs or third-party cloud lock-in.
 
 ## Overview
 
-![Krawlyx Crawl Runner & Workbench](docs/assets/ui-1-newjob.png)
+![Krawlyx Authentication & Patchtroy Stealth Engine Showcase](docs/assets/ui-0-login.png)
 
-> 📖 **Looking for a full tour?** Explore the [**Interactive UI & Feature Gallery (5 Modules)**](docs/0008-get-started-quickly.md#7-workbench-visual-tour) in the Quick Start Guide.
+> 📖 **Looking for a full tour?** Explore the [**Interactive UI & Feature Gallery (7 Modules)**](docs/0008-get-started.md#7-workbench-visual-tour) in the Quick Start Guide.
 
 ---
 
@@ -80,7 +80,7 @@ All project documentation, architectural decision records, implementation plans,
 - `0005` — [M4: Streaming CSV/XLSX Exporter & File Splitting](docs/0005-m4-export.md)
 - `0006` — [M5: APScheduler Cron Scheduling Engine](docs/0006-m5-scheduler.md)
 - `0007` — [M6: Security, SSRF Guard & Diagnostics Hardening](docs/0007-m6-hardening.md)
-- `0008` — [🚀 Get Started Quickly Guide](docs/0008-get-started-quickly.md)
+- `0008` — [🚀 Get Started Guide](docs/0008-get-started.md)
 
 ### Universal Workbench Features & Deployment Guides
 - `0009` — [Universal Custom Schema & Persistent Datasets](docs/0009-custom-schema-and-datasets.md) — Arbitrary schema extraction and SQLite persistence.

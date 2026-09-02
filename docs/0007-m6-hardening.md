@@ -23,7 +23,7 @@ Date: 2026-08-29
 
 ## 4. Identifiable User-Agent (`NFR-05`)
 
-- `backend/app/engines/base.py`: `user_agent(template)` builds `MyKrawl/0.1 (+{contact}) via {template}`. Empty contact degrades to `MyKrawl/0.1 via {template}`.
+- `backend/app/engines/base.py`: `user_agent(template)` builds `Krawlyx/0.1 (+{contact}) via {template}`. Empty contact degrades to `Krawlyx/0.1 via {template}`.
 - Applied in both `crawl4ai_engine.py` (`user_agent("crawl4ai")`) and `scrapy_engine.py` (`user_agent("scrapy")`).
 - Admin contact: `MYKRAWL_ADMIN_CONTACT_EMAIL` (new in `Settings`).
 

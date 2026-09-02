@@ -254,7 +254,7 @@ export function DatabaseBrowser() {
               SQLite Database Browser & Engine Terminal
             </h2>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-mono">
-              {stats?.db_path || 'data/mykrawl.db'}
+              {stats?.db_path || 'data/krawlyx.db'}
             </p>
           </div>
 

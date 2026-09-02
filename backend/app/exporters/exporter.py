@@ -104,7 +104,7 @@ class Exporter:
 
     @property
     def manifest_path(self) -> Path:
-        return self._dir / f"MyKrawl_{self._slug}_{self._ts}_manifest.json"
+        return self._dir / f"Krawlyx_{self._slug}_{self._ts}_manifest.json"
 
     @property
     def parts(self) -> list[Path]:
@@ -258,7 +258,7 @@ class Exporter:
     def _open_new_part(self) -> None:
         self._part_index += 1
         ext = self._fmt
-        filename = f"MyKrawl_{self._slug}_{self._ts}_part{self._part_index:03d}.{ext}"
+        filename = f"Krawlyx_{self._slug}_{self._ts}_part{self._part_index:03d}.{ext}"
         path = self._dir / filename
         try:
             self._writer = self._writer_factory()

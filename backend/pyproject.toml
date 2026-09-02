@@ -1,7 +1,7 @@
 [project]
-name = "mykrawl"
+name = "krawlyx"
 version = "0.1.0"
-description = "MyKrawl backend API — self-hosted web scraping workbench"
+description = "Krawlyx backend API — self-hosted web scraping workbench"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115,<1",

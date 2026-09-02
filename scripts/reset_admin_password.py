@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MyKrawl SuperAdmin Password Reset Utility
+Krawlyx SuperAdmin Password Reset Utility
 ==========================================
 Emergency tool to reset the password and restore SuperAdmin privileges for the 'admin' account.
 
@@ -30,7 +30,7 @@ def reset_password(username: str, new_password: str | None = None) -> None:
         from app.core.security import hash_password
         from app.models.user import User
     except ImportError as e:
-        print(f"❌ Error importing MyKrawl backend modules: {e}")
+        print(f"❌ Error importing Krawlyx backend modules: {e}")
         print("Please ensure your virtual environment is active: source backend/.venv/bin/activate")
         sys.exit(1)
 
@@ -70,7 +70,7 @@ def reset_password(username: str, new_password: str | None = None) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Reset MyKrawl SuperAdmin password.")
+    parser = argparse.ArgumentParser(description="Reset Krawlyx SuperAdmin password.")
     parser.add_argument("password", nargs="?", default=None, help="New password (optional; prompted if omitted)")
     parser.add_argument("--username", default="admin", help="Username to reset (default: 'admin')")
     args = parser.parse_args()

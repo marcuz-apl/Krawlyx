@@ -1,4 +1,4 @@
-"""Environment diagnostic for self-hosters (`python -m mykrawl.doctor`).
+"""Environment diagnostic for self-hosters (`python -m app.core.doctor`).
 
 Runs a short list of read-only checks and prints a one-screen report.
 Exits 0 when everything passes, 1 otherwise. The check list is
@@ -176,7 +176,7 @@ _CHECKS = [
 
 
 def run() -> int:
-    print("MyKrawl doctor")
+    print("Krawlyx doctor")
     print("=" * 40)
     failed = 0
     for fn in _CHECKS:

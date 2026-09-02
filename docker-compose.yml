@@ -1,10 +1,10 @@
 services:
-  mykrawl:
+  krawlyx:
     build:
       context: .
       dockerfile: Dockerfile
-    image: mykrawl:latest
-    container_name: mykrawl
+    image: krawlyx:latest
+    container_name: krawlyx
     restart: unless-stopped
     ports:
       - "4040:4040"
