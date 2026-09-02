@@ -7,16 +7,43 @@ interface LocationState {
   from?: { pathname: string };
 }
 
+const SLOGANS = [
+  {
+    title: "Precision Scraping. Undetected Ingestion. Structured Intelligence.",
+    desc: "Self-hosted workbench powered by the Patchtroy stealth engine & high-velocity spiders.",
+  },
+  {
+    title: "Stealth Chromium Automation & Trafilatura Markdown.",
+    desc: "Bypass bot challenges and capture dynamic SPAs with pristine content extraction.",
+  },
+  {
+    title: "Subprocess Spiders & Concurrent Deep Web Ingestion.",
+    desc: "High-throughput Scrapy spiders streaming results without blocking the web process.",
+  },
+  {
+    title: "Universal Relational SQL Transform & Adaptive Exports.",
+    desc: "Turn messy web crawls into structured SQLite datasets with CSV/XLSX part-splitting.",
+  },
+];
+
 export function LoginPage() {
   const login = useLogin();
   const navigate = useNavigate();
   const location = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [sloganIndex, setSloganIndex] = useState(0);
 
   useEffect(() => {
     setUsername("");
     setPassword("");
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSloganIndex((prev) => (prev + 1) % SLOGANS.length);
+    }, 4000);
+    return () => clearInterval(timer);
   }, []);
 
   const onSubmit = (e: React.FormEvent) => {
@@ -51,12 +78,37 @@ export function LoginPage() {
             </h1>
           </div>
 
-          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 tracking-wide">
-            Precision Scraping. Undetected Ingestion. Structured Intelligence.
-          </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto leading-relaxed">
-            Self-hosted workbench powered by the <strong className="text-slate-700 dark:text-slate-300">Patchtroy</strong> stealth engine & high-velocity spiders.
-          </p>
+          {/* Animated Slogan Box with Fade/Slide Transitions */}
+          <div className="min-h-[58px] flex flex-col items-center justify-center">
+            <div
+              key={sloganIndex}
+              className="animate-in fade-in slide-in-from-bottom-2 duration-500 text-center"
+            >
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 tracking-wide">
+                {SLOGANS[sloganIndex].title}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto leading-relaxed">
+                {SLOGANS[sloganIndex].desc}
+              </p>
+            </div>
+          </div>
+
+          {/* Dots Carousel Indicator */}
+          <div className="flex items-center justify-center gap-1.5 mt-2.5">
+            {SLOGANS.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setSloganIndex(idx)}
+                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                  sloganIndex === idx
+                    ? "w-5 bg-brand-600 dark:bg-brand-400"
+                    : "w-1.5 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400"
+                }`}
+                aria-label={`Go to slogan ${idx + 1}`}
+              />
+            ))}
+          </div>
 
           {/* Feature highlights pill row */}
           <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-[11px]">
