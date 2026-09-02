@@ -9,4 +9,8 @@
 **/.coverage
 data/*.db-wal
 data/*.db-shm
+data/*.db
 .env
+.tmp/
+tmp/
+*.tmp

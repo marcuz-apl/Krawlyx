@@ -35,3 +35,8 @@ Thumbs.db
 .idea/
 .vscode/
 .claude/settings.local.json
+
+# Temporary & scratch files
+.tmp/
+tmp/
+*.tmp
