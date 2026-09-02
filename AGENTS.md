@@ -1,4 +1,4 @@
-# AGENTS.md — MyKrawl
+# AGENTS.md — Krawlyx
 
 Guidance for AI coding agents (and humans) working in this repository.
 **Read `PRD.md` first** — it is the source of truth for scope and requirements;

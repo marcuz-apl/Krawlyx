@@ -1,4 +1,4 @@
-# Get Started Quickly — MyKrawl
+# Get Started Quickly — Krawlyx
 
 ## 1. First-time setup (30 seconds)
 
@@ -6,7 +6,7 @@
 # Inside backend/
 python -m venv .venv && source .venv/Scripts/activate   # or .venv/bin/activate (Linux)
 pip install -e "."
-playwright install chromium
+patchright install chromium
 ```
 
 Copy `.env.example` → `.env` and fill at minimum:
@@ -56,7 +56,7 @@ uvicorn app.main:app --port 4040 --reload
 | robots.txt compliance | `on` | `MYKRAWL_ROBOTS_TXT_ENABLED` |
 | Per-domain rate limit | `1.0` s | `MYKRAWL_PER_DOMAIN_INTERVAL_S` |
 | Content size cap | `5` MB | `MYKRAWL_CONTENT_SIZE_CAP_BYTES` |
-| User-Agent | `MyKrawl/0.1 (+{email}) via {engine}` (`NFR-05`) | `MYKRAWL_ADMIN_CONTACT_EMAIL` |
+| User-Agent | `Krawlyx/0.1 (+{email}) via {engine}` (`NFR-05`) | `MYKRAWL_ADMIN_CONTACT_EMAIL` |
 
 When `SSRF_ALLOW_LIST` is non-empty, **only** listed hosts pass (suffix match, case-insensitive). Empty list = standard block-by-default.
 

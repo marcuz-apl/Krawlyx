@@ -1,6 +1,6 @@
 # 0015: Production Deployment Guide (Docker Compose, Synology NAS, & Bare Metal)
 
-This guide details how to deploy **MyKrawl** in production environments, including Docker Compose, Synology NAS (Container Manager / DSM Reverse Proxy), and Linux systemd services.
+This guide details how to deploy **Krawlyx** in production environments, including Docker Compose, Synology NAS (Container Manager / DSM Reverse Proxy), and Linux systemd services.
 
 ---
 
@@ -40,7 +40,7 @@ docker compose ps
 
 ## 2. Deploying on Synology NAS (Container Manager / DSM)
 
-Deploying MyKrawl on Synology NAS provides automatic restarts, persistent storage, and built-in SSL reverse proxying.
+Deploying Krawlyx on Synology NAS provides automatic restarts, persistent storage, and built-in SSL reverse proxying.
 
 ### Step 1: Storage Setup in File Station
 Create a directory structure on your storage pool:
@@ -87,7 +87,7 @@ services:
 ```
 
 ### Step 3: Synology DSM Reverse Proxy Configuration (HTTPS & SSL)
-To access MyKrawl securely over the internet without exposing raw ports:
+To access Krawlyx securely over the internet without exposing raw ports:
 
 1. Open **Control Panel** -> **Login Portal** -> **Advanced** -> **Reverse Proxy**.
 2. Click **Create**:
@@ -151,7 +151,7 @@ For non-containerized Linux hosts:
 3. **Create Systemd Unit (`/etc/systemd/system/mykrawl.service`)**:
    ```ini
    [Unit]
-   Description=MyKrawl Web Scraping Workbench
+   Description=Krawlyx Web Scraping Workbench
    After=network.target
 
    [Service]

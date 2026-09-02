@@ -1,8 +1,8 @@
-# MyKrawl — Product Requirements Document
+# Krawlyx — Product Requirements Document
 
 | | |
 | --- | --- |
-| **Product** | MyKrawl |
+| **Product** | Krawlyx |
 | **Version** | 0.1 (Draft for review) |
 | **Date** | 2026-08-26 |
 | **Source brief** | `Initiative.md` |
@@ -12,7 +12,7 @@
 
 ## 1. Overview
 
-MyKrawl is a self-hosted web scraping workbench. A **runner** pastes one or more
+Krawlyx is a self-hosted web scraping workbench. A **runner** pastes one or more
 web addresses, picks a crawl engine from an admin-curated pool, and launches a
 batch crawl job, watching progress live. An **admin** configures the available
 engines, schedules recurring crawls, and decides where results land — the local
@@ -27,7 +27,7 @@ SQLite database or an external/shared folder as auto-splitting CSV/Excel files.
 - G5 — Scheduled (cron) crawling without external cron tooling.
 - G6 — Safe by default: auth, role separation, SSRF guardrails, robots.txt opt-out.
 - G7 — **Zero-cost**: every bundled component is free/open source; no paid API is
-  required for any core feature. MyKrawl itself is released under MIT.
+  required for any core feature. Krawlyx itself is released under MIT.
 
 ## 3. Non-goals (v1)
 
@@ -61,7 +61,7 @@ Correct call for this scope: single-node, low write concurrency, file-based back
 (copy the `.db` file). Conditions applied:
 
 - The database file lives at **`./data/mykrawl.db`** (overridable via settings/env);
-  MyKrawl creates `./data/` on first run. The folder is tracked in git; only the
+  Krawlyx creates `./data/` on first run. The folder is tracked in git; only the
   transient `-wal`/`-shm` SQLite sidecars are ignored.
 - Enable **WAL mode** so readers (UI polling results) don't block the crawl writer.
 - Access exclusively through **SQLAlchemy 2.x** so a later Postgres move is a config change.
@@ -125,7 +125,7 @@ ecosystem/talent pool).
 
 ### 4.7 Zero-cost constraint (stakeholder directive, 2026-08-26)
 
-There is no budget for paid services; MyKrawl exists for the public good and is
+There is no budget for paid services; Krawlyx exists for the public good and is
 released under MIT.
 
 - **Bundled core engines (free, run locally): Patchtroy + Scrapy.** Both are fully
@@ -198,7 +198,7 @@ IDs are stable and referenced by tests and issues.
 - **FR-EXP-04** — Files are written incrementally during the crawl (not at completion), so partial results survive crashes.
 - **FR-EXP-05** — **CSV splitting**: pure streaming write; when the open file reaches `split_size_mb` (default 40, min 1), it is closed and a new part begins. Each part repeats the header row. Encoding UTF-8 with BOM (`utf-8-sig`) for Excel compatibility.
 - **FR-EXP-06** — **XLSX splitting**: openpyxl write-only workbook per part; row budget per part = `split_size_mb` ÷ observed average bytes-per-row for the job (measured adaptively), clamped to a conservative floor (target ≈ 90% of limit). Header row repeated per part.
-- **FR-EXP-07** — Naming: `MyKrawl_{jobslug}_{YYYYMMDD-HHMMSS}_part{n:03d}.{csv|xlsx}`; a `_manifest.json` beside the parts lists columns, row counts, sizes, and job id.
+- **FR-EXP-07** — Naming: `Krawlyx_{jobslug}_{YYYYMMDD-HHMMSS}_part{n:03d}.{csv|xlsx}`; a `_manifest.json` beside the parts lists columns, row counts, sizes, and job id.
 - **FR-EXP-08** — Target health: "Test" writes and deletes a probe file; failures surface path/permission errors clearly. Unwritable target ⇒ job continues, DB persists, job flagged `export_degraded`.
 
 ### 6.5 Global settings (admin)
@@ -305,7 +305,7 @@ cookie pattern). The JSON API equally serves scripting/tests.
 
 ```text
 ┌───────────────────────────────────────────────────────────┐
-│ MyKrawl   [New job] [History]                 runner ▾   │
+│ Krawlyx   [New job] [History]                 runner ▾   │
 ├───────────────────────────────────────────────────────────┤
 │ Engine  [ Patchtroy Local ▾ ]   (only pooled engines)      │
 │                                                           │
@@ -340,7 +340,7 @@ edit config with masked secrets) · **Schedules** (table + cron editor) ·
 - **NFR-02 Portability** — Runs on Windows 10/11 and Linux; single command to start; SQLite + files only.
 - **NFR-03 Observability** — Structured logs (rotating file + stdout); per-job log view in UI; every engine failure captured with reason on the target row.
 - **NFR-04 Security** — bcrypt passwords; HttpOnly/SameSite session cookies; CSRF on mutations; SSRF guard default-on; secrets encrypted at rest; no secrets in logs.
-- **NFR-05 Compliance** — robots.txt respected by default; identifiable User-Agent `MyKrawl/0.1 (+{admin contact})`.
+- **NFR-05 Compliance** — robots.txt respected by default; identifiable User-Agent `Krawlyx/0.1 (+{admin contact})`.
 - **NFR-06 Quality** — pytest suite; engine adapters tested against recorded fixtures (no live network in CI); export splitters unit-tested incl. rollover boundaries; ≥ 80 % coverage on `app/engines`, `app/exporters`, `app/services`; frontend units via Vitest + Testing Library.
 - **NFR-07 Packaging** — monorepo: `backend/pyproject.toml` + `frontend/package.json`; `uvicorn` entrypoint serving the built SPA; optional multi-stage Dockerfile (Node build stage → Python runtime).
 

@@ -1,4 +1,4 @@
-# MyKrawl
+# Krawlyx
 
 A self-hosted web scraping workbench: paste URLs, pick a crawl engine from an
 admin-curated pool, run batch crawls on demand or on a cron schedule, and land
@@ -11,7 +11,7 @@ no paid APIs or third-party cloud lock-in.
 
 ## Overview
 
-![MyKrawl Crawl Runner & Anti-Ban Workbench](docs/assets/ui-1-newjob.png)
+![Krawlyx Crawl Runner & Workbench](docs/assets/ui-1-newjob.png)
 
 > 📖 **Looking for a full tour?** Explore the [**Interactive UI & Feature Gallery (5 Modules)**](docs/0008-get-started-quickly.md#7-workbench-visual-tour) in the Quick Start Guide.
 
@@ -19,7 +19,7 @@ no paid APIs or third-party cloud lock-in.
 
 ## Status
 
-M6 Hardening & Workbench Enhancements complete (`v1.7.1`). See [`PRD.md`](PRD.md) §12 and commit log. Key additions: SuperAdmin role hierarchy, SQLite database browser & SQL query console, unified full-dataset view with single-tier row pagination, multi-worker anti-ban session time gaps, SSRF guard, per-host throttle, per-job rotating logs, and full Docker deployment suite.
+M6 Hardening & Workbench Enhancements complete (`v1.8.9`). See [`PRD.md`](PRD.md) §12 and commit log. Key additions: SuperAdmin role hierarchy, SQLite database browser & SQL query console, unified full-dataset view with single-tier row pagination, multi-worker anti-ban session time gaps, SSRF guard, per-host throttle, per-job rotating logs, and full Docker deployment suite.
 
 ## Quick test (final product)
 
@@ -49,7 +49,7 @@ See [`AGENTS.md`](AGENTS.md) for the engineering contract used by AI agents and 
 
 ## Crawl Engines (Patchtroy vs. Scrapy)
 
-MyKrawl provides two built-in crawl engines tailored for different scraping tasks:
+Krawlyx provides two built-in crawl engines tailored for different scraping tasks:
 
 - **🛡️🐴 [Patchtroy](docs/0013-engines-comparison.md)**: Undetected Patchright headless Chromium browser engine paired with Trafilatura for pristine Markdown extraction, anti-bot evasion (evading Cloudflare/DataDome CDP leaks), full client-side JavaScript execution, Next.js/React hydration support, and automatic HTTP fallback. Best for dynamic, JS-rendered SPAs and anti-bot protected sites.
 - **⚡ [Scrapy](https://github.com/scrapy/scrapy)**: Ultra-fast, lightweight asynchronous HTTP engine running in an isolated subprocess. Best for large-scale bulk scraping, server-rendered HTML, and deep link crawling.
@@ -104,9 +104,9 @@ git config core.hooksPath .githooks
 
 ## Credits & Acknowledgements
 
-MyKrawl is built upon outstanding open-source projects:
+Krawlyx is built upon outstanding open-source projects:
 
-- **[Playwright for Python](https://github.com/microsoft/playwright-python)** — Reliable end-to-end browser automation for Chromium.
+- **[Patchright](https://github.com/Kaliiiiiiiiii-Vinyzu/patchright)** (Undetected Playwright for Python) — Undetected headless browser automation evading Cloudflare/DataDome CDP leakages.
 - **[Trafilatura](https://github.com/adbar/trafilatura)** — High-performance web text extraction and clean Markdown generation.
 - **[Scrapy](https://github.com/scrapy/scrapy)** — The battle-tested fast high-level web crawling and scraping framework for Python.
 - **[FastAPI](https://github.com/fastapi/fastapi)** — Modern, fast (high-performance) web framework for building APIs.

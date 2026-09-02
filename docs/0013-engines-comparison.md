@@ -1,6 +1,6 @@
 # Engines Comparison — Patchtroy vs. Scrapy
 
-MyKrawl includes two pluggable crawl engines in v1. Choose the engine that best fits your target website, performance requirements, and data structure.
+Krawlyx includes two pluggable crawl engines in v1. Choose the engine that best fits your target website, performance requirements, and data structure.
 
 ---
 
@@ -29,7 +29,7 @@ Choose **Patchtroy** when scraping dynamic, modern web applications or protected
 4. **Pristine Markdown & Boilerplate Removal**: Patchtroy pairs headless Chromium with Trafilatura to automatically remove navigation bars, footers, and ads, outputting clean Markdown and structured JSON-LD.
 
 > [!NOTE]
-> In MyKrawl, Patchtroy is guarded by a **25-second execution timeout** and an automatic high-speed HTTP fallback. If a headless browser instance encounters resource contention, it seamlessly falls back to direct HTTP fetching.
+> In Krawlyx, Patchtroy is guarded by a **25-second execution timeout** and an automatic high-speed HTTP fallback. If a headless browser instance encounters resource contention, it seamlessly falls back to direct HTTP fetching.
 
 ---
 
