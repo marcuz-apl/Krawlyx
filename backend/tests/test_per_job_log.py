@@ -29,7 +29,7 @@ from tests._helpers import auth_as, make_user
 # ---- fake adapter ----
 
 
-def _shadow_with_fake(type_id: str = "crawl4ai") -> None:
+def _shadow_with_fake(type_id: str = "playtrafi") -> None:
     class _Fake(CrawlEngine):
         type = type_id
         capabilities = Capabilities(deep_crawl=False)
@@ -76,13 +76,15 @@ def _dispatcher(isolated_engine_registry):
 # ---- tests ----
 
 
-def test_per_job_log_file_is_created_and_populated(client: TestClient) -> None:
-    _shadow_with_fake("crawl4ai")
+def test_per_job_log_file_is_created_and_populated(
+    client: TestClient, isolated_engine_registry
+) -> None:
+    _shadow_with_fake("playtrafi")
     with SessionLocal() as db:
         make_user("u", "admin")
         eid_row = EngineInstance(
             name="e1",
-            type="crawl4ai",
+            type="playtrafi",
             config_encrypted=encrypt_config({}),
             pooled=True,
         )

@@ -143,7 +143,7 @@ For non-containerized Linux hosts:
    python3 -m venv .venv
    source .venv/bin/activate
    pip install -e .
-   pip install crawl4ai scrapy playwright
+   pip install trafilatura scrapy playwright
    playwright install chromium
    playwright install-deps chromium
    ```

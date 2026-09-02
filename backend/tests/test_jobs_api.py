@@ -120,8 +120,8 @@ def test_create_job_requires_auth(client: TestClient) -> None:
 
 
 def test_create_job_validates_urls_and_returns_line_numbers(client: TestClient, db) -> None:
-    _shadow_with_fake("crawl4ai", sleep_s=0.05)
-    eid = _make_engine(db, "e1", "crawl4ai")
+    _shadow_with_fake("playtrafi", sleep_s=0.05)
+    eid = _make_engine(db, "e1", "playtrafi")
     csrf = _auth(client, "u1", "admin")
 
     r = client.post(
@@ -151,8 +151,8 @@ def test_create_job_validates_urls_and_returns_line_numbers(client: TestClient, 
 
 
 def test_create_job_rejects_engine_not_pooled(client: TestClient, db) -> None:
-    _shadow_with_fake("crawl4ai", sleep_s=0.05)
-    eid = _make_engine(db, "e2", "crawl4ai", pooled=False)
+    _shadow_with_fake("playtrafi", sleep_s=0.05)
+    eid = _make_engine(db, "e2", "playtrafi", pooled=False)
     csrf = _auth(client, "u2", "admin")
     r = client.post(
         "/api/jobs",
@@ -164,8 +164,8 @@ def test_create_job_rejects_engine_not_pooled(client: TestClient, db) -> None:
 
 
 def test_create_job_rejects_when_all_urls_invalid(client: TestClient, db) -> None:
-    _shadow_with_fake("crawl4ai", sleep_s=0.05)
-    eid = _make_engine(db, "e3", "crawl4ai")
+    _shadow_with_fake("playtrafi", sleep_s=0.05)
+    eid = _make_engine(db, "e3", "playtrafi")
     csrf = _auth(client, "u3", "admin")
     r = client.post(
         "/api/jobs",
@@ -191,8 +191,8 @@ def _wait_for_terminal(jid: int, timeout_s: float = 5.0) -> None:
 
 
 def test_get_job_returns_counts_and_targets_after_run(client: TestClient, db) -> None:
-    _shadow_with_fake("crawl4ai", sleep_s=0.05)
-    eid = _make_engine(db, "e4", "crawl4ai")
+    _shadow_with_fake("playtrafi", sleep_s=0.05)
+    eid = _make_engine(db, "e4", "playtrafi")
     csrf = _auth(client, "u4", "admin")
     r = client.post(
         "/api/jobs",
@@ -212,8 +212,8 @@ def test_get_job_returns_counts_and_targets_after_run(client: TestClient, db) ->
 
 
 def test_cancel_job_is_owner_or_admin_only(client: TestClient, db) -> None:
-    _shadow_with_fake("crawl4ai", sleep_s=0.5)
-    eid = _make_engine(db, "e5", "crawl4ai")
+    _shadow_with_fake("playtrafi", sleep_s=0.5)
+    eid = _make_engine(db, "e5", "playtrafi")
 
     # Owner logs in.
     csrf = _auth(client, "owner", "runner")
@@ -240,8 +240,8 @@ def test_cancel_job_is_owner_or_admin_only(client: TestClient, db) -> None:
 
 
 def test_results_paginate_and_downloads_work(client: TestClient, db) -> None:
-    _shadow_with_fake("crawl4ai", sleep_s=0.05)
-    eid = _make_engine(db, "e6", "crawl4ai")
+    _shadow_with_fake("playtrafi", sleep_s=0.05)
+    eid = _make_engine(db, "e6", "playtrafi")
     csrf = _auth(client, "u6", "admin")
     r = client.post(
         "/api/jobs",
@@ -284,8 +284,8 @@ def test_results_paginate_and_downloads_work(client: TestClient, db) -> None:
 
 
 def test_rerun_clones_into_new_job(client: TestClient, db) -> None:
-    _shadow_with_fake("crawl4ai", sleep_s=0.05)
-    eid = _make_engine(db, "e7", "crawl4ai")
+    _shadow_with_fake("playtrafi", sleep_s=0.05)
+    eid = _make_engine(db, "e7", "playtrafi")
     csrf = _auth(client, "u7", "admin")
     r = client.post(
         "/api/jobs",

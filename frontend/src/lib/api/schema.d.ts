@@ -145,6 +145,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/engines/bootstrap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore Default Engines */
+        post: operations["restore_default_engines_api_engines_bootstrap_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/jobs": {
         parameters: {
             query?: never;
@@ -265,6 +282,26 @@ export interface paths {
         };
         /** Get Result Json */
         get: operations["get_result_json_api_jobs__job_id__results__result_id__download_json_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/jobs/{job_id}/records": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Job Records
+         * @description Return all extracted structured records for the entire job without outer target pagination.
+         */
+        get: operations["get_job_records_api_jobs__job_id__records_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1384,6 +1421,21 @@ export interface components {
              */
             created_at: string;
         };
+        /** JobRecordsOut */
+        JobRecordsOut: {
+            /** Job Id */
+            job_id: number;
+            /** Total Records */
+            total_records: number;
+            /** Total Targets */
+            total_targets: number;
+            /** Columns */
+            columns: string[];
+            /** Records */
+            records: {
+                [key: string]: unknown;
+            }[];
+        };
         /** JobResultOut */
         JobResultOut: {
             /** Id */
@@ -2037,6 +2089,26 @@ export interface operations {
             };
         };
     };
+    restore_default_engines_api_engines_bootstrap_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EngineOut"][];
+                };
+            };
+        };
+    };
     list_jobs_api_jobs_get: {
         parameters: {
             query?: {
@@ -2305,6 +2377,37 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_job_records_api_jobs__job_id__records_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobRecordsOut"];
+                };
             };
             /** @description Validation Error */
             422: {

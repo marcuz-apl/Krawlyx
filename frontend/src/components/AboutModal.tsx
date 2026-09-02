@@ -40,7 +40,7 @@ export function AboutModal({ isOpen, onClose, version = "v1.5.5" }: AboutModalPr
           </strong>
           <br /><br />
           MyKrawl empowers data engineers and analysts to execute high-throughput web scraping, 
-          manage crawl queues with Crawl4AI & Scrapy engines, extract structured datasets with JSON schema, and stream results directly into CSV, XLSX, or SQLite.
+          manage crawl queues with Playtrafi & Scrapy engines, extract structured datasets with JSON schema, and stream results directly into CSV, XLSX, or SQLite.
         </p>
 
         {/* Separator Line */}

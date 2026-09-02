@@ -115,7 +115,7 @@ def test_multi_job_merge_and_save_dataset():
             assert user is not None
 
             # Create dummy engine and jobs
-            engine = EngineInstance(name="TestEngine", type="crawl4ai", pooled=True)
+            engine = EngineInstance(name="TestEngine", type="playtrafi", pooled=True)
             db_session.add(engine)
             db_session.flush()
 

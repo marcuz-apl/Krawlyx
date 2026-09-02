@@ -14,7 +14,7 @@ from app.models.base import Base, utcnow
 
 class EngineInstance(Base):
     __tablename__ = "engines"
-    __table_args__ = (CheckConstraint("type IN ('crawl4ai','scrapy')", name="ck_engines_type"),)
+    __table_args__ = (CheckConstraint("type IN ('playtrafi','scrapy')", name="ck_engines_type"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(120), unique=True)

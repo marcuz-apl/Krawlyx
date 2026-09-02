@@ -119,7 +119,7 @@ def test_delete_referenced_target_refused(client: TestClient) -> None:
         user = db.scalar(__import__("sqlalchemy").select(User).where(User.username == "at6"))
         eid = EngineInstance(
             name="dummy",
-            type="crawl4ai",
+            type="playtrafi",
             config_encrypted=encrypt_config({}),
             pooled=True,
         )

@@ -43,14 +43,14 @@ def test_capabilities_endpoint_returns_registered_types(client: TestClient, db) 
     r = client.get("/api/engines/capabilities")
     assert r.status_code == 200
     types = {t["type"] for t in r.json()["types"]}
-    assert types == {"crawl4ai", "scrapy"}
+    assert types == {"playtrafi", "scrapy"}
 
 
 def test_runner_cannot_create_engine(client: TestClient, db) -> None:
     csrf = auth_as(client, db, "runner1", "runner")
     r = client.post(
         "/api/engines",
-        json={"name": "c4", "type": "crawl4ai", "config": {}, "pooled": True},
+        json={"name": "pt", "type": "playtrafi", "config": {}, "pooled": True},
         headers={"X-CSRF-Token": csrf},
     )
     assert r.status_code == 403
@@ -65,8 +65,8 @@ def test_admin_creates_engine_and_secret_is_redacted(client: TestClient, db) -> 
     r = client.post(
         "/api/engines",
         json={
-            "name": "c4 local",
-            "type": "crawl4ai",
+            "name": "pt local",
+            "type": "playtrafi",
             "config": {"user_agent": "test/1", "browser_timeout_s": 5},
             "pooled": True,
         },
@@ -136,13 +136,13 @@ def test_test_endpoint_against_real_engine(client: TestClient, db) -> None:
     csrf = auth_as(client, db, "admin5", "admin")
     r = client.post(
         "/api/engines",
-        json={"name": "c4 health", "type": "crawl4ai", "config": {}, "pooled": True},
+        json={"name": "pt health", "type": "playtrafi", "config": {}, "pooled": True},
         headers={"X-CSRF-Token": csrf},
     )
     eid = r.json()["id"]
     r = client.post(f"/api/engines/{eid}/test", headers={"X-CSRF-Token": csrf})
     assert r.status_code == 200
     body = r.json()
-    # crawl4ai is installed; health should be ok (browser install is a separate concern).
+    # playtrafi is installed; health should be ok
     assert "ok" in body
     assert isinstance(body["latency_ms"], int)

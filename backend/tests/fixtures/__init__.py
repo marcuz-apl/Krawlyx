@@ -1,7 +1,7 @@
 """Engine-agnostic fixture suite for the cross-engine normalization test.
 
 Each fixture provides:
-  - The HTML a browser-rendering engine (Crawl4AI) would observe
+  - The HTML a browser-rendering engine (Playtrafi) would observe
   - The plain text a minimal HTTP engine (Scrapy TextResponse) would observe
   - The link set that a follow-links engine would surface
   - A canonical record describing the expected normalized output

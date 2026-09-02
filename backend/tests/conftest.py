@@ -55,13 +55,14 @@ def isolated_engine_registry():
 
     Lets job tests register fake adapters (`fake-ok`, `fake-slow`,
     `fake-error`) without leaking them into other tests. The default
-    `crawl4ai` / `scrapy` types are preserved.
+    `playtrafi` / `scrapy` types are preserved.
     """
     from app.engines import registry as _reg
 
-    saved = set(_reg.available_types())
+    saved_registry = dict(_reg._REGISTRY)
+    saved_caps = dict(_reg._CAPABILITIES)
     yield _reg
-    for t in list(_reg.available_types()):
-        if t not in saved:
-            _reg._REGISTRY.pop(t, None)
-            _reg._CAPABILITIES.pop(t, None)
+    _reg._REGISTRY.clear()
+    _reg._REGISTRY.update(saved_registry)
+    _reg._CAPABILITIES.clear()
+    _reg._CAPABILITIES.update(saved_caps)

@@ -80,9 +80,12 @@ def create_app() -> FastAPI:
     app.include_router(database.router)
     app.include_router(settings_api.router)
     # Serve the built SPA in production. The Vite dev server handles this in dev mode.
-    if FRONTEND_DIST.is_dir():
+    if FRONTEND_DIST.is_dir() and (FRONTEND_DIST / "index.html").is_file():
         # Serve static assets (JS/CSS) directly; SPA routes fall through to index.html.
-        app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets")
+        if (FRONTEND_DIST / "assets").is_dir():
+            app.mount(
+                "/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets"
+            )
 
         # SPA fallback: any non-API, non-asset path serves index.html (react-router handles /admin, etc.).
         @app.get("/{full_path:path}")

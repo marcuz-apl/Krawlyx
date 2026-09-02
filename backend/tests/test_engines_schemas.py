@@ -4,24 +4,24 @@ import pytest
 from pydantic import ValidationError
 
 from app.engines.schemas import (
-    Crawl4AIConfig,
+    PlaytrafiConfig,
     ScrapyConfig,
     config_model_for,
 )
 
 
-def test_crawl4ai_config_defaults_are_safe() -> None:
-    cfg = Crawl4AIConfig()
+def test_playtrafi_config_defaults_are_safe() -> None:
+    cfg = PlaytrafiConfig()
     assert cfg.headless is True
     assert 1 <= cfg.browser_timeout_s <= 300
     assert cfg.max_pages_per_target <= 200
 
 
-def test_crawl4ai_rejects_out_of_range_timeout() -> None:
+def test_playtrafi_rejects_out_of_range_timeout() -> None:
     with pytest.raises(ValidationError):
-        Crawl4AIConfig(browser_timeout_s=0)
+        PlaytrafiConfig(browser_timeout_s=0)
     with pytest.raises(ValidationError):
-        Crawl4AIConfig(browser_timeout_s=10_000)
+        PlaytrafiConfig(browser_timeout_s=10_000)
 
 
 def test_scrapy_config_parses_allowed_domains_csv() -> None:
@@ -35,7 +35,7 @@ def test_scrapy_rejects_negative_delay() -> None:
 
 
 def test_config_model_for_dispatches_by_type() -> None:
-    assert config_model_for("crawl4ai") is Crawl4AIConfig
+    assert config_model_for("playtrafi") is PlaytrafiConfig
     assert config_model_for("scrapy") is ScrapyConfig
 
 

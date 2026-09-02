@@ -47,7 +47,7 @@ be revisited deliberately rather than by accident.
 | Factor | Python | Java |
 | --- | --- | --- |
 | Scrapy | Native | Via Jython/deprecated or subprocess |
-| Crawl4AI | Native library | None — would shell out to Python anyway |
+| Playtrafi | Native library (Playwright + Trafilatura) | Modern headless Chromium rendering with clean markdown |
 | Firecrawl | Official SDK | Community REST calls |
 | Web framework | FastAPI (mature, async) | Spring Boot (heavy for this scope) |
 | Scheduling | APScheduler | Quartz (heavy) |
@@ -72,7 +72,7 @@ Correct call for this scope: single-node, low write concurrency, file-based back
 The three engines have different semantics; pretending they're interchangeable
 would produce a bad UX. Normalization strategy:
 
-- **Firecrawl** and **Crawl4AI** are *single-page extractors* → clean markdown/text of one URL.
+- **Firecrawl** and **Playtrafi** are *single-page extractors* → clean markdown/text of one URL.
 - **Scrapy** is a *site crawler* → follows links within a domain up to a depth/page cap.
 
 Therefore the adapter exposes capabilities (see §6), and the job form shows
@@ -111,7 +111,7 @@ ecosystem/talent pool).
 ### 4.6 Corrections/additions to the original brief
 
 1. **Engine "pool" clarified** — modeled as multiple *configured engine instances*
-   (e.g., "Crawl4AI Local", "Scrapy Default", "Firecrawl Self-hosted") that the admin registers and
+   (e.g., "Playtrafi Local", "Scrapy Default", "Firecrawl Self-hosted") that the admin registers and
    toggles into the user-visible pool. Users see names, not connection details.
 2. **XLSX splitting is estimated, not exact** — XLSX is a zip of XML and cannot be
    appended after close. Splitting uses an adaptive rows-per-file budget derived from
@@ -128,13 +128,13 @@ ecosystem/talent pool).
 There is no budget for paid services; MyKrawl exists for the public good and is
 released under MIT.
 
-- **Bundled core engines (free, run locally): Crawl4AI + Scrapy.** Both are fully
+- **Bundled core engines (free, run locally): Playtrafi + Scrapy.** Both are fully
   open source (Apache-2.0 / BSD) and execute on the host machine — these are the
   engines enabled in the pool by default.
 - **Firecrawl is out of scope for v1** (revised after weight review): self-hosting
   it means operating a separate Docker stack (API service + Redis queue + browser
   workers) — operationally heavy for a zero-cost, single-node tool, and its core
-  niche (JS-rendered page → clean markdown) is already covered by Crawl4AI
+  niche (JS-rendered page → clean markdown) is already covered by Playtrafi
   in-process. The engine registry stays type-extensible, so an adapter can be
   added post-v1 if demand appears.
 - Standing rule: no feature may acquire a dependency on a paid API. New
@@ -161,9 +161,9 @@ IDs are stable and referenced by tests and issues.
 
 ### 6.1 Engines (admin)
 
-- **FR-ENG-01** — Admin can register an engine instance: {name, type ∈ {crawl4ai, scrapy}, config JSON}. Multiple instances per type allowed; the registry is extensible for future engine types.
-- **FR-ENG-02** — Config fields per type:
-  - `crawl4ai`: `headless` (bool), `browser_timeout_s`, `text_mode`.
+- **FR-ENG-01** — Admin can register an engine instance: {name, type ∈ {playtrafi, scrapy}, config JSON}. Multiple instances per type allowed; the registry is extensible for future engine types.
+- **FR-ENG-02** — Admin config schema varies by type (validated by Pydantic on the backend):
+  - `playtrafi`: `headless` (bool), `browser_timeout_s`, `text_mode`.
   - `scrapy`: `concurrency`, `download_delay_s`, `autothrottle` (bool), `user_agent`.
 - **FR-ENG-03** — Secrets (`api_key`) are write-only: never returned by the API, masked in UI (`••••`), stored encrypted-at-rest (Fernet with app secret).
 - **FR-ENG-04** — Admin can enable/disable each instance for the **user pool**; disabled instances reject new jobs but finish running ones.
@@ -173,7 +173,7 @@ IDs are stable and referenced by tests and issues.
 ### 6.2 Job runner (user)
 
 - **FR-JOB-01** — Runner composes a job: multiline URL list (one per line, validated), engine picked **only from pooled instances**, optional notes.
-- **FR-JOB-02** — Per-engine options appear conditionally: for Scrapy — follow-links toggle, max depth, max pages per URL, allowed-domains override; for Crawl4AI — same options (supported); for Firecrawl — hidden (single-page).
+- **FR-JOB-02** — Per-engine options appear conditionally: for Scrapy — follow-links toggle, max depth, max pages per URL, allowed-domains override; for Playtrafi — same options (supported); for Firecrawl — hidden (single-page).
 - **FR-JOB-03** — Submitting queues the job; jobs execute FIFO with a global concurrency limit and per-job target parallelism.
 - **FR-JOB-04** — Live progress view: counts (pending/running/done/error), per-target status table, elapsed time; refreshes via TanStack Query polling (≤2 s), upgraded to SSE where available.
 - **FR-JOB-05** — Runner can cancel a queued/running job (running targets complete, pending targets skipped).
@@ -243,7 +243,7 @@ class CrawlEngine(Protocol):
 
 | Engine | Execution model | Deep crawl | Notes |
 | --- | --- | --- | --- |
-| Crawl4AI | In-process, Playwright/Chromium | ✅ | **Default engine.** Browser installed via `crawl4ai-setup`; shared browser context per job |
+| Playtrafi | In-process, Playwright/Chromium + Trafilatura | ✅ | **Default engine.** Browser installed via `playwright install chromium`; shared browser context per job |
 | Scrapy | Subprocess (`scrapy runspider` generic spider) | ✅ | Items streamed back as JSONL on stdout; autothrottle honors per-domain interval |
 
 *Firecrawl deferred post-v1 (§4.7): too operationally heavy relative to the gap it fills.*
@@ -307,7 +307,7 @@ cookie pattern). The JSON API equally serves scripting/tests.
 ┌───────────────────────────────────────────────────────────┐
 │ MyKrawl   [New job] [History]                 runner ▾   │
 ├───────────────────────────────────────────────────────────┤
-│ Engine  [ Crawl4AI Local ▾ ]   (only pooled engines)      │
+│ Engine  [ Playtrafi Local ▾ ]   (only pooled engines)      │
 │                                                           │
 │ URLs (one per line)                                       │
 │ ┌───────────────────────────────────────────────────────┐ │
@@ -349,7 +349,7 @@ edit config with masked secrets) · **Schedules** (table + cron editor) ·
 | Phase | Scope | Exit criteria |
 | --- | --- | --- |
 | **M1 Skeleton** | FastAPI app, auth + roles, SQLite schema + migrations, settings, engine registry interface; React+Vite scaffold with router &amp; theme | Login works, admin bootstrap, empty UI shell styled |
-| **M2 Engines** | Adapters ×2 (Crawl4AI, Scrapy), normalized records, fixture-based contract tests | Same URL produces equivalent normalized record from all engines |
+| **M2 Engines** | Adapters ×2 (Playtrafi, Scrapy), normalized records, fixture-based contract tests | Same URL produces equivalent normalized record from all engines |
 | **M3 Runner** | Job form, queue/worker pool, live progress, results browser | Batch of 20 URLs runs end-to-end with live UI updates |
 | **M4 Export** | Folder targets, CSV/XLSX streaming writers, splitting, manifest | 120 MB synthetic job yields correctly-split parts + manifest |
 | **M5 Scheduler + Admin** | Cron schedules, engine/target/settings screens, run-now | Daily schedule fires unattended and produces files |
@@ -359,7 +359,7 @@ edit config with masked secrets) · **Schedules** (table + cron editor) ·
 
 | Risk | Mitigation |
 | --- | --- |
-| Playwright browser install friction on Windows | Document `crawl4ai-setup`; ship doctor command `python -m mykrawl.doctor` |
+| Playwright browser install friction on Windows | Document `playwright install chromium`; ship doctor command `python -m mykrawl.doctor` |
 | Scrapy subprocess IPC fragility | Strict JSONL contract + timeout + stderr capture; contract tests |
 | XLSX size estimates drift | Adaptive measurement + conservative 90 % clamp; manifest records actual sizes |
 | Engine scope creep | Adapter contract isolates engines; adding one requires only a module + contract tests |

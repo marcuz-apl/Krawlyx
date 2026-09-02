@@ -164,20 +164,35 @@ def test_engine(engine: EngineInstance) -> tuple[bool, str, int]:
 
 def bootstrap_default_engines(db: Session) -> None:
     """Ensure default engine instances exist and have descriptive, clean names."""
-    c4ai = db.scalar(select(EngineInstance).where(EngineInstance.type == "crawl4ai"))
-    if not c4ai:
-        c4ai = EngineInstance(
-            name="Crawl4AI (Browser & JS Dynamic)",
-            type="crawl4ai",
+    # Migrate any legacy crawl4ai row to playtrafi if present
+    legacy_c4ai = db.scalar(select(EngineInstance).where(EngineInstance.type == "crawl4ai"))
+    if legacy_c4ai:
+        legacy_c4ai.type = "playtrafi"
+        legacy_c4ai.name = "Playtrafi (Browser & JS Dynamic)"
+        if not legacy_c4ai.pooled and legacy_c4ai.disabled_at is None:
+            legacy_c4ai.pooled = True
+
+    playtrafi = db.scalar(select(EngineInstance).where(EngineInstance.type == "playtrafi"))
+    if not playtrafi:
+        playtrafi = EngineInstance(
+            name="Playtrafi (Browser & JS Dynamic)",
+            type="playtrafi",
             config_encrypted=encrypt_config({}),
             pooled=True,
         )
-        db.add(c4ai)
+        db.add(playtrafi)
     else:
-        if c4ai.name in {"e", "crawl4ai", "Crawl4AI"}:
-            c4ai.name = "Crawl4AI (Browser & JS Dynamic)"
-        if not c4ai.pooled and c4ai.disabled_at is None:
-            c4ai.pooled = True
+        if playtrafi.name in {
+            "e",
+            "crawl4ai",
+            "Crawl4AI",
+            "Crawl4AI (Browser & JS Dynamic)",
+            "playtrafi",
+            "Playtrafi",
+        }:
+            playtrafi.name = "Playtrafi (Browser & JS Dynamic)"
+        if not playtrafi.pooled and playtrafi.disabled_at is None:
+            playtrafi.pooled = True
 
     scrapy = db.scalar(select(EngineInstance).where(EngineInstance.type == "scrapy"))
     if not scrapy:

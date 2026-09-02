@@ -73,7 +73,7 @@ def _make_engine() -> int:
     with SessionLocal() as db:
         eid = EngineInstance(
             name="exp-eng",
-            type="crawl4ai",
+            type="playtrafi",
             config_encrypted=encrypt_config({}),
             pooled=True,
         )

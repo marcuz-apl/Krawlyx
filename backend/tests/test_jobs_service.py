@@ -69,7 +69,7 @@ def _register_fake(type_id: str, sleep_s: float, fail: bool = False) -> None:
     # Shadow the real registered factory for the duration of this test.
     # The `isolated_engine_registry` fixture in conftest snapshots the
     # production factories on entry and restores them on exit. We swap
-    # in the fake under the canonical type id (crawl4ai or scrapy) and
+    # in the fake under the canonical type id (playtrafi or scrapy) and
     # write the engine row with that same id so the schema's CHECK
     # constraint accepts it.
     registry._REGISTRY[type_id] = lambda config=None: _Fake(config)
@@ -156,7 +156,7 @@ def test_recover_orphaned_jobs_marks_running_and_queued_as_failed() -> None:
         db.commit()
         db.refresh(user)
         uid = user.id
-    eid = _bootstrap_engine("e1", "crawl4ai")
+    eid = _bootstrap_engine("e1", "playtrafi")
 
     j1 = _make_job(eid, ["https://example.com/a"], user_id=uid)
     j2 = _make_job(eid, ["https://example.com/b"], user_id=uid)
@@ -179,10 +179,10 @@ def test_recover_orphaned_jobs_marks_running_and_queued_as_failed() -> None:
 
 
 def test_cancel_job_marks_pending_targets_skipped_and_is_idempotent() -> None:
-    _register_fake("crawl4ai", sleep_s=0.2)
+    _register_fake("playtrafi", sleep_s=0.2)
     with SessionLocal() as db:
         make_user("c", "runner")
-        eid = _bootstrap_engine("c1", "crawl4ai")
+        eid = _bootstrap_engine("c1", "playtrafi")
         user = db.scalar(select(User).where(User.username == "c"))
 
     # 5 targets; cancel after the worker has started processing.
@@ -214,10 +214,10 @@ def test_cancel_job_marks_pending_targets_skipped_and_is_idempotent() -> None:
 
 def test_enqueue_runs_two_jobs_under_default_concurrency() -> None:
     """Default max_concurrent_jobs=2 → two jobs run in parallel, both finish."""
-    _register_fake("crawl4ai", sleep_s=0.2)
+    _register_fake("playtrafi", sleep_s=0.2)
     with SessionLocal() as db:
         make_user("f", "runner")
-        eid = _bootstrap_engine("f1", "crawl4ai")
+        eid = _bootstrap_engine("f1", "playtrafi")
         user = db.scalar(select(User).where(User.username == "f"))
 
     j1 = _make_job(eid, ["https://example.com/1"], user_id=user.id)

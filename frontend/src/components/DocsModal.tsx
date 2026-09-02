@@ -47,7 +47,7 @@ const DOC_SECTIONS: DocSection[] = [
     badge: "Core",
     description: "High-performance web scraping workbench with asynchronous job queues, pluggable engines, and SQLite storage.",
     content: {
-      overview: "MyKrawl is a production-grade, self-hosted web scraping workbench built on FastAPI, React SPA, and SQLite in WAL mode. It unifies headless browser crawling (Crawl4AI) and high-throughput spiders (Scrapy) behind a single engine protocol.",
+      overview: "MyKrawl is a production-grade, self-hosted web scraping workbench built on FastAPI, React SPA, and SQLite in WAL mode. It unifies headless browser crawling (Playtrafi) and high-throughput spiders (Scrapy) behind a single engine protocol.",
       highlights: [
         { title: "Pluggable Engine Protocol", desc: "Standardized contract for both browser-based dynamic crawlers and high-volume static spiders." },
         { title: "Streaming Importers & Exporters", desc: "Append row-by-row with automatic file splitting for large datasets (CSV bytes & XLSX adaptive rows)." },
@@ -68,41 +68,40 @@ curl -s http://localhost:4040/api/health
     }
   },
   {
-    id: "crawl4ai",
+    id: "playtrafi",
     category: "Crawl Engines",
-    title: "Crawl4AI Engine",
+    title: "Playtrafi Engine",
     icon: Zap,
-    badge: "Headless Chromium",
-    description: "LLM-ready, browser-based extraction engine designed for dynamic single-page applications and rich media rendering.",
+    badge: "Playwright + Trafilatura",
+    description: "Lightweight, native browser extraction engine pairing Playwright Chromium with Trafilatura Markdown extraction.",
     content: {
-      overview: "Crawl4AI runs a headless Chromium browser instance to execute JavaScript, bypass client-side rendering hurdles, and generate clean Markdown alongside structured JSON items.",
+      overview: "Playtrafi pairs a native Playwright headless Chromium browser instance with Trafilatura to execute client-side JavaScript, bypass rendering hurdles, and generate pristine Markdown alongside structured JSON items.",
       highlights: [
         { title: "JavaScript Execution", desc: "Renders modern client-side SPAs (React, Vue, Next.js, Angular) before extracting DOM content." },
-        { title: "CSS & XPath Targeting", desc: "Target specific CSS selector containers to eliminate header/footer noise and extract only clean content." },
-        { title: "Markdown Cleansing", desc: "Converts rendered DOM nodes into formatted Markdown ready for LLM processing or embeddings." }
+        { title: "Boilerplate Removal", desc: "Trafilatura automatically strips repetitive headers, footers, and navigation elements." },
+        { title: "Pristine Markdown", desc: "Converts rendered DOM nodes into clean, structured Markdown ready for downstream processing." }
       ],
       codeBlock: {
         language: "json",
         label: "Sample Engine Options Payload",
         code: `{
-  "css_selector": ".listing-card",
-  "wait_for": "css:.listing-card",
-  "delay_seconds": 1.0,
-  "screenshot": false,
-  "user_agent": "MyKrawl/1.0 (Workbench)"
+  "wait_for": ".listing-card",
+  "browser_timeout_s": 30,
+  "headless": true,
+  "user_agent": "MyKrawl/1.0 via playtrafi"
 }`
       },
       table: {
         headers: ["Option", "Type", "Default", "Description"],
         rows: [
-          ["css_selector", "string", "null", "CSS selector to restrict extraction container"],
-          ["wait_for", "string", "null", "Wait for specific CSS element or duration before capture"],
-          ["delay_seconds", "number", "0.5", "Politeness delay between requests to the same host"],
-          ["cache_mode", "string", "bypass", "Cache policy: bypass, write, or read"]
+          ["wait_for", "string", "null", "Wait for specific CSS element before capture"],
+          ["browser_timeout_s", "number", "30", "Browser navigation and page load timeout in seconds"],
+          ["headless", "boolean", "true", "Run Chromium in headless mode"],
+          ["user_agent", "string", "MyKrawl/0.1 (+local)", "Custom User-Agent header"]
         ]
       },
       tips: [
-        "Use Crawl4AI when scraping sites that rely on JavaScript rendering or dynamic AJAX pagination.",
+        "Use Playtrafi when scraping sites that rely on JavaScript rendering or dynamic AJAX pagination.",
         "Ensure Chromium dependencies are installed via `playwright install chromium`."
       ]
     }
