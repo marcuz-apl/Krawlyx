@@ -62,7 +62,7 @@ export function LoginPage() {
           <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-[11px]">
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-medium">
               <ShieldCheck className="h-3 w-3 text-emerald-500" />
-              Patchtroy Anti-Bot Evasion
+              Patchtroy Stealth Engine
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 font-medium">
               <Zap className="h-3 w-3 text-amber-500" />
