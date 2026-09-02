@@ -30,13 +30,13 @@ def user_agent(template: str | None = None) -> str:
 
     `template` is the engine's per-adapter UA prefix (e.g. ``"patchtroy"``).
     The admin contact from ``Settings.admin_contact_email`` is appended
-    when set, e.g. ``"MyKrawl/0.1 (+ops@example.com) via patchtroy"``.
-    An empty contact degrades to ``"MyKrawl/0.1 via patchtroy"``.
+    when set, e.g. ``"Krawlyx/0.1 (+ops@example.com) via patchtroy"``.
+    An empty contact degrades to ``"Krawlyx/0.1 via patchtroy"``.
     """
     from app.core.config import get_settings
 
     contact = get_settings().admin_contact_email.strip()
-    base = "MyKrawl/0.1"
+    base = "Krawlyx/0.1"
     if contact:
         base = f"{base} (+{contact})"
     if template:

@@ -123,7 +123,7 @@ export function Header() {
             <button
               onClick={() => setShowAboutModal(true)}
               className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-400 transition"
-              title="About MyKrawl"
+              title="About Krawlyx"
             >
               <Info className="h-4 w-4" />
               <span className="hidden sm:inline">About</span>
@@ -138,7 +138,7 @@ export function Header() {
               </div>
               <div className="flex items-baseline gap-1.5">
                 <span className="font-extrabold text-base tracking-tight bg-gradient-to-r from-brand-600 via-indigo-600 to-sky-500 bg-clip-text text-transparent dark:from-brand-400 dark:via-indigo-300 dark:to-sky-300">
-                  MyKrawl
+                  Krawlyx
                 </span>
                 <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
                   {dynamicVersion}

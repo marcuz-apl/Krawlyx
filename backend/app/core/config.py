@@ -18,7 +18,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "MyKrawl"
+    app_name: str = "Krawlyx"
     # Required for any real deployment; the default keeps local dev frictionless.
     secret_key: str = "dev-insecure-secret-key"
     db_path: Path = ROOT_DIR / "data" / "mykrawl.db"

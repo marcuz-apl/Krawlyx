@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Bug, Lock, User, ArrowRight } from "lucide-react";
+import { Bug, Lock, User, ArrowRight, ShieldCheck, Zap, Sparkles } from "lucide-react";
 import { useLogin } from "@/hooks/useAuth";
 
 interface LocationState {
@@ -34,18 +34,44 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 transition-colors duration-150">
-      <div className="w-full max-w-md">
-        {/* Card Header & Brand */}
+      <div className="w-full max-w-lg">
+        {/* Fancy Hero Slogan & Banner */}
         <div className="text-center mb-6">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 text-white shadow-lg shadow-brand-500/25 mb-3">
-            <Bug className="h-7 w-7 animate-spin-slow text-white" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-gradient-to-r from-brand-500/10 via-indigo-500/10 to-sky-500/10 border border-brand-500/20 text-brand-600 dark:text-brand-400 mb-3 shadow-sm">
+            <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
+            <span>Next-Gen Extraction Workbench</span>
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            Welcome to MyKrawl
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Self-Hosted Web Scraping & Structured Extraction Workbench
+
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-600 to-sky-500 text-white shadow-xl shadow-brand-500/25">
+              <Bug className="h-6 w-6 animate-spin-slow text-white" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-brand-600 via-indigo-600 to-sky-500 bg-clip-text text-transparent dark:from-brand-400 dark:via-indigo-300 dark:to-sky-300">
+              Krawlyx
+            </h1>
+          </div>
+
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 tracking-wide">
+            Precision Scraping. Undetected Ingestion. Structured Intelligence.
           </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto leading-relaxed">
+            Self-hosted workbench powered by the <strong className="text-slate-700 dark:text-slate-300">Patchtroy</strong> stealth engine & high-velocity spiders.
+          </p>
+
+          {/* Feature highlights pill row */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-[11px]">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-medium">
+              <ShieldCheck className="h-3 w-3 text-emerald-500" />
+              Patchtroy Anti-Bot Evasion
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 font-medium">
+              <Zap className="h-3 w-3 text-amber-500" />
+              Scrapy High-Speed Spiders
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-medium">
+              Universal Datasets & SQL
+            </span>
+          </div>
         </div>
 
         {/* Login Form */}
@@ -110,7 +136,7 @@ export function LoginPage() {
         </form>
 
         <div className="text-center mt-6 text-xs text-slate-400 dark:text-slate-600">
-          MyKrawl Workbench · © {new Date().getFullYear()} Alfazen Inc.
+          Krawlyx Workbench · © {new Date().getFullYear()} Alfazen Inc.
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, Layers, Square, Trash2 } from 'lucide-react';
+import { AlertCircle, Layers, RotateCcw, Square, Trash2 } from 'lucide-react';
 
 import type { JobOut } from '@/lib/api/client';
 import { api } from '@/lib/api/client';
@@ -29,6 +29,17 @@ export function JobHistoryList({ jobs }: Props) {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [confirmBulkDelete, setConfirmBulkDelete] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const rerun = useMutation({
+    mutationFn: (id: number) => api.jobs.rerun(id),
+    onSuccess: (newJob) => {
+      qc.invalidateQueries({ queryKey: ['jobs'] });
+      navigate(`/jobs/${newJob.id}`);
+    },
+    onError: (err: Error) => {
+      setErrorMessage(`Failed to re-run job: ${err.message}`);
+    },
+  });
 
   const cancel = useMutation({
     mutationFn: (id: number) => api.jobs.cancel(id),
@@ -257,6 +268,19 @@ export function JobHistoryList({ jobs }: Props) {
                         </button>
                       ) : (
                         <>
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`Re-run Job #${j.id} with the same settings?`)) {
+                                rerun.mutate(j.id);
+                              }
+                            }}
+                            disabled={rerun.isPending}
+                            className="inline-flex items-center gap-1 rounded border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/80 dark:bg-indigo-950/40 px-2 py-0.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors mr-2 cursor-pointer disabled:opacity-50"
+                            title="Re-run this crawl job with identical engine & settings"
+                          >
+                            <RotateCcw className="h-3 w-3" />
+                            <span>Re-run</span>
+                          </button>
                           <Link
                             to={`/jobs/${j.id}/results`}
                             className="inline-block text-xs font-medium text-brand-600 hover:text-brand-800 hover:underline mr-2 whitespace-nowrap"

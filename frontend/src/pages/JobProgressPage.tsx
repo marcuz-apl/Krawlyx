@@ -1,6 +1,6 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Clock, ShieldCheck, Zap } from 'lucide-react';
+import { Clock, RotateCcw, ShieldCheck, Zap } from 'lucide-react';
 
 import { Counters } from '@/components/Counters';
 import { TargetStatusTable } from '@/components/TargetStatusTable';
@@ -10,12 +10,21 @@ import { api } from '@/lib/api/client';
 export function JobProgressPage() {
   const params = useParams<{ id: string }>();
   const id = Number(params.id);
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const { data, error, isLoading } = useJobPolling(id);
 
   const cancel = useMutation({
     mutationFn: () => api.jobs.cancel(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['job', id] }),
+  });
+
+  const rerun = useMutation({
+    mutationFn: () => api.jobs.rerun(id),
+    onSuccess: (newJob) => {
+      qc.invalidateQueries({ queryKey: ['jobs'] });
+      navigate(`/jobs/${newJob.id}`);
+    },
   });
 
   if (isLoading || !data) {
@@ -80,12 +89,27 @@ export function JobProgressPage() {
             </button>
           )}
           {isTerminal && (
-            <Link
-              to={`/jobs/${data.id}/results`}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-500 transition-all"
-            >
-              View Results ({data.counts.done} Extracted) →
-            </Link>
+            <>
+              <button
+                onClick={() => {
+                  if (window.confirm('Re-run this crawl job with identical settings?')) {
+                    rerun.mutate();
+                  }
+                }}
+                disabled={rerun.isPending}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-300 dark:border-indigo-700 bg-white dark:bg-slate-900 px-3.5 py-2 text-xs font-bold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                title="Re-run crawl with identical settings"
+              >
+                <RotateCcw className={`w-3.5 h-3.5 ${rerun.isPending ? 'animate-spin' : ''}`} />
+                <span>{rerun.isPending ? 'Re-queuing…' : 'Re-run Crawl'}</span>
+              </button>
+              <Link
+                to={`/jobs/${data.id}/results`}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-500 transition-all"
+              >
+                View Results ({data.counts.done} Extracted) →
+              </Link>
+            </>
           )}
         </div>
       </div>

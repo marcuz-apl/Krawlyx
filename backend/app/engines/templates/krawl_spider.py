@@ -124,7 +124,7 @@ def main() -> int:
         return 2
 
     settings = {
-        "USER_AGENT": os.environ.get("MYKRAWL_USER_AGENT", "MyKrawl/0.1 (+local)"),
+        "USER_AGENT": os.environ.get("MYKRAWL_USER_AGENT", "Krawlyx/0.1 (+local)"),
         "CONCURRENT_REQUESTS": _int("MYKRAWL_CONCURRENCY", 8),
         "DOWNLOAD_DELAY": _float("MYKRAWL_DOWNLOAD_DELAY", 0.0),
         "AUTOTHROTTLE_ENABLED": _bool("MYKRAWL_AUTOTHROTTLE", True),

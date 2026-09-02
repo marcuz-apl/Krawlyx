@@ -27,7 +27,7 @@ export function AboutModal({ isOpen, onClose, version = "v1.5.5" }: AboutModalPr
 
         {/* Product Name & Version */}
         <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
-          MyKrawl Workbench
+          Krawlyx Workbench
         </h2>
         <span className="mt-1 rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-semibold text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
           Version {version}
@@ -36,10 +36,10 @@ export function AboutModal({ isOpen, onClose, version = "v1.5.5" }: AboutModalPr
         {/* Intro */}
         <p className="mt-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
           <strong className="text-slate-900 dark:text-white">
-            MyKrawl = Modern, Self-Hosted Web Scraping & Structured Extraction Workbench
+            Krawlyx = Modern, Self-Hosted Web Scraping & Structured Extraction Workbench
           </strong>
           <br /><br />
-          MyKrawl empowers data engineers and analysts to execute high-throughput web scraping, 
+          Krawlyx empowers data engineers and analysts to execute high-throughput web scraping, 
           manage crawl queues with Patchtroy & Scrapy engines, extract structured datasets with JSON schema, and stream results directly into CSV, XLSX, or SQLite.
         </p>
 
