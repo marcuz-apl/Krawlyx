@@ -271,25 +271,29 @@ class PatchtroyEngine:
         except Exception:  # noqa: BLE001
             pass
 
-        duration_ms = int((time.monotonic() - t0) * 1000)
-        record = CrawlRecord(
+        options_dict = {}
+        if dataclasses.is_dataclass(options):
+            options_dict = dataclasses.asdict(options)
+        elif hasattr(options, "model_dump"):
+            options_dict = options.model_dump()
+        elif isinstance(options, dict):
+            options_dict = dict(options)
+
+        rec = normalize_record(
             target_id=target.target_id,
             source_url=target.url,
+            html=html,
+            markdown=md,
             final_url=final_url,
-            status="ok",
             http_status=status_code,
-            title=title,
-            content_html=html,
-            content_markdown=md or "",
-            duration_ms=duration_ms,
-            extra={"links": links},
+            links=links,
+            options=options_dict,
         )
+        rec.duration_ms = int((time.monotonic() - t0) * 1000)
+        if title and not rec.title:
+            rec.title = title
 
-        yield normalize_record(
-            record,
-            custom_schema=options.custom_schema,
-            text_mode=self.config.text_mode,
-        )
+        yield rec
 
 
 # Register the engine with the type-extensible registry.
