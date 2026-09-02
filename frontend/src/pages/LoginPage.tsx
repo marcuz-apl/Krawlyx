@@ -9,8 +9,8 @@ interface LocationState {
 
 const SLOGANS = [
   {
-    title: "Precision Scraping. Undetected Ingestion. Structured Intelligence.",
-    desc: "Self-hosted workbench powered by the Patchtroy stealth engine & high-velocity spiders.",
+    title: "Precision Scraping & Structured Intelligence.",
+    desc: "Self-hosted workbench powered by Patchtroy & high-velocity spiders.",
   },
   {
     title: "Stealth Chromium Automation & Trafilatura Markdown.",
@@ -84,10 +84,10 @@ export function LoginPage() {
               key={sloganIndex}
               className="animate-in fade-in slide-in-from-bottom-2 duration-500 text-center"
             >
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 tracking-wide">
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 tracking-wide text-balance">
                 {SLOGANS[sloganIndex].title}
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto leading-relaxed">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto leading-relaxed text-balance">
                 {SLOGANS[sloganIndex].desc}
               </p>
             </div>
