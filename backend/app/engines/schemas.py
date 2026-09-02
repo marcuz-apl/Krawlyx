@@ -8,14 +8,14 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
-EngineType = Literal["playtrafi", "scrapy"]
+EngineType = Literal["patchtroy", "scrapy"]
 
 
 class _StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
 
-class PlaytrafiConfig(_StrictModel):
+class PatchtroyConfig(_StrictModel):
     headless: bool = True
     browser_timeout_s: int = Field(default=30, ge=1, le=300)
     text_mode: bool = False
@@ -26,8 +26,9 @@ class PlaytrafiConfig(_StrictModel):
     max_pages_per_target: int = Field(default=50, ge=1, le=200)
 
 
-# Backward-compatibility alias
-Crawl4AIConfig = PlaytrafiConfig
+# Backward-compatibility aliases
+PlaytrafiConfig = PatchtroyConfig
+Crawl4AIConfig = PatchtroyConfig
 
 
 class ScrapyConfig(_StrictModel):
@@ -50,7 +51,8 @@ class ScrapyConfig(_StrictModel):
 
 def config_model_for(engine_type: str) -> type[BaseModel]:
     return {
-        "playtrafi": PlaytrafiConfig,
+        "patchtroy": PatchtroyConfig,
+        "playtrafi": PatchtroyConfig,
         "scrapy": ScrapyConfig,
     }[engine_type]
 
@@ -58,6 +60,7 @@ def config_model_for(engine_type: str) -> type[BaseModel]:
 __all__ = [
     "Crawl4AIConfig",
     "EngineType",
+    "PatchtroyConfig",
     "PlaytrafiConfig",
     "ScrapyConfig",
     "config_model_for",

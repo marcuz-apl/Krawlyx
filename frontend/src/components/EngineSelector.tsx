@@ -53,7 +53,7 @@ export function EngineSelector({ value, onChange }: Props) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300 space-y-2">
         <p className="font-medium">
-          No pooled engines available. A pooled engine (such as Playtrafi or Scrapy) is required to run jobs.
+          No pooled engines available. A pooled engine (such as Patchtroy or Scrapy) is required to run jobs.
         </p>
         <div className="flex items-center gap-2 pt-1">
           <button

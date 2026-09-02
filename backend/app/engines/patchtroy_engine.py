@@ -1,12 +1,12 @@
-"""Playtrafi adapter — native Playwright browser engine with Trafilatura extraction.
+"""Patchtroy adapter — undetected Patchright browser engine with Trafilatura extraction.
 
-Couples headless Chromium (for client-side JS execution and SPA rendering) with
-Trafilatura (for clean Markdown generation, boilerplate removal, and metadata).
-Zero heavy ML/AI baggage.
+Couples undetected headless Chromium via Patchright (bypassing Cloudflare/DataDome CDP
+leakages and executing client-side JS) with Trafilatura (for clean Markdown generation,
+boilerplate removal, and metadata). Zero heavy ML/AI baggage.
 
 The adapter:
-  - validates config through PlaytrafiConfig
-  - launches headless Chromium via playwright.async_api
+  - validates config through PatchtroyConfig
+  - launches stealth Chromium via patchright (or playwright fallback)
   - extracts rendered HTML, final URL, status code, and links
   - converts HTML to clean Markdown via trafilatura
   - applies the SSRF guard before touching the network (PRD §6.5)
@@ -30,12 +30,12 @@ from app.engines.base import (
     user_agent,
 )
 from app.engines.normalize import normalize_record
-from app.engines.schemas import PlaytrafiConfig
+from app.engines.schemas import PatchtroyConfig
 from app.engines.ssrf import resolve_safe
 
-logger = logging.getLogger("mykrawl.engines.playtrafi")
+logger = logging.getLogger("mykrawl.engines.patchtroy")
 
-ENGINE_TYPE = "playtrafi"
+ENGINE_TYPE = "patchtroy"
 
 CAPABILITIES = Capabilities(
     deep_crawl=True,
@@ -46,24 +46,29 @@ CAPABILITIES = Capabilities(
 )
 
 
-class PlaytrafiEngine:
-    """Concretely implements the CrawlEngine protocol using Playwright and Trafilatura."""
+class PatchtroyEngine:
+    """Concretely implements the CrawlEngine protocol using Patchright and Trafilatura."""
 
     type = ENGINE_TYPE
     capabilities = CAPABILITIES
 
     def __init__(self, config: dict | None = None) -> None:
-        self.config = PlaytrafiConfig.model_validate(config or {})
+        self.config = PatchtroyConfig.model_validate(config or {})
         self._last_fetch: dict[str, float] = {}
 
     def health(self) -> HealthReport:
-        """Verify Playwright and Trafilatura packages are importable."""
+        """Verify Patchright/Playwright and Trafilatura packages are importable."""
         try:
-            import playwright  # noqa: F401
+            try:
+                import patchright  # noqa: F401
+                driver_name = "patchright"
+            except ImportError:
+                import playwright  # noqa: F401
+                driver_name = "playwright"
             import trafilatura  # noqa: F401
         except (ImportError, OSError) as exc:
-            return HealthReport(ok=False, detail=f"playtrafi dependencies not importable: {exc}")
-        return HealthReport(ok=True, detail=f"playtrafi ready ({self.config.user_agent})")
+            return HealthReport(ok=False, detail=f"patchtroy dependencies not importable: {exc}")
+        return HealthReport(ok=True, detail=f"patchtroy ready via {driver_name} ({self.config.user_agent})")
 
     async def fetch(self, target: Target, options: JobOptions) -> AsyncIterator[CrawlRecord]:
         from app.core.config import get_settings
@@ -74,38 +79,43 @@ class PlaytrafiEngine:
         try:
             host, _ = resolve_safe(target, cfg)
         except ValueError as exc:
+            logger.warning("target rejected by SSRF guard: %s (%s)", target.url, exc)
             yield CrawlRecord(
                 target_id=target.target_id,
                 source_url=target.url,
-                status="skipped",
-                error=str(exc),
+                status="blocked",
+                error=f"SSRF guard: {exc}",
             )
             return
 
-        # Per-host throttle (FR-SET-02)
+        # FR-SET-02: per-host rate limiting
         interval = cfg.per_domain_interval_s
-        if interval > 0:
-            now = time.monotonic()
-            last = self._last_fetch.get(host, 0.0)
-            wait = last + interval - now
-            if wait > 0:
-                await asyncio.sleep(wait)
-            self._last_fetch[host] = time.monotonic()
+        now = time.monotonic()
+        last = self._last_fetch.get(host)
+        if last is not None and (now - last) < interval:
+            await asyncio.sleep(interval - (now - last))
+        self._last_fetch[host] = time.monotonic()
 
-        # Verify imports
+        t0 = time.monotonic()
+
+        # Import async_playwright from patchright if available, else playwright
         try:
+            try:
+                from patchright.async_api import async_playwright
+            except ImportError:
+                from playwright.async_api import async_playwright
             import trafilatura
-            from playwright.async_api import async_playwright
         except (ImportError, OSError) as exc:
+            logger.error("patchtroy import failed: %s", exc)
             yield CrawlRecord(
                 target_id=target.target_id,
                 source_url=target.url,
                 status="error",
-                error=f"playtrafi import failed: {exc}",
+                error=f"patchtroy import failed: {exc}",
             )
             return
 
-        ua = user_agent("playtrafi")
+        ua = user_agent("patchtroy")
         html = ""
         md = None
         status_code = 200
@@ -114,7 +124,7 @@ class PlaytrafiEngine:
 
         timeout_ms = min(self.config.browser_timeout_s, 25) * 1000
 
-        # On Windows, Playwright requires a ProactorEventLoop inside an isolated thread
+        # On Windows, Playwright/Patchright requires a ProactorEventLoop inside an isolated thread
         def _sync_browser_fetch() -> tuple[str, str, int, list[dict[str, str]]]:
             if sys.platform == "win32":
                 asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
@@ -123,14 +133,28 @@ class PlaytrafiEngine:
 
             async def _inner():
                 async with async_playwright() as p:
-                    browser = await p.chromium.launch(headless=self.config.headless)
+                    browser = await p.chromium.launch(
+                        headless=self.config.headless,
+                        args=[
+                            "--disable-blink-features=AutomationControlled",
+                            "--no-sandbox",
+                        ],
+                    )
                     try:
                         context = await browser.new_context(
                             user_agent=ua,
                             viewport={"width": 1280, "height": 800},
                             ignore_https_errors=True,
+                            locale="en-US",
                         )
                         page = await context.new_page()
+
+                        # In-process stealth script: masks navigator.webdriver
+                        await page.add_init_script("""
+                            Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+                            window.chrome = { runtime: {} };
+                        """)
+
                         resp = await page.goto(
                             target.url,
                             timeout=timeout_ms,
@@ -191,7 +215,7 @@ class PlaytrafiEngine:
                     logger.debug("Trafilatura extraction fallback: %s", traf_exc)
         except Exception as exc:  # noqa: BLE001
             logger.warning(
-                "Playtrafi browser fetch failed or timed out (%s) for %s; using fast HTTP fallback",
+                "Patchtroy browser fetch failed or timed out (%s) for %s; using fast HTTP fallback",
                 exc,
                 target.url,
             )
@@ -230,34 +254,48 @@ class PlaytrafiEngine:
                 target_id=target.target_id,
                 source_url=target.url,
                 status="error",
-                http_status=status_code,
-                error="empty HTML response",
+                http_status=status_code if status_code != 200 else 500,
+                error="patchtroy fetch returned empty body",
+                duration_ms=int((time.monotonic() - t0) * 1000),
             )
             return
 
-        options_dict = {}
-        if dataclasses.is_dataclass(options):
-            options_dict = dataclasses.asdict(options)
-        elif hasattr(options, "model_dump"):
-            options_dict = options.model_dump()
-        elif isinstance(options, dict):
-            options_dict = dict(options)
+        # Extract title from HTML
+        title = ""
+        try:
+            from bs4 import BeautifulSoup
 
-        yield normalize_record(
+            soup = BeautifulSoup(html[:50000], "html.parser")
+            if soup.title and soup.title.string:
+                title = soup.title.string.strip()
+        except Exception:  # noqa: BLE001
+            pass
+
+        duration_ms = int((time.monotonic() - t0) * 1000)
+        record = CrawlRecord(
             target_id=target.target_id,
             source_url=target.url,
-            html=html,
-            markdown=md,
             final_url=final_url,
+            status="ok",
             http_status=status_code,
-            links=links,
-            options=options_dict,
+            title=title,
+            content_html=html,
+            content_markdown=md or "",
+            duration_ms=duration_ms,
+            extra={"links": links},
+        )
+
+        yield normalize_record(
+            record,
+            custom_schema=options.custom_schema,
+            text_mode=self.config.text_mode,
         )
 
 
-# Register engine with registry
+# Register the engine with the type-extensible registry.
 from app.engines.registry import register_engine
 
-register_engine(ENGINE_TYPE, CAPABILITIES)(PlaytrafiEngine)
+register_engine(ENGINE_TYPE, CAPABILITIES)(PatchtroyEngine)
 
-__all__ = ["PlaytrafiEngine"]
+
+__all__ = ["PatchtroyEngine"]

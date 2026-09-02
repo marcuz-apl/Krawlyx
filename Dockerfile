@@ -33,7 +33,7 @@ COPY backend/pyproject.toml ./backend/
 RUN pip install --upgrade pip setuptools wheel && \
     python -c 'import tomllib; open("requirements.txt", "w").write("\n".join(tomllib.load(open("backend/pyproject.toml", "rb"))["project"]["dependencies"]))' && \
     pip install -r requirements.txt && \
-    pip install playwright
+    pip install patchright
 
 # Strip unit tests, compiled bytecode, and C headers from site-packages
 RUN find /opt/venv/lib/python3.12/site-packages -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true && \
@@ -57,12 +57,12 @@ WORKDIR /app
 # Copy virtualenv from builder stage (zero compiler/build tools in runtime)
 COPY --from=python-builder /opt/venv /opt/venv
 
-# Install curl (healthchecks), ca-certificates, and Playwright Chromium OS deps
+# Install curl (healthchecks), ca-certificates, and Patchright Chromium OS deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
-    && playwright install-deps chromium \
-    && playwright install chromium \
+    && patchright install-deps chromium \
+    && patchright install chromium \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/* /root/.cache \
     && find /ms-playwright -name "*.zip" -delete
 

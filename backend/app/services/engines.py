@@ -164,35 +164,40 @@ def test_engine(engine: EngineInstance) -> tuple[bool, str, int]:
 
 def bootstrap_default_engines(db: Session) -> None:
     """Ensure default engine instances exist and have descriptive, clean names."""
-    # Migrate any legacy crawl4ai row to playtrafi if present
-    legacy_c4ai = db.scalar(select(EngineInstance).where(EngineInstance.type == "crawl4ai"))
-    if legacy_c4ai:
-        legacy_c4ai.type = "playtrafi"
-        legacy_c4ai.name = "Playtrafi (Browser & JS Dynamic)"
-        if not legacy_c4ai.pooled and legacy_c4ai.disabled_at is None:
-            legacy_c4ai.pooled = True
+    # Migrate any legacy crawl4ai or playtrafi row to patchtroy if present
+    legacy_engine = db.scalar(
+        select(EngineInstance).where(EngineInstance.type.in_(["crawl4ai", "playtrafi"]))
+    )
+    if legacy_engine:
+        legacy_engine.type = "patchtroy"
+        legacy_engine.name = "Patchtroy (Stealth Browser & Dynamic JS)"
+        if not legacy_engine.pooled and legacy_engine.disabled_at is None:
+            legacy_engine.pooled = True
 
-    playtrafi = db.scalar(select(EngineInstance).where(EngineInstance.type == "playtrafi"))
-    if not playtrafi:
-        playtrafi = EngineInstance(
-            name="Playtrafi (Browser & JS Dynamic)",
-            type="playtrafi",
+    patchtroy = db.scalar(select(EngineInstance).where(EngineInstance.type == "patchtroy"))
+    if not patchtroy:
+        patchtroy = EngineInstance(
+            name="Patchtroy (Stealth Browser & Dynamic JS)",
+            type="patchtroy",
             config_encrypted=encrypt_config({}),
             pooled=True,
         )
-        db.add(playtrafi)
+        db.add(patchtroy)
     else:
-        if playtrafi.name in {
+        if patchtroy.name in {
             "e",
             "crawl4ai",
             "Crawl4AI",
             "Crawl4AI (Browser & JS Dynamic)",
             "playtrafi",
             "Playtrafi",
+            "Playtrafi (Browser & JS Dynamic)",
+            "patchtroy",
+            "Patchtroy",
         }:
-            playtrafi.name = "Playtrafi (Browser & JS Dynamic)"
-        if not playtrafi.pooled and playtrafi.disabled_at is None:
-            playtrafi.pooled = True
+            patchtroy.name = "Patchtroy (Stealth Browser & Dynamic JS)"
+        if not patchtroy.pooled and patchtroy.disabled_at is None:
+            patchtroy.pooled = True
 
     scrapy = db.scalar(select(EngineInstance).where(EngineInstance.type == "scrapy"))
     if not scrapy:

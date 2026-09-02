@@ -11,7 +11,7 @@ clear. Each entry contains:
 - `source_url` — the canonical URL the runner would have requested
 - `final_url` — after redirects (currently always equal to source_url here)
 - `http_status`, `title`
-- `raw_html` — what the HTML engine (Playtrafi) would observe
+- `raw_html` — what the HTML engine (Patchtroy) would observe
 - `raw_text` — what the plain-text engine (Scrapy with TextResponse) would
   observe when `text_mode=True`
 - `discovered_links` — the link set Scrapy's spider would surface if the page

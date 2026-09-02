@@ -49,6 +49,13 @@ def build(type_id: str, config: dict | None = None) -> CrawlEngine:
 # even if a concrete adapter is not yet implemented (e.g. the v1 Firecrawl
 # deferral, PRD §4.7). The UI reads capabilities_for() to render form fields.
 _DEFAULT_CAPABILITIES: dict[str, Capabilities] = {
+    "patchtroy": Capabilities(
+        deep_crawl=True,
+        max_depth=5,
+        max_pages_per_target=200,
+        supports_wait_for=True,
+        supports_render=True,
+    ),
     "playtrafi": Capabilities(
         deep_crawl=True,
         max_depth=5,

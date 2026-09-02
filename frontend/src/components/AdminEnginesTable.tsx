@@ -31,7 +31,7 @@ export function AdminEnginesTable() {
     mutationFn: () => api.engines.bootstrap(),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['engines'] });
-      setSuccessMsg('Default engines (Playtrafi and Scrapy) restored and pooled successfully!');
+      setSuccessMsg('Default engines (Patchtroy and Scrapy) restored and pooled successfully!');
       setTimeout(() => setSuccessMsg(null), 4000);
     },
   });
@@ -58,7 +58,7 @@ export function AdminEnginesTable() {
             onClick={() => restore.mutate()}
             disabled={restore.isPending}
             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
-            title="Re-creates default Playtrafi and Scrapy engines if missing or unpooled"
+            title="Re-creates default Patchtroy and Scrapy engines if missing or unpooled"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             {restore.isPending ? 'Restoring…' : 'Restore Defaults'}
@@ -213,7 +213,7 @@ export function AdminEnginesTable() {
 
 function CreateForm({ onDone }: { onDone: () => void }) {
   const [name, setName] = useState('');
-  const [type, setType] = useState('playtrafi');
+  const [type, setType] = useState('patchtroy');
   const [pooled, setPooled] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
@@ -222,7 +222,7 @@ function CreateForm({ onDone }: { onDone: () => void }) {
     queryFn: () => api.engines.capabilities(),
   });
 
-  const availableTypes = capData?.types?.map((t) => t.type) ?? ['playtrafi', 'scrapy'];
+  const availableTypes = capData?.types?.map((t) => t.type) ?? ['patchtroy', 'scrapy'];
 
   const create = useMutation({
     mutationFn: (body: EngineCreateBody) => api.engines.create(body),
@@ -251,7 +251,7 @@ function CreateForm({ onDone }: { onDone: () => void }) {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. My Custom Playtrafi"
+            placeholder="e.g. My Custom Patchtroy"
             className="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2.5 py-1.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           />
         </label>

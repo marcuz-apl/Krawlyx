@@ -44,14 +44,14 @@ See [`AGENTS.md`](AGENTS.md) for the engineering contract used by AI agents and 
 | --- | --- |
 | Backend | Python · FastAPI · SQLAlchemy · APScheduler |
 | Frontend | React + TypeScript + Vite + Tailwind CSS + shadcn/ui |
-| Engines | Playtrafi, Scrapy (pluggable adapter registry) |
+| Engines | Patchtroy, Scrapy (pluggable adapter registry) |
 | Storage | SQLite (WAL) + CSV/XLSX export with size-based splitting |
 
-## Crawl Engines (Playtrafi vs. Scrapy)
+## Crawl Engines (Patchtroy vs. Scrapy)
 
 MyKrawl provides two built-in crawl engines tailored for different scraping tasks:
 
-- **🎭 [Playtrafi](docs/0013-engines-comparison.md)**: Native Playwright headless Chromium browser engine paired with Trafilatura for pristine Markdown extraction, full client-side JavaScript execution, Next.js/React hydration support, and automatic HTTP fallback. Best for dynamic, JS-rendered SPAs.
+- **🛡️🐴 [Patchtroy](docs/0013-engines-comparison.md)**: Undetected Patchright headless Chromium browser engine paired with Trafilatura for pristine Markdown extraction, anti-bot evasion (evading Cloudflare/DataDome CDP leaks), full client-side JavaScript execution, Next.js/React hydration support, and automatic HTTP fallback. Best for dynamic, JS-rendered SPAs and anti-bot protected sites.
 - **⚡ [Scrapy](https://github.com/scrapy/scrapy)**: Ultra-fast, lightweight asynchronous HTTP engine running in an isolated subprocess. Best for large-scale bulk scraping, server-rendered HTML, and deep link crawling.
 
 ## SuperAdmin Password Recovery
@@ -87,7 +87,7 @@ All project documentation, architectural decision records, implementation plans,
 - `0010` — [Universal SQL Query & Transform Console](docs/0010-universal-sql-console.md) — In-browser dynamic SQL transforms and data cleaning.
 - `0011` — [Multi-Worker Rate Limiting & Engine Hardening](docs/0011-rate-limiting-and-crawler-hardening.md) — Anti-ban stagger, 25s timeouts, and HTTP fallbacks.
 - `0012` — [Multi-Job Dataset Merger](docs/0012-multi-job-merger.md) — Multi-job selection, column union, and unified export.
-- `0013` — [⚙️ Crawl Engines Comparison: Playtrafi vs. Scrapy](docs/0013-engines-comparison.md) — Deep dive into engine differences, speeds, and use cases.
+- `0013` — [⚙️ Crawl Engines Comparison: Patchtroy vs. Scrapy](docs/0013-engines-comparison.md) — Deep dive into engine differences, speeds, and use cases.
 - `0014` — [Dataset Filters, Splitting, Sorting & Maintenance](docs/0014-dataset-filters-splitting-sorting-maintenance.md) — Dataset browser operations and maintenance.
 - `0015` — [🐳 Production Deployment Guide (Docker, Compose & Synology NAS)](docs/0015-production-deployment-guide.md) — Complete 1-click Docker, Compose, and DSM Reverse Proxy guide.
 

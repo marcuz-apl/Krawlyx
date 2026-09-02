@@ -47,7 +47,7 @@ const DOC_SECTIONS: DocSection[] = [
     badge: "Core",
     description: "High-performance web scraping workbench with asynchronous job queues, pluggable engines, and SQLite storage.",
     content: {
-      overview: "MyKrawl is a production-grade, self-hosted web scraping workbench built on FastAPI, React SPA, and SQLite in WAL mode. It unifies headless browser crawling (Playtrafi) and high-throughput spiders (Scrapy) behind a single engine protocol.",
+      overview: "MyKrawl is a production-grade, self-hosted web scraping workbench built on FastAPI, React SPA, and SQLite in WAL mode. It unifies undetected stealth browser crawling (Patchtroy) and high-throughput spiders (Scrapy) behind a single engine protocol.",
       highlights: [
         { title: "Pluggable Engine Protocol", desc: "Standardized contract for both browser-based dynamic crawlers and high-volume static spiders." },
         { title: "Streaming Importers & Exporters", desc: "Append row-by-row with automatic file splitting for large datasets (CSV bytes & XLSX adaptive rows)." },
@@ -68,18 +68,18 @@ curl -s http://localhost:4040/api/health
     }
   },
   {
-    id: "playtrafi",
+    id: "patchtroy",
     category: "Crawl Engines",
-    title: "Playtrafi Engine",
+    title: "Patchtroy Engine",
     icon: Zap,
-    badge: "Playwright + Trafilatura",
-    description: "Lightweight, native browser extraction engine pairing Playwright Chromium with Trafilatura Markdown extraction.",
+    badge: "Patchright + Trafilatura",
+    description: "Undetected stealth browser extraction engine pairing Patchright Chromium with Trafilatura Markdown extraction.",
     content: {
-      overview: "Playtrafi pairs a native Playwright headless Chromium browser instance with Trafilatura to execute client-side JavaScript, bypass rendering hurdles, and generate pristine Markdown alongside structured JSON items.",
+      overview: "Patchtroy pairs an undetected Patchright headless Chromium browser instance with Trafilatura to bypass Cloudflare/DataDome detection, execute client-side JavaScript, and generate pristine Markdown alongside structured JSON items.",
       highlights: [
+        { title: "Anti-Bot Evasion", desc: "Patches CDP runtime leakages and masks automation flags to evade modern WAFs and bot challenges." },
         { title: "JavaScript Execution", desc: "Renders modern client-side SPAs (React, Vue, Next.js, Angular) before extracting DOM content." },
-        { title: "Boilerplate Removal", desc: "Trafilatura automatically strips repetitive headers, footers, and navigation elements." },
-        { title: "Pristine Markdown", desc: "Converts rendered DOM nodes into clean, structured Markdown ready for downstream processing." }
+        { title: "Pristine Markdown", desc: "Trafilatura strips repetitive boilerplate, navigation bars, and footers, leaving high-value content." }
       ],
       codeBlock: {
         language: "json",
@@ -88,7 +88,7 @@ curl -s http://localhost:4040/api/health
   "wait_for": ".listing-card",
   "browser_timeout_s": 30,
   "headless": true,
-  "user_agent": "MyKrawl/1.0 via playtrafi"
+  "user_agent": "MyKrawl/1.0 via patchtroy"
 }`
       },
       table: {
@@ -101,8 +101,8 @@ curl -s http://localhost:4040/api/health
         ]
       },
       tips: [
-        "Use Playtrafi when scraping sites that rely on JavaScript rendering or dynamic AJAX pagination.",
-        "Ensure Chromium dependencies are installed via `playwright install chromium`."
+        "Use Patchtroy when scraping sites that rely on JavaScript rendering, dynamic AJAX pagination, or bot defenses.",
+        "Ensure Chromium dependencies are installed via `patchright install chromium`."
       ]
     }
   },

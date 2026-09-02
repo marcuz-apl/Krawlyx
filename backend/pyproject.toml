@@ -17,7 +17,7 @@ dependencies = [
     "openpyxl>=3.1,<4",
     "beautifulsoup4>=4.12",
     "scrapy>=2.11",
-    "playwright>=1.40",
+    "patchright>=1.49",
     "trafilatura>=1.12",
 ]
 
