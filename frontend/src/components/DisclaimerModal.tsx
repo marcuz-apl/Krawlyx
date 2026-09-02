@@ -26,7 +26,7 @@ export function DisclaimerModal({ isOpen, onClose }: DisclaimerModalProps) {
 
         <div className="max-h-[300px] space-y-3 overflow-y-auto pr-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
           <p>
-            <strong>MyKrawl</strong> is a technical web crawling and data engineering workbench provided for research, automated indexing, and authorized data integration purposes.
+            <strong>Krawlyx</strong> is a technical web crawling and data engineering workbench provided for research, automated indexing, and authorized data integration purposes.
           </p>
           <p>
             <strong>Robots.txt & Terms of Service:</strong> Users are responsible for ensuring that all crawled target domains permit automated crawling and that rate limits are configured respectfully (e.g. configuring per-domain request intervals and avoiding denial-of-service impacts).

@@ -31,7 +31,7 @@ export function Footer() {
 
           {/* Center: Copyright */}
           <div className="text-slate-500 dark:text-slate-400 font-medium text-center">
-            MyKrawl Workbench — © {new Date().getFullYear()} Alfazen Inc. All rights reserved
+            Krawlyx Workbench — © {new Date().getFullYear()} Alfazen Inc. All rights reserved
           </div>
 
           {/* Right Corner: Social Links */}

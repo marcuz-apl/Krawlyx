@@ -47,7 +47,7 @@ const DOC_SECTIONS: DocSection[] = [
     badge: "Core",
     description: "High-performance web scraping workbench with asynchronous job queues, pluggable engines, and SQLite storage.",
     content: {
-      overview: "MyKrawl is a production-grade, self-hosted web scraping workbench built on FastAPI, React SPA, and SQLite in WAL mode. It unifies undetected stealth browser crawling (Patchtroy) and high-throughput spiders (Scrapy) behind a single engine protocol.",
+      overview: "Krawlyx is a production-grade, self-hosted web scraping workbench built on FastAPI, React SPA, and SQLite in WAL mode. It unifies undetected stealth browser crawling (Patchtroy) and high-throughput spiders (Scrapy) behind a single engine protocol.",
       highlights: [
         { title: "Pluggable Engine Protocol", desc: "Standardized contract for both browser-based dynamic crawlers and high-volume static spiders." },
         { title: "Streaming Importers & Exporters", desc: "Append row-by-row with automatic file splitting for large datasets (CSV bytes & XLSX adaptive rows)." },
@@ -59,7 +59,7 @@ const DOC_SECTIONS: DocSection[] = [
         label: "Quick Health Check",
         code: `# Check API health and running version
 curl -s http://localhost:4040/api/health
-# Response: {"status":"ok","app":"MyKrawl","version":"v1.5.8"}`
+# Response: {"status":"ok","app":"Krawlyx","version":"v1.8.5"}`
       },
       tips: [
         "Backend API runs on port 4040, and the Vite frontend dev server runs on port 4039.",
@@ -88,7 +88,7 @@ curl -s http://localhost:4040/api/health
   "wait_for": ".listing-card",
   "browser_timeout_s": 30,
   "headless": true,
-  "user_agent": "MyKrawl/1.0 via patchtroy"
+  "user_agent": "Krawlyx/0.1 via patchtroy"
 }`
       },
       table: {
@@ -97,7 +97,7 @@ curl -s http://localhost:4040/api/health
           ["wait_for", "string", "null", "Wait for specific CSS element before capture"],
           ["browser_timeout_s", "number", "30", "Browser navigation and page load timeout in seconds"],
           ["headless", "boolean", "true", "Run Chromium in headless mode"],
-          ["user_agent", "string", "MyKrawl/0.1 (+local)", "Custom User-Agent header"]
+          ["user_agent", "string", "Krawlyx/0.1 (+local)", "Custom User-Agent header"]
         ]
       },
       tips: [
@@ -123,13 +123,13 @@ curl -s http://localhost:4040/api/health
       codeBlock: {
         language: "bash",
         label: "Subprocess Stream Protocol",
-        code: `# Scrapy outputs line-delimited JSONL directly to MyKrawl worker
+        code: `# Scrapy outputs line-delimited JSONL directly to Krawlyx worker
 {"url": "https://example.com/p/1", "title": "Item 1", "price": 19.99}
 {"url": "https://example.com/p/2", "title": "Item 2", "price": 29.99}`
       },
       tips: [
         "Scrapy is best suited for static HTML catalogs, blogs, documentation sites, and deep crawl jobs.",
-        "Never import Scrapy directly into the web process; MyKrawl handles process lifecycle automatically."
+        "Never import Scrapy directly into the web process; Krawlyx handles process lifecycle automatically."
       ]
     }
   },
@@ -175,7 +175,7 @@ ORDER BY total_units DESC;`
     badge: "APScheduler",
     description: "Configure recurring scrape jobs using standard 5-field cron expressions with automatic worker distribution.",
     content: {
-      overview: "MyKrawl integrates APScheduler (AsyncIOScheduler) to trigger recurring crawl workflows. Each scheduled task stores target URLs, engine configuration, and export settings.",
+      overview: "Krawlyx integrates APScheduler (AsyncIOScheduler) to trigger recurring crawl workflows. Each scheduled task stores target URLs, engine configuration, and export settings.",
       highlights: [
         { title: "5-Field Cron Syntax", desc: "Schedule jobs to run every N minutes, hourly, daily, or on specific days of the week." },
         { title: "One-Click Run Now", desc: "Trigger any scheduled workflow immediately for ad-hoc validation without altering the cron timer." },
@@ -233,7 +233,7 @@ curl -O http://localhost:4040/api/datasets/1/export/csv`
     badge: "Admin",
     description: "Role-based access control, SSRF loopback protections, encrypted engine secrets, and robots.txt compliance.",
     content: {
-      overview: "MyKrawl is designed for secure deployment in internal networks, NAS environments, and cloud servers.",
+      overview: "Krawlyx is designed for secure deployment in internal networks, NAS environments, and cloud servers.",
       highlights: [
         { title: "SSRF Protection", desc: "Default-on guard blocking requests to private, loopback, link-local, and cloud metadata IPs." },
         { title: "Encrypted Secrets", desc: "Engine API keys and proxy credentials are encrypted at rest and never echoed back in API responses." },
@@ -288,7 +288,7 @@ export function DocsModal({ isOpen, onClose }: DocsModalProps) {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-sm text-slate-900 dark:text-white">MyKrawl Documentation</span>
+                <span className="font-bold text-sm text-slate-900 dark:text-white">Krawlyx Documentation</span>
                 <span className="rounded-full bg-brand-100 dark:bg-brand-950/60 px-2 py-0.5 text-[10px] font-semibold text-brand-700 dark:text-brand-300">
                   Guide
                 </span>

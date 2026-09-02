@@ -24,7 +24,7 @@ export function AppNav() {
   return (
     <header className="mb-6 flex items-center justify-between border-b border-slate-200 pb-3">
       <div className="flex items-center gap-4">
-        <span className="text-lg font-semibold text-slate-900">MyKrawl</span>
+        <span className="text-lg font-semibold text-slate-900 dark:text-white">Krawlyx</span>
         <nav className="flex items-center gap-1">
           {link('/', 'New job')}
           {link('/history', 'History')}
