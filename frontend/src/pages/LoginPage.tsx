@@ -10,19 +10,19 @@ interface LocationState {
 const SLOGANS = [
   {
     title: "Precision Scraping & Structured Intelligence.",
-    desc: "Self-hosted workbench powered by Patchtroy & high-velocity spiders.",
+    desc: "Self-hosted workbench powered by Patchtroy, Patroy & Scrapy spiders.",
   },
   {
-    title: "Stealth Chromium Automation & Trafilatura Markdown.",
-    desc: "Execute client-side JavaScript and capture dynamic SPAs with pristine content extraction.",
+    title: "Stealth Chromium Automation & Trafilatura.",
+    desc: "Render client-side JavaScript and dynamic SPAs into clean Markdown.",
   },
   {
-    title: "Subprocess Spiders & Concurrent Deep Web Ingestion.",
-    desc: "High-throughput Scrapy spiders streaming results without blocking the web process.",
+    title: "Subprocess Spiders & Concurrent Deep Ingestion.",
+    desc: "High-throughput Scrapy spiders streaming results in isolated processes.",
   },
   {
     title: "Universal Relational SQL Transform & Adaptive Exports.",
-    desc: "Turn messy web crawls into structured SQLite datasets with CSV/XLSX part-splitting.",
+    desc: "Turn web crawls into structured SQLite datasets with CSV/XLSX splitting.",
   },
 ];
 
