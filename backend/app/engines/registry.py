@@ -64,6 +64,13 @@ _DEFAULT_CAPABILITIES: dict[str, Capabilities] = {
         supports_render=True,
     ),
     "scrapy": Capabilities(deep_crawl=True, max_depth=10, max_pages_per_target=1000),
+    "patroy": Capabilities(
+        deep_crawl=True,
+        max_depth=5,
+        max_pages_per_target=200,
+        supports_wait_for=True,
+        supports_render=True,
+    ),
 }
 for _type_id, _caps in _DEFAULT_CAPABILITIES.items():
     _CAPABILITIES.setdefault(_type_id, _caps)

@@ -93,10 +93,12 @@ All project documentation, architectural decision records, implementation plans,
 
 ## Versioning
 
-This repo uses the **alfazen-versioning** contract: the root `VERSION` file holds
-`v{m.n.p}-{yymmddc}` (release version + UTC date/daily-counter build id). Git
-hooks in `.githooks/` bump and stamp every commit automatically — enable them
-after cloning with:
+This repo adheres to **Alfazen Versioning (v2.0)**:
+- The root `VERSION` file holds the base Semantic Version `m.n.p` (e.g. `1.9.1`).
+- The Alfazen build identifier `+yymmddc` is computed dynamically as SemVer 2.0.0 build metadata.
+- Git commit messages preserve pure Conventional Commit subjects on row 1, and the `prepare-commit-msg` hook stamps the trailer `Alfazen-Build: v<m.n.p>+<yymmddc>` in the commit footer.
+
+Enable repository Git hooks after cloning with:
 
 ```sh
 git config core.hooksPath .githooks

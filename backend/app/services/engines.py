@@ -214,4 +214,17 @@ def bootstrap_default_engines(db: Session) -> None:
         if not scrapy.pooled and scrapy.disabled_at is None:
             scrapy.pooled = True
 
+    patroy = db.scalar(select(EngineInstance).where(EngineInstance.type == "patroy"))
+    if not patroy:
+        patroy = EngineInstance(
+            name="Patroy (Go Stealth Browser)",
+            type="patroy",
+            config_encrypted=encrypt_config({}),
+            pooled=True,
+        )
+        db.add(patroy)
+    else:
+        if not patroy.pooled and patroy.disabled_at is None:
+            patroy.pooled = True
+
     db.commit()

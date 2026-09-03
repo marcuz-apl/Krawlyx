@@ -1,0 +1,156 @@
+#!/bin/sh
+# alfazen-version — Unified version engine for Alfazen Versioning (v2.0)
+#
+# Standard:
+#   - Root VERSION file contains base Semantic Version m.n.p (e.g., 1.9.1)
+#   - Alfazen build identifier +yymmddc (SemVer 2.0.0 build metadata)
+#   - Commit subject (Row 1): pure Conventional Commit
+#   - Commit trailer (Footer): Alfazen-Build: v<m.n.p>+<yymmddc>
+#
+# Commands:
+#   alfazen-version id        -> prints <m.n.p>+<yymmddc> (e.g., 1.9.1+2609031)
+#   alfazen-version tag       -> prints v<m.n.p>+<yymmddc> (e.g., v1.9.1+2609031)
+#   alfazen-version hook <msg> -> stamps trailer on commit message file
+
+set -e
+
+ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+VERSION_FILE="$ROOT_DIR/VERSION"
+
+get_base_version() {
+  if [ ! -f "$VERSION_FILE" ]; then
+    echo "1.0.0"
+    return
+  fi
+  ver=$(tr -d '\r\n\t ' < "$VERSION_FILE")
+  # Strip leading 'v' or trailing build suffix if present
+  ver=${ver#v}
+  ver=${ver%%+*}
+  ver=${ver%%-*}
+  if [ -z "$ver" ]; then
+    ver="1.0.0"
+  fi
+  printf '%s' "$ver"
+}
+
+utc_yymmdd() {
+  date -u +%y%m%d 2>/dev/null || date +%y%m%d
+}
+
+next_char() {
+  case "$1" in
+    "") echo "1" ;;
+    1) echo "2" ;;
+    2) echo "3" ;;
+    3) echo "4" ;;
+    4) echo "5" ;;
+    5) echo "6" ;;
+    6) echo "7" ;;
+    7) echo "8" ;;
+    8) echo "9" ;;
+    9) echo "a" ;;
+    a) echo "b" ;;
+    b) echo "c" ;;
+    c) echo "d" ;;
+    d) echo "e" ;;
+    e) echo "f" ;;
+    f) echo "g" ;;
+    g) echo "h" ;;
+    h) echo "i" ;;
+    i) echo "j" ;;
+    j) echo "k" ;;
+    k) echo "l" ;;
+    l) echo "m" ;;
+    m) echo "n" ;;
+    n) echo "o" ;;
+    o) echo "p" ;;
+    p) echo "q" ;;
+    q) echo "r" ;;
+    r) echo "s" ;;
+    s) echo "t" ;;
+    t) echo "u" ;;
+    u) echo "v" ;;
+    v) echo "w" ;;
+    w) echo "x" ;;
+    x) echo "y" ;;
+    y) echo "z" ;;
+    z) echo "z" ;;
+    *) echo "1" ;;
+  esac
+}
+
+get_build_counter() {
+  today=$1
+  last_c=""
+
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    # Look for trailers matching today in recent commit log
+    match=$(git log -n 50 --format="%(trailers:key=Alfazen-Build)" 2>/dev/null | grep -o "${today}[0-9a-z]" | head -n 1 || true)
+    if [ -n "$match" ]; then
+      last_c=${match#$today}
+    else
+      # Check legacy subject prefixes if any
+      leg_match=$(git log -n 50 --oneline 2>/dev/null | grep -o "\-${today}[0-9a-z]" | head -n 1 || true)
+      if [ -n "$leg_match" ]; then
+        last_c=${leg_match#-${today}}
+      fi
+    fi
+  fi
+
+  next_char "$last_c"
+}
+
+compute_build_id() {
+  base=$(get_base_version)
+  today=$(utc_yymmdd)
+  ctr=$(get_build_counter "$today")
+  printf '%s+%s%s' "$base" "$today" "$ctr"
+}
+
+case "$1" in
+  id)
+    compute_build_id
+    echo ""
+    ;;
+  tag)
+    printf 'v%s\n' "$(compute_build_id)"
+    ;;
+  hook)
+    msgfile=$2
+    [ -f "$msgfile" ] || exit 0
+
+    base=$(get_base_version)
+    today=$(utc_yymmdd)
+    ctr=$(get_build_counter "$today")
+    build_id="v${base}+${today}${ctr}"
+
+    # Strip any old legacy version prefix from subject line
+    tmp=$(mktemp) || exit 1
+    awk -v trailer="Alfazen-Build: $build_id" '
+      BEGIN { in_subject = 1; has_trailer = 0; }
+      in_subject && $0 !~ /^#/ && NF > 0 {
+        sub(/^v[0-9]+\.[0-9]\.[0-9]-[0-9]{6}[0-9a-z] /, "")
+        print $0
+        in_subject = 0
+        next
+      }
+      $0 ~ /^Alfazen-Build:/ {
+        print trailer
+        has_trailer = 1
+        next
+      }
+      { print $0 }
+      END {
+        if (!has_trailer) {
+          # Ensure trailer is added cleanly at footer
+          print ""
+          print trailer
+        }
+      }
+    ' "$msgfile" > "$tmp" && mv -f "$tmp" "$msgfile"
+    ;;
+  *)
+    echo "Usage: $0 {id|tag|hook <commit-msg-file>}" >&2
+    exit 1
+    ;;
+esac

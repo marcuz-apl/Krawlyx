@@ -66,6 +66,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/* /root/.cache \
     && find /ms-playwright -name "*.zip" -delete
 
+# Optional Go engine: place static patroy binary into /usr/local/bin if bundled
+# (Patroy can also be mounted at runtime or connected via microservice daemon)
+
 # Copy backend application source and version
 COPY backend/ /app/backend/
 COPY VERSION /app/VERSION

@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 from app.engines.schemas import (
     PatchtroyConfig,
+    PatroyConfig,
     ScrapyConfig,
     config_model_for,
 )
@@ -24,6 +25,13 @@ def test_patchtroy_rejects_out_of_range_timeout() -> None:
         PatchtroyConfig(browser_timeout_s=10_000)
 
 
+def test_patroy_config_defaults_are_safe() -> None:
+    cfg = PatroyConfig()
+    assert cfg.mode == "cli"
+    assert 1 <= cfg.timeout_s <= 300
+    assert cfg.max_pages_per_target <= 200
+
+
 def test_scrapy_config_parses_allowed_domains_csv() -> None:
     cfg = ScrapyConfig.model_validate({"allowed_domains": "a.test, b.test, c.test"})
     assert cfg.allowed_domains == ["a.test", "b.test", "c.test"]
@@ -37,6 +45,7 @@ def test_scrapy_rejects_negative_delay() -> None:
 def test_config_model_for_dispatches_by_type() -> None:
     assert config_model_for("patchtroy") is PatchtroyConfig
     assert config_model_for("scrapy") is ScrapyConfig
+    assert config_model_for("patroy") is PatroyConfig
 
 
 def test_unknown_engine_type_raises_keyerror() -> None:

@@ -222,7 +222,7 @@ function CreateForm({ onDone }: { onDone: () => void }) {
     queryFn: () => api.engines.capabilities(),
   });
 
-  const availableTypes = capData?.types?.map((t) => t.type) ?? ['patchtroy', 'scrapy'];
+  const availableTypes = capData?.types?.map((t) => t.type) ?? ['patchtroy', 'scrapy', 'patroy'];
 
   const create = useMutation({
     mutationFn: (body: EngineCreateBody) => api.engines.create(body),
