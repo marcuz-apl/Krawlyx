@@ -1,20 +1,15 @@
 #!/bin/sh
-# pre-commit — alfazen-versioning: compute exactly one successor identifier,
-# write it to the root VERSION file, and stage only VERSION.
+# pre-commit — validate that root VERSION is a valid SemVer m.n.p string
+set -e
 
 HOOKDIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-. "$HOOKDIR/versionlib.sh"
+ROOTDIR=$(CDPATH= cd -- "$HOOKDIR/.." && pwd)
+VERSION_FILE="$ROOTDIR/VERSION"
 
-old=$(read_version)
-validate_identifier "$old"
-new=$(next_identifier "$old" "$(utc_yymmdd)") || exit 1
-[ -n "$new" ] || die "failed to compute next identifier"
-
-printf '%s\n' "$new" > "$VERSION_FILE"
-git add -- "$VERSION_FILE"
-
-echo "alfazen-versioning: $old -> $new"
-if git rev-parse --verify HEAD >/dev/null 2>&1; then
-  echo "alfazen-versioning: if this commit is aborted, roll back with:"
-  echo "  git restore --source=HEAD --staged --worktree -- VERSION"
+if [ -f "$VERSION_FILE" ]; then
+  ver=$(tr -d '\r\n\t ' < "$VERSION_FILE")
+  if ! printf '%s' "$ver" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+    echo "alfazen-versioning: malformed VERSION '$ver' (expected SemVer m.n.p, e.g. 1.9.1)" >&2
+    exit 1
+  fi
 fi

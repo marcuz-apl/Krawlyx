@@ -65,8 +65,9 @@ def get_settings() -> Settings:
 
 
 def read_version() -> str:
-    """Return the alfazen identifier from the tracked root VERSION file."""
+    """Return the version string from the tracked root VERSION file."""
     try:
-        return VERSION_FILE.read_text(encoding="utf-8").strip() or "unknown"
+        raw = VERSION_FILE.read_text(encoding="utf-8").strip() or "2.0.0"
+        return raw if raw.startswith("v") else f"v{raw}"
     except OSError:
-        return "unknown"
+        return "v2.0.0"

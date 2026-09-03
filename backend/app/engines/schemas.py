@@ -8,7 +8,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
-EngineType = Literal["patchtroy", "scrapy"]
+EngineType = Literal["patchtroy", "scrapy", "patroy"]
 
 
 class _StrictModel(BaseModel):
@@ -49,11 +49,24 @@ class ScrapyConfig(_StrictModel):
         return v
 
 
+class PatroyConfig(_StrictModel):
+    mode: Literal["cli", "daemon"] = "cli"
+    binary_path: str = "patroy"
+    daemon_url: str = "http://127.0.0.1:4023"
+    timeout_s: int = Field(default=30, ge=1, le=300)
+    wait_for: str | None = None
+    user_agent: str = "Krawlyx/0.1 (+local; patroy)"
+    follow_links: bool = False
+    max_depth: int = Field(default=1, ge=1, le=5)
+    max_pages_per_target: int = Field(default=50, ge=1, le=200)
+
+
 def config_model_for(engine_type: str) -> type[BaseModel]:
     return {
         "patchtroy": PatchtroyConfig,
         "playtrafi": PatchtroyConfig,
         "scrapy": ScrapyConfig,
+        "patroy": PatroyConfig,
     }[engine_type]
 
 
@@ -61,6 +74,7 @@ __all__ = [
     "Crawl4AIConfig",
     "EngineType",
     "PatchtroyConfig",
+    "PatroyConfig",
     "PlaytrafiConfig",
     "ScrapyConfig",
     "config_model_for",

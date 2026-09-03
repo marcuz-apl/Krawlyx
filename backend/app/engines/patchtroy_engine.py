@@ -1,23 +1,18 @@
-"""Patchtroy adapter — undetected Patchright browser engine with Trafilatura extraction.
+"""Patchtroy adapter — standalone Patchtroy browser engine with Trafilatura extraction.
 
-Couples undetected headless Chromium via Patchright (bypassing Cloudflare/DataDome CDP
-leakages and executing client-side JS) with Trafilatura (for clean Markdown generation,
-boilerplate removal, and metadata). Zero heavy ML/AI baggage.
-
-The adapter:
+Wraps the standalone `patchtroy` package (pairing undetected headless Chromium via Patchright
+with Trafilatura and schema graph extraction, context pooling, and fast HTTP fallback)
+while maintaining Krawlyx's perimeter controls:
   - validates config through PatchtroyConfig
-  - launches stealth Chromium via patchright (or playwright fallback)
-  - extracts rendered HTML, final URL, status code, and links
-  - converts HTML to clean Markdown via trafilatura
+  - delegates browser lifecycle, stealth masking, and extraction to patchtroy.AsyncPatchtroy
   - applies the SSRF guard before touching the network (PRD §6.5)
   - applies per-host throttling (FR-SET-02) and identifiable User-Agent (NFR-05)
-  - provides fast HTTP fallback if the browser engine fails
+  - yields normalized CrawlRecord items (including structured data graphs)
 """
 
 import asyncio
 import dataclasses
 import logging
-import sys
 import time
 from collections.abc import AsyncIterator
 
@@ -47,7 +42,7 @@ CAPABILITIES = Capabilities(
 
 
 class PatchtroyEngine:
-    """Concretely implements the CrawlEngine protocol using Patchright and Trafilatura."""
+    """Concretely implements the CrawlEngine protocol using standalone Patchtroy."""
 
     type = ENGINE_TYPE
     capabilities = CAPABILITIES
@@ -57,18 +52,17 @@ class PatchtroyEngine:
         self._last_fetch: dict[str, float] = {}
 
     def health(self) -> HealthReport:
-        """Verify Patchright/Playwright and Trafilatura packages are importable."""
+        """Verify the official patchtroy library is available and operational."""
         try:
-            try:
-                import patchright  # noqa: F401
-                driver_name = "patchright"
-            except ImportError:
-                import playwright  # noqa: F401
-                driver_name = "playwright"
+            import patchright  # noqa: F401
+            import patchtroy  # noqa: F401
             import trafilatura  # noqa: F401
         except (ImportError, OSError) as exc:
             return HealthReport(ok=False, detail=f"patchtroy dependencies not importable: {exc}")
-        return HealthReport(ok=True, detail=f"patchtroy ready via {driver_name} ({self.config.user_agent})")
+        return HealthReport(
+            ok=True,
+            detail=f"patchtroy ready via standalone library ({self.config.user_agent})",
+        )
 
     async def fetch(self, target: Target, options: JobOptions) -> AsyncIterator[CrawlRecord]:
         from app.core.config import get_settings
@@ -98,13 +92,8 @@ class PatchtroyEngine:
 
         t0 = time.monotonic()
 
-        # Import async_playwright from patchright if available, else playwright
         try:
-            try:
-                from patchright.async_api import async_playwright
-            except ImportError:
-                from playwright.async_api import async_playwright
-            import trafilatura
+            import patchtroy
         except (ImportError, OSError) as exc:
             logger.error("patchtroy import failed: %s", exc)
             yield CrawlRecord(
@@ -115,161 +104,39 @@ class PatchtroyEngine:
             )
             return
 
-        ua = user_agent("patchtroy")
-        html = ""
-        md = None
-        status_code = 200
-        final_url = target.url
-        links: list[dict[str, str]] = []
+        ua = self.config.user_agent or user_agent("patchtroy")
 
-        timeout_ms = min(self.config.browser_timeout_s, 25) * 1000
-
-        # On Windows, Playwright/Patchright requires a ProactorEventLoop inside an isolated thread
-        def _sync_browser_fetch() -> tuple[str, str, int, list[dict[str, str]]]:
-            if sys.platform == "win32":
-                asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
-            async def _inner():
-                async with async_playwright() as p:
-                    browser = await p.chromium.launch(
-                        headless=self.config.headless,
-                        args=[
-                            "--disable-blink-features=AutomationControlled",
-                            "--no-sandbox",
-                        ],
-                    )
-                    try:
-                        context = await browser.new_context(
-                            user_agent=ua,
-                            viewport={"width": 1280, "height": 800},
-                            ignore_https_errors=True,
-                            locale="en-US",
-                        )
-                        page = await context.new_page()
-
-                        # In-process stealth script: masks navigator.webdriver
-                        await page.add_init_script("""
-                            Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-                            window.chrome = { runtime: {} };
-                        """)
-
-                        resp = await page.goto(
-                            target.url,
-                            timeout=timeout_ms,
-                            wait_until="domcontentloaded",
-                        )
-                        if self.config.wait_for:
-                            try:
-                                await page.wait_for_selector(self.config.wait_for, timeout=5000)
-                            except Exception as sel_exc:  # noqa: BLE001
-                                logger.debug(
-                                    "wait_for selector %s not found: %s",
-                                    self.config.wait_for,
-                                    sel_exc,
-                                )
-
-                        _page_html = await page.content()
-                        _final_url = page.url or target.url
-                        _status_code = resp.status if resp else 200
-
-                        _extracted_links: list[dict[str, str]] = []
-                        try:
-                            elements = await page.eval_on_selector_all(
-                                "a[href]",
-                                "els => els.map(e => ({ href: e.href, text: (e.innerText || '').trim() }))",
-                            )
-                            _extracted_links = [
-                                {"url": el["href"], "text": el.get("text", "")}
-                                for el in elements
-                                if isinstance(el, dict) and el.get("href")
-                            ]
-                        except Exception as link_exc:  # noqa: BLE001
-                            logger.debug("Link extraction failed: %s", link_exc)
-
-                        await context.close()
-                        return _page_html, _final_url, _status_code, _extracted_links
-                    finally:
-                        await browser.close()
-
-            try:
-                return loop.run_until_complete(_inner())
-            finally:
-                loop.close()
+        # Map Krawlyx config to standalone patchtroy config
+        client_config = {
+            "headless": self.config.headless,
+            "browser_timeout_s": min(self.config.browser_timeout_s, 60),
+            "wait_for": self.config.wait_for,
+            "user_agent": ua,
+            "http_fallback": True,
+            "extract_schema": True,
+            "extract_links": True,
+        }
 
         try:
-            html, final_url, status_code, links = await asyncio.wait_for(
-                asyncio.to_thread(_sync_browser_fetch),
-                timeout=30.0,
+            crawler = patchtroy.AsyncPatchtroy(client_config)
+            result = await crawler.scrape(
+                url=target.url,
+                wait_for=self.config.wait_for,
             )
-            if html:
-                try:
-                    md = trafilatura.extract(
-                        html,
-                        output_format="markdown",
-                        include_links=True,
-                        include_images=False,
-                    )
-                except Exception as traf_exc:  # noqa: BLE001
-                    logger.debug("Trafilatura extraction fallback: %s", traf_exc)
         except Exception as exc:  # noqa: BLE001
-            logger.warning(
-                "Patchtroy browser fetch failed or timed out (%s) for %s; using fast HTTP fallback",
-                exc,
-                target.url,
-            )
+            logger.warning("Patchtroy scrape exception (%s) for %s", exc, target.url)
+            result = None
 
-        # Fast HTTP fallback if browser rendering failed or returned empty
-        if not html:
-            try:
-                import httpx
-
-                http_headers = {
-                    "User-Agent": ua,
-                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                    "Accept-Language": "en-US,en;q=0.9",
-                }
-                async with httpx.AsyncClient(
-                    headers=http_headers, follow_redirects=True, timeout=15.0
-                ) as client:
-                    resp = await client.get(target.url)
-                    html = resp.text
-                    status_code = resp.status_code
-                    final_url = str(resp.url)
-                    if html:
-                        try:
-                            import trafilatura
-
-                            md = trafilatura.extract(
-                                html, output_format="markdown", include_links=True
-                            )
-                        except Exception as parse_exc:  # noqa: BLE001
-                            logger.debug("Trafilatura fallback extraction failed: %s", parse_exc)
-            except Exception as http_exc:  # noqa: BLE001
-                logger.warning("HTTP fallback failed for %s: %s", target.url, http_exc)
-
-        if not html:
+        if result is None or (not result.html and not result.success):
             yield CrawlRecord(
                 target_id=target.target_id,
                 source_url=target.url,
                 status="error",
-                http_status=status_code if status_code != 200 else 500,
-                error="patchtroy fetch returned empty body",
+                http_status=result.status_code if (result and result.status_code != 200) else 500,
+                error=(result.error if result else None) or "patchtroy fetch returned empty body",
                 duration_ms=int((time.monotonic() - t0) * 1000),
             )
             return
-
-        # Extract title from HTML
-        title = ""
-        try:
-            from bs4 import BeautifulSoup
-
-            soup = BeautifulSoup(html[:50000], "html.parser")
-            if soup.title and soup.title.string:
-                title = soup.title.string.strip()
-        except Exception:  # noqa: BLE001
-            pass
 
         options_dict = {}
         if dataclasses.is_dataclass(options):
@@ -279,19 +146,33 @@ class PatchtroyEngine:
         elif isinstance(options, dict):
             options_dict = dict(options)
 
+        links: list[dict[str, str]] = []
+        if result.links:
+            for item in result.links:
+                if isinstance(item, dict):
+                    links.append({"url": item.get("url", ""), "text": item.get("text", "")})
+                elif hasattr(item, "url"):
+                    links.append(
+                        {"url": getattr(item, "url", ""), "text": getattr(item, "text", "")}
+                    )
+
         rec = normalize_record(
             target_id=target.target_id,
             source_url=target.url,
-            html=html,
-            markdown=md,
-            final_url=final_url,
-            http_status=status_code,
+            html=result.html or "",
+            markdown=result.markdown,
+            final_url=result.url or target.url,
+            http_status=result.status_code or 200,
             links=links,
             options=options_dict,
         )
         rec.duration_ms = int((time.monotonic() - t0) * 1000)
-        if title and not rec.title:
-            rec.title = title
+        if result.title and not rec.title:
+            rec.title = result.title
+
+        # Preserve structured data graph extracted by standalone patchtroy
+        if result.structured_data:
+            rec.metadata["structured_data"] = result.structured_data
 
         yield rec
 
@@ -300,6 +181,5 @@ class PatchtroyEngine:
 from app.engines.registry import register_engine
 
 register_engine(ENGINE_TYPE, CAPABILITIES)(PatchtroyEngine)
-
 
 __all__ = ["PatchtroyEngine"]

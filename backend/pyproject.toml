@@ -19,6 +19,7 @@ dependencies = [
     "scrapy>=2.11",
     "patchright>=1.49",
     "trafilatura>=1.12",
+    "patchtroy>=0.5.2",
 ]
 
 # Static files are served from ../frontend/dist (built by `npm run build`).
@@ -28,6 +29,7 @@ app = []
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3",
+    "pytest-asyncio>=1.4",
     "httpx>=0.28",
     "ruff>=0.9",
 ]
