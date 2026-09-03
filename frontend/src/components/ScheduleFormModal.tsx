@@ -97,7 +97,7 @@ export function ScheduleFormModal({ schedule, isOpen = true, onClose, onToggleOp
     }
   }, [schedule, isOpen]);
 
-  // Multi-Worker Stagger Anti-ban State
+  // Multi-Worker Stagger State
   const initialOptions = (schedule?.options || {}) as Record<string, any>;
   const [staggerEnabled, setStaggerEnabled] = useState<boolean>(
     initialOptions.stagger_workers ?? initialOptions.stagger_enabled ?? true,
@@ -300,7 +300,7 @@ export function ScheduleFormModal({ schedule, isOpen = true, onClose, onToggleOp
         <form onSubmit={onSubmit} className="px-6 pb-6 pt-2 border-t border-slate-100 dark:border-slate-800 space-y-5 animate-in fade-in">
           {/* 2-Column Responsive Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
-            {/* LEFT COLUMN: Timing, Frequency, Anti-Ban & Notes */}
+            {/* LEFT COLUMN: Timing, Frequency, Stagger & Notes */}
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="text-xs block">
@@ -426,7 +426,7 @@ export function ScheduleFormModal({ schedule, isOpen = true, onClose, onToggleOp
                 )}
               </div>
 
-              {/* Multi-Worker Anti-Ban Time Gap Settings */}
+              {/* Multi-Worker Session Stagger Time Gap Settings */}
               <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 space-y-2.5 text-xs dark:border-slate-800 dark:bg-slate-800/50">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-800 dark:text-slate-100">
@@ -436,15 +436,15 @@ export function ScheduleFormModal({ schedule, isOpen = true, onClose, onToggleOp
                       onChange={(e) => setStaggerEnabled(e.target.checked)}
                       className="rounded border-slate-300 text-brand-600 focus:ring-brand-500 h-4 w-4"
                     />
-                    <span>⏱️ Multi-Worker Time Gap (Anti-Ban Guard)</span>
+                    <span>⏱️ Multi-Worker Time Gap (Rate-Limit Guard)</span>
                   </label>
                   <span className="rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border dark:border-emerald-800/40 font-semibold px-2 py-0.5 text-[10px]">
-                    Anti-Ban Active
+                    Rate Guard Active
                   </span>
                 </div>
 
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Randomized delays between worker sessions to avoid rate limits and bot detection on recurring runs.
+                  Randomized delays between worker sessions to avoid rate limits on recurring runs.
                 </p>
 
                 {staggerEnabled && (

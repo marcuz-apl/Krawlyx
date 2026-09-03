@@ -76,9 +76,9 @@ curl -s http://localhost:4040/api/health
     badge: "Patchright + Trafilatura",
     description: "Undetected stealth browser extraction engine pairing Patchright Chromium with Trafilatura Markdown extraction.",
     content: {
-      overview: "Patchtroy pairs an undetected Patchright headless Chromium browser instance with Trafilatura to bypass Cloudflare/DataDome detection, execute client-side JavaScript, and generate pristine Markdown alongside structured JSON items.",
+      overview: "Patchtroy pairs an undetected Patchright headless Chromium browser instance with Trafilatura to execute client-side JavaScript, render dynamic content, and generate pristine Markdown alongside structured JSON items.",
       highlights: [
-        { title: "Anti-Bot Evasion", desc: "Patches CDP runtime leakages and masks automation flags to evade modern WAFs and bot challenges." },
+        { title: "Browser Automation", desc: "Patches CDP runtime leakages and masks automation flags for seamless web navigation." },
         { title: "JavaScript Execution", desc: "Renders modern client-side SPAs (React, Vue, Next.js, Angular) before extracting DOM content." },
         { title: "Pristine Markdown", desc: "Trafilatura strips repetitive boilerplate, navigation bars, and footers, leaving high-value content." }
       ],
@@ -102,7 +102,7 @@ curl -s http://localhost:4040/api/health
         ]
       },
       tips: [
-        "Use Patchtroy when scraping sites that rely on JavaScript rendering, dynamic AJAX pagination, or bot defenses.",
+        "Use Patchtroy when scraping sites that rely on JavaScript rendering, dynamic AJAX pagination, or complex DOM hydration.",
         "Ensure Chromium dependencies are installed via `patchright install chromium`."
       ]
     }
@@ -140,7 +140,7 @@ curl -s http://localhost:4040/api/health
     title: "Patroy Go Engine",
     icon: Gauge,
     badge: "Go-Rod + Stealth",
-    description: "Ultra-fast, low-memory Go browser engine with sub-50ms cold starts and stealth bot-evasion profiles.",
+    description: "Ultra-fast, low-memory Go browser engine with sub-50ms cold starts and resilient browsing profiles.",
     content: {
       overview: "Patroy provides a native compiled Go scraping engine built on Go-Rod and Stealth. It executes as a lightweight CLI binary or local microservice daemon, consuming under 50MB RAM while offering native CDP stealth emulation.",
       highlights: [

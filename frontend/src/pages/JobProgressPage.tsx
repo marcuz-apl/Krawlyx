@@ -124,7 +124,7 @@ export function JobProgressPage() {
                   <Clock className="w-4 h-4" />
                 </span>
                 <span className="text-xs font-bold uppercase tracking-wider text-indigo-900 dark:text-indigo-300">
-                  Anti-Ban Multi-Worker Time Gap Schedule
+                  Staggered Multi-Worker Time Gap Schedule
                 </span>
                 <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800">
                   <ShieldCheck className="w-3 h-3" />
@@ -134,7 +134,7 @@ export function JobProgressPage() {
               <p className="text-xs text-slate-600 dark:text-slate-400">
                 Worker sessions are staggered with randomized delays between{' '}
                 <strong className="text-slate-900 dark:text-white font-mono">{staggerMinMin} min ({staggerMinS}s)</strong> and{' '}
-                <strong className="text-slate-900 dark:text-white font-mono">{staggerMaxMin} min ({staggerMaxS}s)</strong> to prevent concurrent bursts and avoid anti-bot detection.
+                <strong className="text-slate-900 dark:text-white font-mono">{staggerMaxMin} min ({staggerMaxS}s)</strong> to prevent concurrent bursts and ensure smooth crawling.
               </p>
             </div>
 

@@ -1,13 +1,13 @@
 # 0011: Multi-Worker Rate Limiting & Crawl Engine Hardening
 
 ## Executive Summary
-Large multi-page crawls on JavaScript-heavy websites face two main challenges: anti-bot rate limiting/IP bans and browser lockups on resource-constrained systems. This milestone introduced **randomized worker stagger delays**, **strict execution timeouts with fast HTTP fallbacks**, and a **bulletproof target lifecycle state machine**.
+Large multi-page crawls on JavaScript-heavy websites face two main challenges: aggressive rate limiting/IP throttling and browser lockups on resource-constrained systems. This milestone introduced **randomized worker stagger delays**, **strict execution timeouts with fast HTTP fallbacks**, and a **bulletproof target lifecycle state machine**.
 
 ---
 
 ## 1. Architecture & Design
 
-### A. Anti-Ban Worker Stagger (`services/jobs.py`)
+### A. Staggered Worker Sessions (`services/jobs.py`)
 - Target 0 starts immediately.
 - Subsequent workers $i \ge 1$ pause for a randomized time interval ($T_{min} \dots T_{max}$, e.g. 1–4 minutes) to simulate natural browsing behavior and avoid traffic bursts.
 
@@ -33,7 +33,7 @@ Playwright Headless Browser (Bounded 25.0s Timeout)
 
 ## 2. Usage & Workflow
 
-1. **Configuring Anti-Ban Stagger**:
+1. **Configuring Worker Stagger**:
    - In the **Runner Page**, expand **⏱️ Multi-Worker Time Gap**.
    - Toggle **Enable Time Gap** ON and choose your interval (e.g. Min: 60s, Max: 240s).
 2. **Monitoring Progress**:
