@@ -17,11 +17,10 @@ import dataclasses
 import json
 import logging
 import os
-from pathlib import Path
 import shutil
-import sys
 import time
 from collections.abc import AsyncIterator
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -206,14 +205,53 @@ class PatroyEngine:
             options=options_dict,
         )
         rec.duration_ms = int((time.monotonic() - t0) * 1000)
-        if title and not rec.title:
+        if title:
             rec.title = title
 
         if "structured_data" in data and isinstance(data["structured_data"], dict):
             rec.metadata["structured_data"] = data["structured_data"]
 
-        if "csv" in data and data["csv"]:
+        if data.get("csv"):
             rec.metadata["patroy_csv"] = data["csv"]
+
+        if data.get("tables"):
+            rec.metadata["tables"] = data["tables"]
+            # Convert tabular extractions into structured items if none were produced yet
+            if not rec.metadata.get("items"):
+                table_items: list[dict[str, Any]] = []
+                for tbl in data["tables"]:
+                    if isinstance(tbl, dict):
+                        headers = tbl.get("headers") or []
+                        rows = tbl.get("rows") or []
+                        if headers and rows:
+                            for row in rows:
+                                if isinstance(row, list):
+                                    row_dict: dict[str, Any] = {
+                                        headers[i]: cell
+                                        for i, cell in enumerate(row)
+                                        if i < len(headers)
+                                    }
+                                    if row_dict:
+                                        row_dict["type"] = "table_row"
+                                        row_dict["source_url"] = target.url
+                                        if tbl.get("caption"):
+                                            row_dict["table_caption"] = tbl["caption"]
+                                        table_items.append(row_dict)
+                if table_items:
+                    rec.metadata["items"] = table_items
+                    rec.metadata["item_count"] = len(table_items)
+                    rec.metadata.setdefault("schema", "table")
+
+        if data.get("json_ld"):
+            rec.metadata["json_ld"] = data["json_ld"]
+
+        if data.get("next_data"):
+            rec.metadata["next_data"] = data["next_data"]
+
+        for field in ("author", "date", "site_name", "description"):
+            val = data.get(field)
+            if val:
+                rec.metadata[field] = val
 
         yield rec
 

@@ -146,7 +146,8 @@ curl -s http://localhost:4040/api/health
       highlights: [
         { title: "Ultra-Low Memory (<50MB)", desc: "Static binary with minimal footprint, ideal for memory-constrained VPS or massive concurrency." },
         { title: "Sub-50ms Cold Starts", desc: "Instant startup and browser process leasing without Python interpreter overhead." },
-        { title: "Dual Architecture (CLI & Daemon)", desc: "Can run as a direct one-shot CLI subprocess (`patroy scrape <url> -o json`) or against a persistent daemon (`patroy serve` on port 4023)." }
+        { title: "Dual Architecture (CLI & Daemon)", desc: "Can run as a direct one-shot CLI subprocess (`patroy scrape <url> -o json`) or against a persistent daemon (`patroy serve` on port 4023)." },
+        { title: "Native Tabular & JSON-LD Extraction", desc: "Directly extracts HTML <table> elements into structured datasets and unwraps Schema.org JSON-LD graphs with automatic metadata hydration." }
       ],
       codeBlock: {
         language: "json",
