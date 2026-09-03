@@ -157,7 +157,7 @@ class PatroyEngine:
             )
             return
 
-        html = data.get("html", "")
+        html = data.get("raw_html") or data.get("clean_html") or data.get("html") or ""
         markdown = data.get("markdown")
         if html and not markdown:
             try:
@@ -202,7 +202,7 @@ class PatroyEngine:
             markdown=markdown,
             final_url=data.get("url") or target.url,
             http_status=int(data.get("status_code", 200)),
-            links=links,
+            links=links or None,
             options=options_dict,
         )
         rec.duration_ms = int((time.monotonic() - t0) * 1000)
@@ -211,6 +211,9 @@ class PatroyEngine:
 
         if "structured_data" in data and isinstance(data["structured_data"], dict):
             rec.metadata["structured_data"] = data["structured_data"]
+
+        if "csv" in data and data["csv"]:
+            rec.metadata["patroy_csv"] = data["csv"]
 
         yield rec
 

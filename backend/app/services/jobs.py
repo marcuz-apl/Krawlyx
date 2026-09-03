@@ -75,6 +75,13 @@ def _slots_semaphore() -> asyncio.Semaphore:
     return _slots
 
 
+def update_concurrency_slots(new_limit: int) -> None:
+    """Dynamically update the concurrency semaphore limit."""
+    global _slots
+    _slots = asyncio.Semaphore(new_limit)
+    logger.info("job dispatcher concurrency limit dynamically updated to %d", new_limit)
+
+
 def start_dispatcher() -> None:
     """Idempotent: recover orphaned rows, then start the dispatcher loop.
 

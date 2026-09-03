@@ -32,7 +32,7 @@ from app.schemas.schedules import (
     ScheduleOut,
     ScheduleUpdate,
 )
-from app.schemas.settings import SettingsOut
+from app.schemas.settings import SettingsOut, SettingsUpdateBody
 from app.schemas.users import UserCreate, UserUpdate
 
 __all__ = [
@@ -61,6 +61,7 @@ __all__ = [
     "ScheduleOut",
     "ScheduleUpdate",
     "SettingsOut",
+    "SettingsUpdateBody",
     "TargetOut",
     "UserCreate",
     "UserOut",

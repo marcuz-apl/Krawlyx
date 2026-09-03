@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, Database, Sparkles, Zap, Sliders, Info } from 'lucide-react';
+import { CheckCircle2, Database, Sparkles, Zap, Sliders, Info, Edit3, X, Save, AlertTriangle } from 'lucide-react';
 
-import { api, type SettingsOut } from '@/lib/api/client';
+import { api, type SettingsOut, type SettingsUpdateBody } from '@/lib/api/client';
 
 export function SettingsReadOnlyCard() {
   const qc = useQueryClient();
+  const [editOpen, setEditOpen] = useState(false);
+  const [editSuccessMsg, setEditSuccessMsg] = useState<string | null>(null);
   const [maintenanceMsg, setMaintenanceMsg] = useState<{
     type: 'checkpoint' | 'vacuum';
     message: string;
@@ -145,17 +147,31 @@ export function SettingsReadOnlyCard() {
 
       {/* Global Config Settings */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Sliders className="h-4 w-4 text-brand-600" />
               Runtime Configuration & System Guardrails
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Server-level operational limits regulated by environment variables to ensure resource stability and security.
+              Server-level operational limits synced with <code className="font-mono text-indigo-600 dark:text-indigo-400">backend/.env</code> and updated live.
             </p>
           </div>
+          <button
+            onClick={() => setEditOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50 dark:bg-indigo-950/40 px-3.5 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 shadow-sm hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors cursor-pointer"
+          >
+            <Edit3 className="w-3.5 h-3.5" />
+            Edit Settings
+          </button>
         </div>
+
+        {editSuccessMsg && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40 p-3 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2 animate-in fade-in">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>{editSuccessMsg}</span>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-3">
           <SettingTipCard
@@ -246,6 +262,277 @@ export function SettingsReadOnlyCard() {
             ).
           </p>
         </div>
+      </div>
+
+      {editOpen && (
+        <EditSettingsModal
+          settings={s}
+          onClose={() => setEditOpen(false)}
+          onSuccess={(msg) => {
+            setEditOpen(false);
+            setEditSuccessMsg(msg);
+            setTimeout(() => setEditSuccessMsg(null), 8000);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function EditSettingsModal({
+  settings,
+  onClose,
+  onSuccess,
+}: {
+  settings: SettingsOut;
+  onClose: () => void;
+  onSuccess: (msg: string) => void;
+}) {
+  const qc = useQueryClient();
+  const [maxConcurrent, setMaxConcurrent] = useState(settings.max_concurrent_jobs);
+  const [maxParallel, setMaxParallel] = useState(settings.max_parallel_targets_per_job);
+  const [splitMb, setSplitMb] = useState(settings.default_split_size_mb);
+  const [intervalS, setIntervalS] = useState(settings.per_domain_interval_s);
+  const [contentCapMb, setContentCapMb] = useState(Math.round(settings.content_size_cap_bytes / (1024 * 1024)));
+  const [robotsTxt, setRobotsTxt] = useState(settings.robots_txt_enabled);
+  const [ssrfGuard, setSsrfGuard] = useState(settings.ssrf_guard_enabled);
+  const [adminEmail, setAdminEmail] = useState(settings.admin_contact_email || '');
+  const [error, setError] = useState<string | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: (body: SettingsUpdateBody) => api.settings.update(body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['settings'] });
+      onSuccess('Settings updated live and back-written to backend/.env successfully!');
+    },
+    onError: (err: any) => {
+      setError(err?.message || 'Failed to update settings');
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    mutation.mutate({
+      max_concurrent_jobs: Number(maxConcurrent),
+      max_parallel_targets_per_job: Number(maxParallel),
+      default_split_size_mb: Number(splitMb),
+      per_domain_interval_s: Number(intervalS),
+      content_size_cap_bytes: Math.round(Number(contentCapMb) * 1024 * 1024),
+      robots_txt_enabled: robotsTxt,
+      ssrf_guard_enabled: ssrfGuard,
+      admin_contact_email: adminEmail.trim(),
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div
+        className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
+              <Sliders className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">Configure Runtime Settings</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Changes take effect immediately and are saved to <code className="font-mono text-indigo-600 dark:text-indigo-400">backend/.env</code>.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+          {error && (
+            <div className="p-3 rounded-xl border border-rose-200 bg-rose-50 dark:border-rose-900 dark:bg-rose-950/40 text-xs text-rose-800 dark:text-rose-300 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {maxConcurrent > 4 && (
+            <div className="p-3 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/60 dark:bg-amber-950/40 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                <strong>High Concurrency Alert:</strong> Running {maxConcurrent} concurrent jobs requires at least 8GB–16GB RAM on the host server to prevent memory exhaustion when running headless browsers.
+              </span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Max Concurrent Jobs (1–64)
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={64}
+                value={maxConcurrent}
+                onChange={(e) => setMaxConcurrent(Number(e.target.value))}
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white"
+                required
+              />
+              <span className="text-[11px] text-slate-400 block mt-1">
+                MYKRAWL_MAX_CONCURRENT_JOBS
+              </span>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Max Parallel Targets / Job (1–100)
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={100}
+                value={maxParallel}
+                onChange={(e) => setMaxParallel(Number(e.target.value))}
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white"
+                required
+              />
+              <span className="text-[11px] text-slate-400 block mt-1">
+                MYKRAWL_MAX_PARALLEL_TARGETS_PER_JOB
+              </span>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Default Export Split (MB)
+              </label>
+              <input
+                type="number"
+                min={5}
+                max={1000}
+                value={splitMb}
+                onChange={(e) => setSplitMb(Number(e.target.value))}
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white"
+                required
+              />
+              <span className="text-[11px] text-slate-400 block mt-1">
+                MYKRAWL_DEFAULT_SPLIT_SIZE_MB
+              </span>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Per-Domain Interval (Seconds)
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                min={0.0}
+                max={60.0}
+                value={intervalS}
+                onChange={(e) => setIntervalS(Number(e.target.value))}
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white"
+                required
+              />
+              <span className="text-[11px] text-slate-400 block mt-1">
+                MYKRAWL_PER_DOMAIN_INTERVAL_S
+              </span>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Content Size Cap (MB)
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={100}
+                value={contentCapMb}
+                onChange={(e) => setContentCapMb(Number(e.target.value))}
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white"
+                required
+              />
+              <span className="text-[11px] text-slate-400 block mt-1">
+                MYKRAWL_CONTENT_SIZE_CAP_BYTES
+              </span>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Admin Contact Email (User-Agent)
+              </label>
+              <input
+                type="email"
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+                placeholder="admin@example.com"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs text-slate-900 dark:text-white"
+              />
+              <span className="text-[11px] text-slate-400 block mt-1">
+                MYKRAWL_ADMIN_CONTACT_EMAIL
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <label className="flex items-center gap-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer">
+              <input
+                type="checkbox"
+                checked={robotsTxt}
+                onChange={(e) => setRobotsTxt(e.target.checked)}
+                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+              />
+              <div>
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                  Enforce Robots.txt Compliance (RFC 9309)
+                </span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
+                  Respects crawl-delay directives and disallow rules per standard crawler etiquette.
+                </span>
+              </div>
+            </label>
+
+            <label className="flex items-center gap-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer">
+              <input
+                type="checkbox"
+                checked={ssrfGuard}
+                onChange={(e) => setSsrfGuard(e.target.checked)}
+                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+              />
+              <div>
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                  Enforce SSRF Security Boundary
+                </span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
+                  Blocks crawlers from connecting to internal private networks, localhost, and cloud metadata.
+                </span>
+              </div>
+            </label>
+          </div>
+
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={mutation.isPending}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition-colors cursor-pointer"
+            >
+              <Save className="w-3.5 h-3.5" />
+              {mutation.isPending ? 'Saving to .env…' : 'Save & Persist to .env'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

@@ -64,6 +64,26 @@ def get_settings() -> Settings:
     return Settings()
 
 
+def reload_settings() -> Settings:
+    """Clear cached settings and return a freshly reloaded Settings instance."""
+    get_settings.cache_clear()
+    return get_settings()
+
+
+def get_env_file_path() -> Path:
+    """Resolve the active .env file location."""
+    backend_env = ROOT_DIR / "backend" / ".env"
+    if backend_env.is_file():
+        return backend_env
+    root_env = ROOT_DIR / ".env"
+    if root_env.is_file():
+        return root_env
+    local_env = Path(".env").resolve()
+    if local_env.is_file():
+        return local_env
+    return backend_env
+
+
 def read_version() -> str:
     """Return the version string from the tracked root VERSION file."""
     try:
