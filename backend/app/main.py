@@ -81,21 +81,29 @@ def create_app() -> FastAPI:
     app.include_router(settings_api.router)
     # Serve the built SPA in production. The Vite dev server handles this in dev mode.
     if FRONTEND_DIST.is_dir() and (FRONTEND_DIST / "index.html").is_file():
-        # Serve static assets (JS/CSS) directly; SPA routes fall through to index.html.
+        # Serve static hashed assets (JS/CSS) directly.
         if (FRONTEND_DIST / "assets").is_dir():
             app.mount(
                 "/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets"
             )
 
-        # SPA fallback: any non-API, non-asset path serves index.html (react-router handles /admin, etc.).
+        # SPA fallback: any non-API, non-asset path serves index.html with strict no-cache.
         @app.get("/{full_path:path}")
         async def spa_fallback(full_path: str):
             from starlette.responses import FileResponse
 
-            return FileResponse(str(FRONTEND_DIST / "index.html"))
+            target_file = FRONTEND_DIST / full_path
+            if full_path and target_file.is_file() and target_file.resolve().is_relative_to(FRONTEND_DIST):
+                return FileResponse(str(target_file))
 
-        # Also mount root explicitly for direct access.
-        app.mount("/", StaticFiles(directory=str(FRONTEND_DIST), html=True), name="spa")
+            return FileResponse(
+                str(FRONTEND_DIST / "index.html"),
+                headers={
+                    "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+                    "Pragma": "no-cache",
+                    "Expires": "0",
+                },
+            )
     return app
 
 
