@@ -135,3 +135,86 @@ def test_patroy_cli_fetch_binary_not_found(monkeypatch) -> None:
         rec = records[0]
         assert rec.status == "error"
         assert "not found in PATH" in (rec.error or "")
+
+
+def test_patroy_v110_native_tables_and_metadata_hydration() -> None:
+    """Verify Patroy 1.1.0 tables extraction, JSON-LD and hydrated metadata support."""
+    from app.engines.patroy_engine import PatroyEngine
+
+    sample_output = {
+        "url": "https://example.com/article",
+        "status_code": 200,
+        "title": "Hydrated Article Headline",
+        "author": "Alice Smith",
+        "date": "2026-09-03T12:00:00Z",
+        "site_name": "Patroy News",
+        "description": "Article summary from Schema.org",
+        "html": "<html><body><h1>Hydrated Article Headline</h1></body></html>",
+        "markdown": "# Hydrated Article Headline\nArticle body.",
+        "tables": [
+            {
+                "caption": "Price Table",
+                "headers": ["Plan", "Price"],
+                "rows": [["Free", "$0"], ["Pro", "$29"]],
+            }
+        ],
+        "json_ld": [{"@type": "Article", "headline": "Hydrated Article Headline"}],
+        "next_data": {"page": "pricing"},
+    }
+
+    mock_proc = AsyncMock()
+    mock_proc.communicate.return_value = (json.dumps(sample_output).encode("utf-8"), b"")
+    mock_proc.returncode = 0
+
+    with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
+        engine = PatroyEngine({"mode": "cli"})
+        records = list(
+            asyncio.run(
+                _drain(engine.fetch(Target("t1", "https://example.com/article"), JobOptions()))
+            )
+        )
+
+        assert len(records) == 1
+        rec = records[0]
+        assert rec.status == "ok"
+        assert rec.title == "Hydrated Article Headline"
+        assert rec.metadata.get("author") == "Alice Smith"
+        assert rec.metadata.get("date") == "2026-09-03T12:00:00Z"
+        assert rec.metadata.get("site_name") == "Patroy News"
+        assert rec.metadata.get("description") == "Article summary from Schema.org"
+        assert len(rec.metadata.get("tables", [])) == 1
+        assert rec.metadata["tables"][0]["caption"] == "Price Table"
+        assert rec.metadata.get("items") is not None
+        assert len(rec.metadata["items"]) == 2
+        assert rec.metadata["items"][0]["Plan"] == "Free"
+        assert rec.metadata["items"][0]["Price"] == "$0"
+        assert rec.metadata["items"][0]["table_caption"] == "Price Table"
+        assert rec.metadata["json_ld"] == [
+            {"@type": "Article", "headline": "Hydrated Article Headline"}
+        ]
+        assert rec.metadata["next_data"] == {"page": "pricing"}
+
+
+def test_patroy_installer_dynamic_latest_version() -> None:
+    """Verify patroy installer defaults to 'latest' and dynamically resolves URLs."""
+    from app.engines.patroy_installer import (
+        DEFAULT_PATROY_VERSION,
+        get_release_url,
+        resolve_latest_release,
+    )
+
+    assert DEFAULT_PATROY_VERSION == "latest"
+
+    tag, direct_url = resolve_latest_release()
+    assert tag
+    assert direct_url is None or direct_url.startswith("https://")
+
+    # Dynamic latest URL resolution
+    url = get_release_url("latest")
+    assert "https://github.com/marcuz-apl/patroy/releases/download/" in url
+    assert "patroy_" in url
+
+    # Pinned version still supported if caller provides explicit version
+    pinned_url = get_release_url("1.0.0")
+    assert "v1.0.0" in pinned_url
+    assert "patroy_1.0.0_" in pinned_url

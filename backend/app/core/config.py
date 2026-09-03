@@ -87,7 +87,7 @@ def get_env_file_path() -> Path:
 def read_version() -> str:
     """Return the version string from the tracked root VERSION file."""
     try:
-        raw = VERSION_FILE.read_text(encoding="utf-8").strip() or "2.0.0"
+        raw = VERSION_FILE.read_text(encoding="utf-8").strip() or "2.1.0"
         return raw if raw.startswith("v") else f"v{raw}"
     except OSError:
-        return "v2.0.0"
+        return "v2.1.0"

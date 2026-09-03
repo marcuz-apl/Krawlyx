@@ -7,6 +7,7 @@ Downloads official release archives from GitHub and installs to local storage.
 from __future__ import annotations
 
 import io
+import json
 import logging
 import os
 import platform
@@ -19,7 +20,8 @@ from pathlib import Path
 
 logger = logging.getLogger("mykrawl.engines.patroy.installer")
 
-DEFAULT_PATROY_VERSION = "1.0.0"
+FALLBACK_PATROY_VERSION = "1.1.0"
+DEFAULT_PATROY_VERSION = "latest"
 GITHUB_REPO = "marcuz-apl/patroy"
 
 
@@ -62,15 +64,68 @@ def detect_platform_and_arch() -> tuple[str, str]:
     return os_name, arch
 
 
-def get_release_asset_name(version: str = DEFAULT_PATROY_VERSION) -> str:
+def resolve_latest_release() -> tuple[str, str | None]:
+    """Resolve the latest release tag and matching platform asset download URL from GitHub."""
     os_name, arch = detect_platform_and_arch()
     ext = "zip" if os_name == "windows" else "tar.gz"
-    return f"patroy_{version}_{os_name}_{arch}.{ext}"
+    expected_suffix = f"_{os_name}_{arch}.{ext}"
+
+    # 1. Try GitHub API
+    api_url = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+    req = urllib.request.Request(
+        api_url,
+        headers={"User-Agent": "Krawlyx-Patroy-Installer"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            tag = str(data.get("tag_name", "")).lstrip("v")
+            assets = data.get("assets", [])
+            for asset in assets:
+                name = asset.get("name", "")
+                if name.endswith(expected_suffix):
+                    return tag or FALLBACK_PATROY_VERSION, asset.get("browser_download_url")
+            if tag:
+                return tag, None
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("GitHub API release check failed: %s", exc)
+
+    # 2. Try following redirect on release URL
+    latest_url = f"https://github.com/{GITHUB_REPO}/releases/latest"
+    redir_req = urllib.request.Request(
+        latest_url,
+        headers={"User-Agent": "Krawlyx-Patroy-Installer"},
+    )
+    try:
+        with urllib.request.urlopen(redir_req, timeout=10) as resp:
+            final_url = resp.geturl()
+            tag = final_url.rstrip("/").split("/")[-1].lstrip("v")
+            if tag and tag != "latest":
+                return tag, None
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("GitHub redirect release check failed: %s", exc)
+
+    return FALLBACK_PATROY_VERSION, None
+
+
+def get_release_asset_name(version: str = DEFAULT_PATROY_VERSION) -> str:
+    resolved_version = version
+    if resolved_version == "latest":
+        resolved_version, _ = resolve_latest_release()
+    os_name, arch = detect_platform_and_arch()
+    ext = "zip" if os_name == "windows" else "tar.gz"
+    return f"patroy_{resolved_version}_{os_name}_{arch}.{ext}"
 
 
 def get_release_url(version: str = DEFAULT_PATROY_VERSION) -> str:
+    if version == "latest":
+        tag, direct_url = resolve_latest_release()
+        if direct_url:
+            return direct_url
+        version = tag
+
     asset_name = get_release_asset_name(version)
-    tag = f"v{version}"
+    tag = f"v{version}" if not version.startswith("v") else version
     return f"https://github.com/{GITHUB_REPO}/releases/download/{tag}/{asset_name}"
 
 
@@ -93,7 +148,7 @@ def install_patroy(version: str = DEFAULT_PATROY_VERSION, target_dir: Path | Non
     )
 
     try:
-        with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310
+        with urllib.request.urlopen(req, timeout=60) as resp:
             archive_data = resp.read()
     except Exception as exc:
         raise RuntimeError(
@@ -172,7 +227,7 @@ def find_or_install_patroy(
             installed = install_patroy(version=version, target_dir=install_dir)
             if installed.is_file() and os.access(installed, os.X_OK):
                 return str(installed.resolve())
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Automatic download of patroy binary failed: %s", exc)
 
     return None
