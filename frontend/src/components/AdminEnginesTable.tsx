@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, RotateCcw, Activity, Edit3, Trash2, CheckCircle2, XCircle } from 'lucide-react';
 
+import { ConfirmModal } from '@/components/ConfirmModal';
 import {
   api,
   type EngineCreateBody,
@@ -39,6 +40,7 @@ export function AdminEnginesTable() {
   const [creating, setCreating] = useState(false);
   const [editingEngine, setEditingEngine] = useState<EngineOut | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [deleteEngine, setDeleteEngine] = useState<EngineOut | null>(null);
 
   if (isLoading) return <p className="text-slate-500 dark:text-slate-400">Loading engines…</p>;
   const engines: EngineOut[] = data ?? [];
@@ -181,10 +183,8 @@ export function AdminEnginesTable() {
                       {e.pooled ? 'Unpool' : 'Pool'}
                     </button>
                     <button
-                      onClick={() => {
-                        if (confirm(`Delete engine "${e.name}"?`)) remove.mutate(e.id);
-                      }}
-                      className="inline-flex items-center gap-1 rounded border border-red-200 dark:border-red-900/60 px-2 py-1 text-xs text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                      onClick={() => setDeleteEngine(e)}
+                      className="inline-flex items-center gap-1 rounded border border-red-200 dark:border-red-900/60 px-2 py-1 text-xs text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-3 h-3" />
                       Delete
@@ -196,6 +196,23 @@ export function AdminEnginesTable() {
           </tbody>
         </table>
       </div>
+
+      <ConfirmModal
+        isOpen={deleteEngine !== null}
+        title={`Delete Engine "${deleteEngine?.name}"?`}
+        message="Are you sure you want to delete this crawl engine? Jobs currently queued or scheduled for this engine will be affected."
+        confirmText="Delete Engine"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={remove.isPending}
+        onConfirm={() => {
+          if (deleteEngine) {
+            remove.mutate(deleteEngine.id);
+            setDeleteEngine(null);
+          }
+        }}
+        onCancel={() => setDeleteEngine(null)}
+      />
 
       {test.data && (
         <div className={`rounded-xl border p-3 text-xs flex items-center gap-2 ${

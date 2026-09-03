@@ -265,7 +265,7 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
             else:
                 raw_max = 240.0
 
-            stagger_min_s = max(10.0, min(600.0, raw_min))
+            stagger_min_s = max(12.0, min(600.0, raw_min))
             stagger_max_s = max(stagger_min_s, min(600.0, raw_max))
 
             tasks = []
