@@ -11,9 +11,11 @@ from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db, require_admin
-from app.core.config import get_settings
+from app.core.config import get_env_file_path, get_settings, reload_settings
+from app.core.env_writer import update_env_file
 from app.models import Dataset, DatasetRow, Job, JobResult, User
-from app.schemas import SettingsOut
+from app.schemas import SettingsOut, SettingsUpdateBody
+from app.services import jobs as jobs_svc
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 
@@ -69,6 +71,59 @@ def get_settings_route(
         content_size_cap_bytes=s.content_size_cap_bytes,
         ssrf_allow_list=list(s.ssrf_allow_list),
         admin_contact_email=s.admin_contact_email,
+    )
+
+
+@router.patch("", response_model=SettingsOut)
+def update_settings_route(
+    body: SettingsUpdateBody,
+    _admin: Annotated[User, Depends(require_admin)],
+) -> SettingsOut:
+    """Update runtime settings, resize dispatcher concurrency, and persist to .env."""
+    env_path = get_env_file_path()
+    updates: dict[str, object] = {}
+
+    if body.max_concurrent_jobs is not None:
+        updates["MYKRAWL_MAX_CONCURRENT_JOBS"] = body.max_concurrent_jobs
+    if body.max_parallel_targets_per_job is not None:
+        updates["MYKRAWL_MAX_PARALLEL_TARGETS_PER_JOB"] = body.max_parallel_targets_per_job
+    if body.default_split_size_mb is not None:
+        updates["MYKRAWL_DEFAULT_SPLIT_SIZE_MB"] = body.default_split_size_mb
+    if body.robots_txt_enabled is not None:
+        updates["MYKRAWL_ROBOTS_TXT_ENABLED"] = body.robots_txt_enabled
+    if body.per_domain_interval_s is not None:
+        updates["MYKRAWL_PER_DOMAIN_INTERVAL_S"] = body.per_domain_interval_s
+    if body.ssrf_guard_enabled is not None:
+        updates["MYKRAWL_SSRF_GUARD_ENABLED"] = body.ssrf_guard_enabled
+    if body.content_size_cap_bytes is not None:
+        updates["MYKRAWL_CONTENT_SIZE_CAP_BYTES"] = body.content_size_cap_bytes
+    if body.ssrf_allow_list is not None:
+        updates["MYKRAWL_SSRF_ALLOW_LIST"] = ",".join(body.ssrf_allow_list)
+    if body.admin_contact_email is not None:
+        updates["MYKRAWL_ADMIN_CONTACT_EMAIL"] = body.admin_contact_email
+
+    if updates:
+        for k, v in updates.items():
+            os.environ[k] = str(v).lower() if isinstance(v, bool) else str(v)
+
+        update_env_file(env_path, updates)
+        reloaded = reload_settings()
+
+        if body.max_concurrent_jobs is not None:
+            jobs_svc.update_concurrency_slots(body.max_concurrent_jobs)
+    else:
+        reloaded = get_settings()
+
+    return SettingsOut(
+        max_concurrent_jobs=reloaded.max_concurrent_jobs,
+        max_parallel_targets_per_job=reloaded.max_parallel_targets_per_job,
+        default_split_size_mb=reloaded.default_split_size_mb,
+        robots_txt_enabled=reloaded.robots_txt_enabled,
+        per_domain_interval_s=reloaded.per_domain_interval_s,
+        ssrf_guard_enabled=reloaded.ssrf_guard_enabled,
+        content_size_cap_bytes=reloaded.content_size_cap_bytes,
+        ssrf_allow_list=list(reloaded.ssrf_allow_list),
+        admin_contact_email=reloaded.admin_contact_email,
     )
 
 

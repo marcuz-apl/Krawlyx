@@ -328,6 +328,20 @@ export interface SettingsOut {
   per_domain_interval_s: number;
   ssrf_guard_enabled: boolean;
   content_size_cap_bytes: number;
+  ssrf_allow_list?: string[];
+  admin_contact_email?: string;
+}
+
+export interface SettingsUpdateBody {
+  max_concurrent_jobs?: number;
+  max_parallel_targets_per_job?: number;
+  default_split_size_mb?: number;
+  robots_txt_enabled?: boolean;
+  per_domain_interval_s?: number;
+  ssrf_guard_enabled?: boolean;
+  content_size_cap_bytes?: number;
+  ssrf_allow_list?: string[];
+  admin_contact_email?: string;
 }
 
 const BASE = '';
@@ -679,6 +693,11 @@ export const api = {
   },
   settings: {
     get: () => request<SettingsOut>('/api/settings'),
+    update: (body: SettingsUpdateBody) =>
+      request<SettingsOut>('/api/settings', {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      }),
     getDbStats: () =>
       request<{
         db_path: string;
