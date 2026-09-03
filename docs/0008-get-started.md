@@ -81,9 +81,9 @@ No live network in tests: engine adapters use monkeypatched fixtures / canned pa
 
 ### 0. Authentication & Patchtroy Stealth Engine Showcase
 ![Authentication & Stealth Engine Showcase](assets/ui-0-login.png)
-Secure role-based authentication interface highlighting Krawlyx's Patchtroy anti-bot stealth engine, headless Chromium automation, and single-node self-hosted architecture.
+Secure role-based authentication interface highlighting Krawlyx's Patchtroy stealth engine, headless Chromium automation, and single-node self-hosted architecture.
 
-### 1. Multi-Worker Anti-Ban Crawl Runner
+### 1. Multi-Worker Crawl Runner
 ![Crawl Runner](assets/ui-1-newjob.png)
 Configure batch target URLs, toggle randomized multi-worker session gaps (0.5m–10m), choose between Patchtroy and Scrapy, or define custom structured extraction schemas.
 

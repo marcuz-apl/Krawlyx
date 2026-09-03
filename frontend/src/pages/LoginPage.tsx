@@ -14,7 +14,7 @@ const SLOGANS = [
   },
   {
     title: "Stealth Chromium Automation & Trafilatura Markdown.",
-    desc: "Bypass bot challenges and capture dynamic SPAs with pristine content extraction.",
+    desc: "Execute client-side JavaScript and capture dynamic SPAs with pristine content extraction.",
   },
   {
     title: "Subprocess Spiders & Concurrent Deep Web Ingestion.",

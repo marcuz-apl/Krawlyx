@@ -9,21 +9,21 @@ Krawlyx includes two pluggable crawl engines in v1. Choose the engine that best 
 | Feature / Aspect | 🛡️🐴 **Patchtroy** | ⚡ **Scrapy** |
 | :--- | :--- | :--- |
 | **How it fetches** | Undetected **Chromium browser** (Patchright + Trafilatura) + Fast HTTP fallback | Direct asynchronous **HTTP requests** (Twisted engine) |
-| **Anti-Bot Evasion** | **Yes** (Evades Cloudflare/DataDome by stripping CDP leakages & automation flags) | **Standard** (User-Agent headers & download delays) |
+| **Browser Stealth & Masking** | **Yes** (Strips CDP leakages & automation flags) | **Standard** (User-Agent headers & download delays) |
 | **JavaScript Rendering** | **Yes** (Executes client-side React, Vue, Next.js hydration, lazy-loading) | **No** (Fetches raw HTML directly from the server) |
 | **Speed** | **Moderate** (~1.5–3 seconds per page) | **Ultra-fast** (~100–300 ms per page) |
 | **Resource Usage** | **Moderate** (Headless browser execution without heavy ML dependencies) | **Extremely Low** (Lightweight asynchronous I/O stream) |
 | **Deep Crawling** | Target-by-target / Single-page focused | Full multi-depth internal link crawling (`max_depth`) |
 | **Execution Model** | In-process thread pool with 25s timeout & HTTP fallback | Isolated **subprocess** streaming JSONL items |
-| **Best For** | Modern JS SPAs, interactive pages, Cloudflare/WAF-protected sites | High-volume catalogs, blogs, news portals, static HTML |
+| **Best For** | Modern JS SPAs, interactive pages, complex web apps | High-volume catalogs, blogs, news portals, static HTML |
 
 ---
 
 ## When to Choose **Patchtroy**
 
-Choose **Patchtroy** when scraping dynamic, modern web applications or protected sites:
+Choose **Patchtroy** when scraping dynamic, modern web applications:
 
-1. **Anti-Bot & WAF Protection**: Websites guarded by Cloudflare, DataDome, Akamai, or bot challenges that detect standard Playwright via `navigator.webdriver` or CDP runtime leakages.
+1. **Browser Fingerprint Masking**: Websites that inspect browser runtime flags or detect standard Playwright via `navigator.webdriver` or CDP leakages.
 2. **Client-Side JavaScript Rendering**: Websites built with React, Vue, Angular, or Next.js that render listing data in the browser rather than in static server HTML.
 3. **Interactive & Lazy-Loaded Content**: Sites where listings, images, or pricing only populate after scrolling, clicking, or running frontend scripts.
 4. **Pristine Markdown & Boilerplate Removal**: Patchtroy pairs headless Chromium with Trafilatura to automatically remove navigation bars, footers, and ads, outputting clean Markdown and structured JSON-LD.

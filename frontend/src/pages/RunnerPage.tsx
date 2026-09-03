@@ -382,7 +382,7 @@ export function RunnerPage() {
 
           <UrlTextarea value={urls} onChange={setUrls} />
 
-          {/* Multi-Worker Time Gap / Anti-Ban Stagger Options */}
+          {/* Multi-Worker Time Gap / Session Stagger Options */}
           <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 space-y-2.5 text-xs dark:border-slate-800 dark:bg-slate-800/50">
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-800 dark:text-slate-100">
@@ -392,7 +392,7 @@ export function RunnerPage() {
                   onChange={(e) => setStaggerEnabled(e.target.checked)}
                   className="rounded border-slate-300 text-brand-600 focus:ring-brand-500 h-4 w-4"
                 />
-                <span>⏱️ Multi-Worker Time Gap (Anti-Ban / Rate-Limit Guard)</span>
+                <span>⏱️ Multi-Worker Time Gap (Rate-Limit Guard)</span>
               </label>
               <span className="rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border dark:border-emerald-800/40 font-semibold px-2 py-0.5 text-[10px]">
                 Recommended for Multi-Page
@@ -400,7 +400,7 @@ export function RunnerPage() {
             </div>
 
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Introduces a randomized delay between workers so paginated requests don't hit target sites at the same time and avoid bot detection/banning. (Page 1 starts immediately).
+              Introduces a randomized delay between workers so paginated requests don't hit target sites at the same time and trigger rate limits. (Page 1 starts immediately).
             </p>
 
             {staggerEnabled && (
