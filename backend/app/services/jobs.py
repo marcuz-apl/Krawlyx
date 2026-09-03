@@ -126,7 +126,7 @@ def get_job_handle(job_id: int) -> JobHandle | None:
 async def enqueue_job(job_id: int) -> None:
     """Try to start the job now; if the pool is full, queue it for FIFO pickup."""
     if not _started:
-        # Tests that bypass the lifespan call start_dispatcher() themselves.
+        # Tests that skip the lifespan call start_dispatcher() themselves.
         start_dispatcher()
     queue = _queue
     sem = _slots_semaphore()

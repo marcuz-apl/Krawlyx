@@ -152,7 +152,7 @@ def test_csv_rolls_over_at_byte_boundary(tmp_path) -> None:
     500 chars, so the largest per-row export is ~1 KB. 2000 rows
     ≈ 2 MB > 1 MB cap → 2+ parts.
 
-    To keep the test fast we bypass the per-row DB roundtrip by
+    To keep the test fast we skip the per-row DB roundtrip by
     writing directly through the orchestrator with constructed
     `JobResult` and `Target` objects (the orchestrator doesn't read
     from the DB on `write_result`, it just copies fields).
