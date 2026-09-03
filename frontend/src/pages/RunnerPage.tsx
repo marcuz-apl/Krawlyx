@@ -67,8 +67,8 @@ export function RunnerPage() {
       const jobOptions: Record<string, any> = {
         ...options,
         stagger_workers: staggerEnabled,
-        stagger_min_seconds: Math.round(Math.min(10, Math.max(0.5, staggerMinMinutes)) * 60),
-        stagger_max_seconds: Math.round(Math.min(10, Math.max(0.5, staggerMaxMinutes)) * 60),
+        stagger_min_seconds: Math.round(Math.min(10, Math.max(0.2, staggerMinMinutes)) * 60),
+        stagger_max_seconds: Math.round(Math.min(10, Math.max(0.2, staggerMaxMinutes)) * 60),
       };
       if (schemaMode === 'custom') {
         jobOptions.custom_schema = {
@@ -410,11 +410,11 @@ export function RunnerPage() {
                     <span className="text-slate-700 dark:text-slate-300 font-semibold">Random Gap Between:</span>
                     <input
                       type="number"
-                      min={0.5}
+                      min={0.2}
                       max={10}
-                      step={0.5}
+                      step={0.1}
                       value={staggerMinMinutes}
-                      onChange={(e) => setStaggerMinMinutes(Math.min(10, Math.max(0.5, Number(e.target.value))))}
+                      onChange={(e) => setStaggerMinMinutes(Math.min(10, Math.max(0.2, Number(e.target.value))))}
                       className="w-16 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 py-1 text-center font-bold text-slate-800 dark:text-slate-100"
                     />
                     <span className="text-slate-600 dark:text-slate-400">min ({Math.round(staggerMinMinutes * 60)}s)</span>
@@ -425,11 +425,11 @@ export function RunnerPage() {
                   <div className="flex items-center gap-1.5">
                     <input
                       type="number"
-                      min={0.5}
+                      min={0.2}
                       max={10}
-                      step={0.5}
+                      step={0.1}
                       value={staggerMaxMinutes}
-                      onChange={(e) => setStaggerMaxMinutes(Math.min(10, Math.max(0.5, Number(e.target.value))))}
+                      onChange={(e) => setStaggerMaxMinutes(Math.min(10, Math.max(0.2, Number(e.target.value))))}
                       className="w-16 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 py-1 text-center font-bold text-slate-800 dark:text-slate-100"
                     />
                     <span className="text-slate-600 dark:text-slate-400">minutes ({Math.round(staggerMaxMinutes * 60)}s)</span>

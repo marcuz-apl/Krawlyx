@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, User as UserIcon, Crown, KeyRound, Trash2, UserPlus, AlertCircle } from 'lucide-react';
+import { ConfirmModal } from '@/components/ConfirmModal';
 import { api, type UserOut } from '@/lib/api/client';
 import { useMe } from '@/hooks/useAuth';
 
@@ -20,6 +21,7 @@ export function UsersTable() {
   const [creating, setCreating] = useState(false);
   const [pwFor, setPwFor] = useState<UserOut | null>(null);
   const [roleEditFor, setRoleEditFor] = useState<UserOut | null>(null);
+  const [deleteUser, setDeleteUser] = useState<UserOut | null>(null);
 
   if (isLoading) return <p className="text-slate-500 dark:text-slate-400">Loading users…</p>;
   const users: UserOut[] = data ?? [];
@@ -154,10 +156,8 @@ export function UsersTable() {
                             Password
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm(`Are you sure you want to delete user ${u.username}?`)) remove.mutate(u.id);
-                            }}
-                            className="rounded-lg border border-rose-200 dark:border-rose-900/60 px-2 py-1 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all"
+                            onClick={() => setDeleteUser(u)}
+                            className="rounded-lg border border-rose-200 dark:border-rose-900/60 px-2 py-1 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all cursor-pointer"
                             title="Delete User"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -172,6 +172,23 @@ export function UsersTable() {
           </tbody>
         </table>
       </div>
+
+      <ConfirmModal
+        isOpen={deleteUser !== null}
+        title={`Delete User "${deleteUser?.username}"?`}
+        message="Are you sure you want to permanently delete this user account? This action cannot be undone."
+        confirmText="Delete User"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={remove.isPending}
+        onConfirm={() => {
+          if (deleteUser) {
+            remove.mutate(deleteUser.id);
+            setDeleteUser(null);
+          }
+        }}
+        onCancel={() => setDeleteUser(null)}
+      />
     </div>
   );
 }

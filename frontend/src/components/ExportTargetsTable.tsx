@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { ConfirmModal } from '@/components/ConfirmModal';
 import {
   api,
   type ExportFormat,
@@ -22,6 +23,7 @@ export function ExportTargetsTable() {
     mutationFn: (id: number) => api.exportTargets.test(id),
   });
   const [creating, setCreating] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
 
   if (isLoading) return <p className="text-slate-500 dark:text-slate-400">Loading…</p>;
 
@@ -106,10 +108,8 @@ export function ExportTargetsTable() {
                       Test
                     </button>
                     <button
-                      onClick={() => {
-                        if (confirm(`Delete target ${t.name}?`)) remove.mutate(t.id);
-                      }}
-                      className="rounded border border-red-300 dark:border-red-900/60 px-2 py-0.5 text-xs text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                      onClick={() => setDeleteTarget({ id: t.id, name: t.name })}
+                      className="rounded border border-red-300 dark:border-red-900/60 px-2 py-0.5 text-xs text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
                     >
                       Delete
                     </button>
@@ -120,6 +120,23 @@ export function ExportTargetsTable() {
           </tbody>
         </table>
       </div>
+
+      <ConfirmModal
+        isOpen={deleteTarget !== null}
+        title={`Delete Export Target "${deleteTarget?.name}"?`}
+        message="Are you sure you want to delete this export target? Existing jobs that already exported data will not be affected."
+        confirmText="Delete Target"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={remove.isPending}
+        onConfirm={() => {
+          if (deleteTarget) {
+            remove.mutate(deleteTarget.id);
+            setDeleteTarget(null);
+          }
+        }}
+        onCancel={() => setDeleteTarget(null)}
+      />
 
       {test.data && (
         <p
