@@ -222,7 +222,7 @@ async def create_job(
     db.commit()
 
     # Hand off to the dispatcher (creates an asyncio.Task on the running
-    # loop). Tests bypass the lifespan; routes always rely on the live loop.
+    # loop). Tests skip the lifespan; routes always rely on the live loop.
     await jobs_svc.enqueue_job(job.id)
 
     return JobSubmitAck(
