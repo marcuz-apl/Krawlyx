@@ -16,7 +16,10 @@ import asyncio
 import dataclasses
 import json
 import logging
+import os
+from pathlib import Path
 import shutil
+import sys
 import time
 from collections.abc import AsyncIterator
 from typing import Any
@@ -58,6 +61,21 @@ class PatroyEngine:
         self.config = PatroyConfig.model_validate(config or {})
         self._last_fetch: dict[str, float] = {}
 
+    def _get_binary_path(self, auto_download: bool = True) -> str | None:
+        from app.engines.patroy_installer import find_or_install_patroy
+
+        configured = self.config.binary_path
+        if configured not in {"patroy", "patroy.exe"}:
+            found = shutil.which(configured)
+            if found:
+                return found
+            target = Path(configured)
+            if target.is_file() and os.access(target, os.X_OK):
+                return str(target)
+            return None
+
+        return find_or_install_patroy(configured_path=configured, auto_download=auto_download)
+
     def health(self) -> HealthReport:
         """Verify Patroy binary is found in PATH or daemon endpoint is reachable."""
         if self.config.mode == "daemon":
@@ -80,7 +98,7 @@ class PatroyEngine:
                 )
 
         # CLI mode
-        resolved = shutil.which(self.config.binary_path)
+        resolved = self._get_binary_path()
         if not resolved:
             return HealthReport(
                 ok=False,
@@ -197,17 +215,21 @@ class PatroyEngine:
         yield rec
 
     async def _fetch_via_cli(self, url: str, ua: str) -> tuple[dict[str, Any], str | None]:
+        bin_path = self._get_binary_path()
+        if not bin_path:
+            return {}, f"patroy binary '{self.config.binary_path}' not found in PATH"
+
         cmd = [
-            self.config.binary_path,
-            "scrape",
+            bin_path,
             url,
-            "-o",
+            "-f",
             "json",
-            "--user-agent",
-            ua,
+            "--silent",
         ]
         if self.config.wait_for:
             cmd.extend(["--wait-for", self.config.wait_for])
+        if self.config.timeout_s:
+            cmd.extend(["--timeout", f"{int(self.config.timeout_s)}s"])
 
         timeout = min(self.config.timeout_s, 120)
         try:

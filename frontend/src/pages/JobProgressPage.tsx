@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Clock, RotateCcw, ShieldCheck, Zap } from 'lucide-react';
+import { Clock, RotateCcw, ShieldCheck, Square, Zap } from 'lucide-react';
 
+import { ConfirmModal } from '@/components/ConfirmModal';
 import { Counters } from '@/components/Counters';
 import { TargetStatusTable } from '@/components/TargetStatusTable';
 import { useJobPolling } from '@/hooks/useJobPolling';
@@ -14,15 +16,22 @@ export function JobProgressPage() {
   const qc = useQueryClient();
   const { data, error, isLoading } = useJobPolling(id);
 
+  const [showStopModal, setShowStopModal] = useState(false);
+  const [showRerunModal, setShowRerunModal] = useState(false);
+
   const cancel = useMutation({
     mutationFn: () => api.jobs.cancel(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['job', id] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['job', id] });
+      setShowStopModal(false);
+    },
   });
 
   const rerun = useMutation({
     mutationFn: () => api.jobs.rerun(id),
     onSuccess: (newJob) => {
       qc.invalidateQueries({ queryKey: ['jobs'] });
+      setShowRerunModal(false);
       navigate(`/jobs/${newJob.id}`);
     },
   });
@@ -42,7 +51,7 @@ export function JobProgressPage() {
     );
   }
 
-  const isTerminal = ['completed', 'failed', 'cancelled'].includes(data.status);
+  const isTerminal = ['completed', 'failed', 'cancelled', 'export_degraded'].includes(data.status);
   const opts = data.options || {};
   const staggerEnabled = Boolean(opts.stagger_workers);
   const staggerMinS = Number(opts.stagger_min_seconds || 60);
@@ -56,10 +65,10 @@ export function JobProgressPage() {
   const waitingTargets = data.targets.filter(t => t.status === 'pending').length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <span>Job #{data.id}</span>
             {staggerEnabled && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800">
@@ -76,26 +85,18 @@ export function JobProgressPage() {
         <div className="flex items-center gap-2">
           {!isTerminal && (
             <button
-              onClick={() => {
-                if (window.confirm('Are you sure you want to stop this crawl immediately?')) {
-                  cancel.mutate();
-                }
-              }}
+              onClick={() => setShowStopModal(true)}
               disabled={cancel.isPending}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 dark:bg-rose-950/50 dark:border-rose-800 px-3.5 py-2 text-xs font-semibold text-rose-700 dark:text-rose-300 shadow-sm hover:bg-rose-100 dark:hover:bg-rose-900/50 active:bg-rose-200 disabled:opacity-50 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 dark:bg-rose-950/50 dark:border-rose-800 px-3.5 py-2 text-xs font-semibold text-rose-700 dark:text-rose-300 shadow-sm hover:bg-rose-100 dark:hover:bg-rose-900/50 active:bg-rose-200 disabled:opacity-50 transition-colors cursor-pointer"
             >
-              <span className="h-2 w-2 rounded-sm bg-rose-600 animate-pulse" />
+              <Square className="h-3 w-3 fill-rose-600 text-rose-600" />
               {cancel.isPending ? 'Stopping…' : 'Stop Crawl'}
             </button>
           )}
           {isTerminal && (
             <>
               <button
-                onClick={() => {
-                  if (window.confirm('Re-run this crawl job with identical settings?')) {
-                    rerun.mutate();
-                  }
-                }}
+                onClick={() => setShowRerunModal(true)}
                 disabled={rerun.isPending}
                 className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-300 dark:border-indigo-700 bg-white dark:bg-slate-900 px-3.5 py-2 text-xs font-bold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 shadow-sm transition-all cursor-pointer disabled:opacity-50"
                 title="Re-run crawl with identical settings"
@@ -113,6 +114,30 @@ export function JobProgressPage() {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showStopModal}
+        title={`Stop Crawl Job #${data.id}?`}
+        message="Are you sure you want to stop this crawl immediately? Active in-flight requests will be terminated and all remaining targets will be marked skipped."
+        confirmText="Stop Crawl Immediately"
+        cancelText="Keep Running"
+        variant="danger"
+        isLoading={cancel.isPending}
+        onConfirm={() => cancel.mutate()}
+        onCancel={() => setShowStopModal(false)}
+      />
+
+      <ConfirmModal
+        isOpen={showRerunModal}
+        title={`Re-run Crawl Job #${data.id}?`}
+        message="Launch a new crawl job with the identical target URLs, engine configuration, and extraction settings?"
+        confirmText="Launch New Job"
+        cancelText="Cancel"
+        variant="primary"
+        isLoading={rerun.isPending}
+        onConfirm={() => rerun.mutate()}
+        onCancel={() => setShowRerunModal(false)}
+      />
 
       {/* Multi-Worker Time Gap Schedule Banner */}
       {staggerEnabled && (

@@ -19,7 +19,7 @@ dependencies = [
     "scrapy>=2.11",
     "patchright>=1.49",
     "trafilatura>=1.12",
-    "patchtroy>=0.5.2",
+    "patchtroy @ git+https://github.com/marcuz-apl/patchtroy.git",
 ]
 
 # Static files are served from ../frontend/dist (built by `npm run build`).
