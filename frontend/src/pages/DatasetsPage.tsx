@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Database, Download, Plus, Trash2, Calendar, Layers, Edit2, Sparkles, Search, CheckSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import { ConfirmModal } from '@/components/ConfirmModal';
 import { api } from '@/lib/api/client';
 
 export function DatasetsPage() {
@@ -15,6 +16,9 @@ export function DatasetsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+
+  // Delete modal state
+  const [datasetToDelete, setDatasetToDelete] = useState<{ id: number; name: string } | null>(null);
 
   // Edit / Rename state
   const [editingDataset, setEditingDataset] = useState<{ id: number; name: string; description: string } | null>(null);
@@ -497,13 +501,9 @@ export function DatasetsPage() {
                       <Download className="h-3 w-3" /> CSV
                     </a>
                     <button
-                      onClick={() => {
-                        if (window.confirm(`Delete dataset "${d.name}"?`)) {
-                          deleteMutation.mutate(d.id);
-                        }
-                      }}
+                      onClick={() => setDatasetToDelete({ id: d.id, name: d.name })}
                       disabled={deleteMutation.isPending}
-                      className="rounded-lg p-1.5 text-rose-600 dark:text-rose-400 bg-rose-50/80 dark:bg-rose-950/60 border border-rose-200/60 dark:border-rose-900/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 hover:text-rose-700 dark:hover:text-rose-300 transition-colors"
+                      className="rounded-lg p-1.5 text-rose-600 dark:text-rose-400 bg-rose-50/80 dark:bg-rose-950/60 border border-rose-200/60 dark:border-rose-900/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 hover:text-rose-700 dark:hover:text-rose-300 transition-colors cursor-pointer"
                       title="Delete dataset"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -515,6 +515,23 @@ export function DatasetsPage() {
           })}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={datasetToDelete !== null}
+        title={`Delete Dataset "${datasetToDelete?.name}"?`}
+        message="This will permanently remove the dataset and its cached table rows from the database. This action cannot be undone."
+        confirmText="Delete Dataset"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => {
+          if (datasetToDelete) {
+            deleteMutation.mutate(datasetToDelete.id);
+            setDatasetToDelete(null);
+          }
+        }}
+        onCancel={() => setDatasetToDelete(null)}
+      />
     </div>
   );
 }

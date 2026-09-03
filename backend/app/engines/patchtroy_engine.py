@@ -57,8 +57,30 @@ class PatchtroyEngine:
             import patchright  # noqa: F401
             import patchtroy  # noqa: F401
             import trafilatura  # noqa: F401
-        except (ImportError, OSError) as exc:
-            return HealthReport(ok=False, detail=f"patchtroy dependencies not importable: {exc}")
+        except (ImportError, OSError):
+            # Attempt automated installation from official repository if not present
+            try:
+                import subprocess
+                import sys
+
+                subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "pip",
+                        "install",
+                        "git+https://github.com/marcuz-apl/patchtroy.git",
+                    ],
+                    check=True,
+                    capture_output=True,
+                    timeout=120,
+                )
+                import patchtroy  # noqa: F401
+            except Exception as install_exc:  # noqa: BLE001
+                return HealthReport(
+                    ok=False, detail=f"patchtroy dependencies not importable: {install_exc}"
+                )
+
         return HealthReport(
             ok=True,
             detail=f"patchtroy ready via standalone library ({self.config.user_agent})",

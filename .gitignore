@@ -20,8 +20,9 @@ frontend/dist/
 # SQLite DB file (system of record — never commit user data)
 data/*.db
 
-# Runtime logs (per-job + app rotating logs)
+# Runtime logs & downloaded engine binaries
 data/logs/
+data/bin/
 
 # SQLite transient sidecars (lock/WAL state — never committable)
 *.db-wal
