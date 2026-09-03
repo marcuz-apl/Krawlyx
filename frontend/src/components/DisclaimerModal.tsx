@@ -35,7 +35,7 @@ export function DisclaimerModal({ isOpen, onClose }: DisclaimerModalProps) {
             <strong>Data Privacy & Copyright:</strong> Users must comply with applicable data protection laws (including GDPR, CCPA) when processing personally identifiable information (PII) or copyrighted third-party assets.
           </p>
           <p>
-            <strong>No Liability:</strong> Under no circumstances shall Alfazen Inc. or contributors be held liable for misuse of web scraping tools, IP blacklisting, CAPTCHA disputes, legal actions, or damages resulting from target site interactions executed through this software.
+            <strong>No Liability:</strong> Under no circumstances shall Alfazen Inc. or contributors be held liable for misuse of software tools, network blocks, legal actions, or damages resulting from target site interactions executed through this software.
           </p>
         </div>
 
