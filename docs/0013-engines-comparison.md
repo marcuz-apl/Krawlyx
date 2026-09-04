@@ -6,9 +6,9 @@ Krawlyx includes three pluggable crawl engines. **Patroy is the flagship default
 
 ## Quick Comparison Matrix
 
-| Feature / Aspect | ⚡ **Patroy (Default)** | 🛡️🐴 **Playtrafi** | 🚀 **Scrapy** |
+| Feature / Aspect | ⚡ **Patroy (Default)** | 🛡️🐴 **[Playtrafi](https://github.com/marcuz-apl/playtrafi)** *(PyPI: `playtrafi`)* | 🚀 **Scrapy** |
 | :--- | :--- | :--- | :--- |
-| **Engine Core** | **Go** (compiled native static binary) | **Python** (async runtime & PyPI package) | **Python** (Twisted asynchronous engine) |
+| **Engine Core** | **Go** (compiled native static binary) | **Python** (async runtime & PyPI `playtrafi`) | **Python** (Twisted asynchronous engine) |
 | **How it fetches** | **Go-Rod + Rod-Stealth** (Chromium) + HTTP fallback | Undetected **Chromium browser** (Patchright + Trafilatura) + HTTP fallback | Direct asynchronous **HTTP requests** (Twisted reactor) |
 | **Browser Stealth & Masking** | **Yes** (Masks `navigator.webdriver`, CDP leakages, platform flags) | **Yes** (Strips CDP leakages & automation flags via C++ patches) | **Standard** (User-Agent headers & download delays) |
 | **JavaScript Rendering** | **Yes** (Executes client-side React, Vue, Next.js hydration, lazy-loading) | **Yes** (Executes client-side React, Vue, Next.js hydration, lazy-loading) | **No** (Fetches raw HTML directly from the server) |

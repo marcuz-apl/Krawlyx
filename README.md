@@ -52,7 +52,7 @@ See [`AGENTS.md`](AGENTS.md) for the engineering contract used by AI agents and 
 Krawlyx provides built-in crawl engines tailored for different scraping tasks, with **Patroy set as the primary default**:
 
 - **⚡ [Patroy](docs/0013-engines-comparison.md) (Default Engine)**: Ultra-fast, lightweight compiled Go engine (<50MB RAM) featuring sub-50ms instant cold starts, native Go-Rod + Stealth headless Chromium automation, full client-side JavaScript rendering (React/Vue/Next.js DOM hydration), zero-config portable binary self-downloading, and native HTML `<table>` and Schema.org JSON-LD extraction. The recommended first choice for modern web scraping and e-commerce listings.
-- **🛡️🐴 [Playtrafi](docs/0013-engines-comparison.md)**: Undetected Patchright headless Chromium browser engine paired with Trafilatura for pristine Markdown extraction, full client-side JavaScript execution, Next.js/React hydration support, and automatic HTTP fallback. Best for dynamic, text-heavy editorial pages and article archives.
+- **🛡️🐴 [Playtrafi](https://github.com/marcuz-apl/playtrafi)** ([Docs](docs/0013-engines-comparison.md), PyPI: `playtrafi`): Undetected Patchright headless Chromium browser engine paired with Trafilatura for pristine Markdown extraction, full client-side JavaScript execution, Next.js/React hydration support, and automatic HTTP fallback. Best for dynamic, text-heavy editorial pages and article archives.
 - **🚀 [Scrapy](https://github.com/scrapy/scrapy)**: Ultra-fast, lightweight asynchronous HTTP engine running in an isolated subprocess. Best for large-scale bulk scraping, server-rendered HTML, and deep link crawling.
 
 ## SuperAdmin Password Recovery
