@@ -355,3 +355,28 @@ def test_endpoint_probe_reports_permission_failure(tmp_path) -> None:
     # The probe should report failure.
     assert body["ok"] is False
     assert body["detail"]  # surface the error message
+
+
+def test_exporter_respects_custom_filename(tmp_path) -> None:
+    """When job.options contains export_filename, the slug uses it."""
+    user = make_user("exp_cust_fn")
+    eid = _make_engine()
+    with SessionLocal() as db:
+        job = Job(
+            created_by_id=user.id,
+            engine_id=eid,
+            options={"export_filename": "autotrader_sedans_2026"},
+            notes="some notes",
+            status="queued",
+        )
+        db.add(job)
+        db.commit()
+        db.refresh(job)
+        jid = job.id
+
+    tid = _make_target("custom_fn_target", path=str(tmp_path), fmt="csv")
+    with SessionLocal() as db:
+        job_row = db.get(Job, jid)
+        target_row = db.get(ExportTarget, tid)
+        exporter = Exporter(job_row, target_row)
+        assert "autotrader_sedans_2026" in exporter._slug

@@ -11,6 +11,7 @@ import { api, type JobSubmitAck } from '@/lib/api/client';
 export function RunnerPage() {
   const [engineId, setEngineId] = useState<number | null>(null);
   const [exportTargetId, setExportTargetId] = useState<number | null>(null);
+  const [exportFilename, setExportFilename] = useState('');
   const [urls, setUrls] = useState('');
   const urlLinesCount = urls.split('\n').map(u => u.trim()).filter(Boolean).length;
   const [options, setOptions] = useState<Record<string, unknown>>({});
@@ -71,6 +72,9 @@ export function RunnerPage() {
         stagger_min_seconds: Math.round(Math.min(10, Math.max(0.2, staggerMinMinutes)) * 60),
         stagger_max_seconds: Math.round(Math.min(10, Math.max(0.2, staggerMaxMinutes)) * 60),
       };
+      if (exportTargetId && exportFilename.trim()) {
+        jobOptions.export_filename = exportFilename.trim();
+      }
       if (schemaMode === 'custom') {
         jobOptions.custom_schema = {
           item_selector: itemSelector.trim() || undefined,
@@ -481,24 +485,54 @@ export function RunnerPage() {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+              Save results to
+            </span>
+            <div className="mt-1">
+              <ExportTargetSelector value={exportTargetId} onChange={setExportTargetId} />
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                Export File Name (Optional)
+              </span>
+              {exportTargetId && exportFilename.trim() && (
+                <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 truncate max-w-[180px]">
+                  {exportFilename.trim().replace(/[^a-zA-Z0-9_-]/g, '-')}_...
+                </span>
+              )}
+            </div>
+            <div className="mt-1">
+              <input
+                type="text"
+                value={exportFilename}
+                onChange={(e) => setExportFilename(e.target.value)}
+                disabled={!exportTargetId}
+                placeholder={
+                  exportTargetId
+                    ? "e.g. autotrader_sedans (default: job slug)"
+                    : "Select an export target to customize filename"
+                }
+                className="block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-brand-400 dark:disabled:bg-slate-800/50 dark:disabled:text-slate-500 transition"
+              />
+            </div>
+          </div>
+        </div>
+
         <label className="block">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Notes</span>
           <input
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             maxLength={2000}
-            className="mt-1 block w-full rounded rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-brand-400"
+            placeholder="Optional notes or description for this crawl job"
+            className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-brand-400"
           />
         </label>
-
-        <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            Save results to
-          </span>
-          <div className="mt-1">
-            <ExportTargetSelector value={exportTargetId} onChange={setExportTargetId} />
-          </div>
-        </div>
 
         {errorMessages.length > 0 && (
           <ul className="rounded border border-red-200 bg-red-50 p-3 text-xs text-red-700">

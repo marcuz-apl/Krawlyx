@@ -39,6 +39,11 @@ _COLUMNS: list[str] = [
 
 
 def _job_slug(job: Job) -> str:
+    custom_name = (job.options or {}).get("export_filename")
+    if custom_name and isinstance(custom_name, str) and custom_name.strip():
+        base = custom_name.strip().lower()
+        base = re.sub(r"[^a-z0-9_-]+", "-", base).strip("-")[:60] or "crawl"
+        return f"job-{job.id}-{base}"
     base = (job.notes or "crawl").lower()
     base = re.sub(r"[^a-z0-9]+", "-", base).strip("-")[:40] or "crawl"
     return f"job-{job.id}-{base}"
