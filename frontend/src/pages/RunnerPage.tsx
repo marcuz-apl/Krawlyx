@@ -126,12 +126,19 @@ export function RunnerPage() {
       const generated: string[] = [];
 
       if (helperType === 'autotrader' || helperType === 'page_num') {
-        // AutoTrader Next.js backend uses size=20 (or 100) and page=1, page=2... (distinct cars/page)
+        // AutoTrader Next.js backend uses size=20, 50, 100 and page=1, page=2...
         urlObj.searchParams.delete('rcs');
         urlObj.searchParams.delete('rcp');
-        if (!urlObj.searchParams.has('size')) {
-          const sizeVal = helperStep > 0 ? String(helperStep) : '20';
-          urlObj.searchParams.set('size', sizeVal);
+        const sizeVal = helperStep > 0 ? String(helperStep) : '20';
+        urlObj.searchParams.set('size', sizeVal);
+        if (urlObj.searchParams.has('limit')) {
+          urlObj.searchParams.set('limit', sizeVal);
+        }
+        if (urlObj.searchParams.has('per_page')) {
+          urlObj.searchParams.set('per_page', sizeVal);
+        }
+        if (urlObj.searchParams.has('pageSize')) {
+          urlObj.searchParams.set('pageSize', sizeVal);
         }
         for (let i = 1; i <= helperPages; i++) {
           const u = new URL(urlObj.toString());
@@ -140,10 +147,27 @@ export function RunnerPage() {
         }
       } else if (helperType === 'offset') {
         const step = helperStep > 0 ? helperStep : 20;
+        const sizeVal = String(step);
+        urlObj.searchParams.set('size', sizeVal);
+        if (urlObj.searchParams.has('limit')) {
+          urlObj.searchParams.set('limit', sizeVal);
+        }
+        if (urlObj.searchParams.has('rcp')) {
+          urlObj.searchParams.set('rcp', sizeVal);
+        }
+        if (urlObj.searchParams.has('per_page')) {
+          urlObj.searchParams.set('per_page', sizeVal);
+        }
+        if (urlObj.searchParams.has('pageSize')) {
+          urlObj.searchParams.set('pageSize', sizeVal);
+        }
         for (let i = 0; i < helperPages; i++) {
           const currentOffset = i * step;
           const u = new URL(urlObj.toString());
           u.searchParams.set('offset', String(currentOffset));
+          if (u.searchParams.has('rcs')) {
+            u.searchParams.set('rcs', String(currentOffset));
+          }
           generated.push(u.toString());
         }
       }
@@ -315,7 +339,24 @@ export function RunnerPage() {
             </span>
             <button
               type="button"
-              onClick={() => setShowHelper(!showHelper)}
+              onClick={() => {
+                if (!showHelper) {
+                  const first = urls.split('\n').map((l) => l.trim()).find((l) => l.length > 0);
+                  if (first) {
+                    if (!helperBaseUrl) setHelperBaseUrl(first);
+                    try {
+                      const u = new URL(first);
+                      const sz = u.searchParams.get('size') || u.searchParams.get('rcp') || u.searchParams.get('limit') || u.searchParams.get('per_page');
+                      if (sz && !isNaN(Number(sz)) && Number(sz) > 0) {
+                        setHelperStep(Number(sz));
+                      }
+                    } catch {
+                      // ignore parse errors
+                    }
+                  }
+                }
+                setShowHelper(!showHelper);
+              }}
               className="text-xs font-semibold text-brand-600 hover:text-brand-800 hover:underline"
             >
               ⚡ Auto-Generate Multi-Page URLs {showHelper ? '▲' : '▼'}
@@ -369,9 +410,11 @@ export function RunnerPage() {
                     onChange={(e) => setHelperStep(Number(e.target.value))}
                     className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-2 py-1.5 text-xs focus:border-brand-500 dark:focus:border-brand-400 focus:outline-none"
                   >
+                    <option value={10}>10 items / page</option>
                     <option value={20}>20 items / page (standard)</option>
-                    <option value={100}>100 items / page</option>
+                    <option value={25}>25 items / page</option>
                     <option value={50}>50 items / page</option>
+                    <option value={100}>100 items / page</option>
                   </select>
                 </div>
               </div>

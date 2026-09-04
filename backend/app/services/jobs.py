@@ -235,6 +235,8 @@ async def _run_job(job_id: int, sem: asyncio.Semaphore) -> None:
             # the streaming Exporter now and put it on the handle. The
             # target must exist, be enabled, and have a path + format.
             exporter = _build_exporter(db, job)
+            if exporter is not None:
+                exporter.open()
             handle.exporter = exporter
 
             targets = list(
@@ -484,7 +486,7 @@ async def _run_target(
 
             # M4: stream the just-persisted result to the export file
             _export_result(handle, row, db)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             job_logger_local.exception(
                 "unexpected error processing target %d: %s", target_row.id, exc
             )
@@ -494,7 +496,7 @@ async def _run_target(
                     row.status = "error"
                     row.error = str(exc)[:500]
                     db.commit()
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
                 pass
         finally:
             db.close()

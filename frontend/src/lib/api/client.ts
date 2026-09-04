@@ -134,6 +134,16 @@ export interface JobDetailOut extends JobOut {
   targets: TargetOut[];
 }
 
+export interface ExportFileInfo {
+  filename: string;
+  size_bytes: number;
+  size_human: string;
+  modified_at: string;
+  format: string;
+  job_id?: number | null;
+  row_count?: number | null;
+}
+
 export interface JobResultOut {
   id: number;
   target_id: number;
@@ -564,6 +574,13 @@ export const api = {
       request<ExportTargetTestResult>(`/api/export-targets/${id}/test`, {
         method: 'POST',
       }),
+  },
+
+  exports: {
+    list: () => request<ExportFileInfo[]>('/api/exports'),
+    downloadUrl: (filename: string) => `/api/exports/${encodeURIComponent(filename)}`,
+    delete: (filename: string) =>
+      request<void>(`/api/exports/${encodeURIComponent(filename)}`, { method: 'DELETE' }),
   },
 
   schedules: {

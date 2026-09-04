@@ -10,6 +10,6 @@ The orchestrator (`Exporter`) is the only entry point used by the job
 worker. The worker never imports a writer directly.
 """
 
-from app.exporters.exporter import Exporter
+from app.exporters.exporter import Exporter, normalize_target_path
 
-__all__ = ["Exporter"]
+__all__ = ["Exporter", "normalize_target_path"]

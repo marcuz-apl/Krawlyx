@@ -9,9 +9,10 @@ submitting. DELETE refuses to drop a target referenced by jobs
 from __future__ import annotations
 
 import logging
+import os
+import re
 import uuid
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -186,7 +187,9 @@ def test_target(
     if row.mode != "folder" or not row.path:
         return ExportTargetTestResult(ok=True, detail="database target — nothing to test")
     try:
-        directory = Path(row.path).expanduser().resolve()
+        from app.exporters import normalize_target_path
+
+        directory = normalize_target_path(row.path)
         directory.mkdir(parents=True, exist_ok=True)
         probe = directory / f"Krawlyx_probe_{uuid.uuid4().hex[:8]}.txt"
         probe.write_text(

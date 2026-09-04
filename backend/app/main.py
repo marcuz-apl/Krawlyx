@@ -23,6 +23,7 @@ from app.api import (
     datasets,
     engines,
     export_targets,
+    exports,
     health,
     jobs,
     schedules,
@@ -50,6 +51,9 @@ async def lifespan(_app: FastAPI):
         from app.services.engines import bootstrap_default_engines
 
         bootstrap_default_engines(db)
+        from app.services.export_targets import bootstrap_default_export_target
+
+        bootstrap_default_export_target(db)
     jobs_svc.start_dispatcher()
     scheduler_svc.start_scheduler()
     try:
@@ -75,6 +79,7 @@ def create_app() -> FastAPI:
     app.include_router(jobs.router)
     app.include_router(datasets.router)
     app.include_router(export_targets.router)
+    app.include_router(exports.router)
     app.include_router(schedules.router)
     app.include_router(users.router)
     app.include_router(database.router)

@@ -380,3 +380,51 @@ def test_exporter_respects_custom_filename(tmp_path) -> None:
         target_row = db.get(ExportTarget, tid)
         exporter = Exporter(job_row, target_row)
         assert "autotrader_sedans_2026" in exporter._slug
+
+
+def test_exporter_writes_structured_items(tmp_path) -> None:
+    """When a target result includes structured items in metadata_json, they are streamed to the file."""
+    user = make_user("exp_struct_user")
+    eid = _make_engine()
+    jid = _make_job(user_id=user.id, engine_id=eid)
+    tid = _make_target("struct_target", path=str(tmp_path), fmt="csv")
+
+    with SessionLocal() as db:
+        job = db.get(Job, jid)
+        target = db.get(ExportTarget, tid)
+        ex = Exporter(job, target)
+        ex.open()
+
+        r = JobResult(
+            target_id=1,
+            final_url="https://example.com/alfa",
+            http_status=200,
+            title="Alfa Romeo Listings",
+            content_markdown="",
+            content_text="",
+            links_json=[],
+            metadata_json={
+                "items": [
+                    {
+                        "year": 2021,
+                        "make": "Alfa Romeo",
+                        "model": "Giulia",
+                        "price": 32000,
+                        "dealer_name": "Calgary Alfa",
+                    }
+                ]
+            },
+            error=None,
+            duration_ms=50,
+            fetched_at=datetime.now(UTC),
+        )
+        ex.write_result(r, source_url="https://example.com/alfa")
+        ex.close()
+
+    parts = list(tmp_path.glob("*.csv"))
+    assert len(parts) == 1
+    content = parts[0].read_text(encoding="utf-8-sig")
+    assert "Alfa Romeo" in content
+    assert "Giulia" in content
+    assert "32000" in content
+    assert "Calgary Alfa" in content

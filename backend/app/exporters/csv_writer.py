@@ -26,7 +26,7 @@ class CsvWriter:
 
     def open(self, path: Path, columns: Sequence[str]) -> None:
         self._fh = open(path, "w", encoding="utf-8-sig", newline="")  # noqa: SIM115 — held open across many write_row calls
-        self._writer = csv.DictWriter(self._fh, fieldnames=list(columns))
+        self._writer = csv.DictWriter(self._fh, fieldnames=list(columns), extrasaction="ignore")
         self._writer.writeheader()
         self._fh.flush()
         # `tell()` on a text file returns the character count, not bytes;

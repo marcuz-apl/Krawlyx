@@ -13,6 +13,7 @@ import {
   PlusCircle, 
   History, 
   Database, 
+  FolderDown,
   Calendar, 
   Shield 
 } from "lucide-react";
@@ -27,8 +28,8 @@ export function Header() {
     queryFn: () => api.health(),
     staleTime: 30000,
   });
-  const rawVersion = healthData?.version || "v2.2.0";
-  const dynamicVersion = rawVersion.split("+")[0].split("-")[0] || "v2.2.0";
+  const rawVersion = healthData?.version || "v2.3.0";
+  const dynamicVersion = rawVersion.split("+")[0].split("-")[0] || "v2.3.0";
   const me = useMe();
   const logout = useLogout();
   const location = useLocation();
@@ -207,6 +208,7 @@ export function Header() {
             {navLink("/", "New Job", PlusCircle)}
             {navLink("/history", "History", History)}
             {navLink("/datasets", "Datasets", Database)}
+            {navLink("/exports", "Exported Files", FolderDown)}
             {(me.data?.role === "admin" || me.data?.role === "superadmin") && navLink("/schedules", "Schedules", Calendar)}
             {(me.data?.role === "admin" || me.data?.role === "superadmin") && navLink("/admin", "Admin", Shield)}
           </nav>
