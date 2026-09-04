@@ -88,7 +88,8 @@ export function EngineSelector({ value, onChange }: Props) {
     >
       {engines.map((e) => (
         <option key={e.id} value={e.id}>
-          {e.name} ({e.type})
+          {e.type === 'patroy' ? '⚡ ' : e.type === 'playtrafi' ? '🛡️ ' : e.type === 'scrapy' ? '🚀 ' : '⚙️ '}
+          {e.name} [type: {e.type}] (ID #{e.id})
         </option>
       ))}
     </select>

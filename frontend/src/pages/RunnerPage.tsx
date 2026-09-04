@@ -166,7 +166,17 @@ export function RunnerPage() {
         className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900"
       >
         <label className="block">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Engine</span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Engine</span>
+            {selectedEngine && (
+              <span className="inline-flex items-center gap-1.5 font-mono text-xs text-slate-500 dark:text-slate-400">
+                <span>Engine Type:</span>
+                <span className="rounded bg-brand-50 dark:bg-brand-950 px-2 py-0.5 text-xs font-bold text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
+                  {selectedEngine.type}
+                </span>
+              </span>
+            )}
+          </div>
           <div className="mt-1">
             <EngineSelector value={engineId} onChange={setEngineId} />
           </div>
@@ -504,15 +514,22 @@ export function RunnerPage() {
             disabled={!engineId || submit.isPending}
             className="rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-brand-500/20 hover:bg-brand-500 transition active:scale-[0.98] disabled:opacity-60 cursor-pointer flex items-center gap-2"
           >
-            {submit.isPending ? 'Submitting…' : selectedEngine ? `Run crawl with ${selectedEngine.name}` : 'Run crawl'}
+            {submit.isPending
+              ? 'Submitting…'
+              : selectedEngine
+              ? `Run crawl with ${selectedEngine.name} [type: ${selectedEngine.type}]`
+              : 'Run crawl'}
           </button>
           {selectedEngine && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300">
               <span className="text-slate-400">Target Engine:</span>
               <strong className="text-brand-600 dark:text-brand-400 font-semibold">
                 {selectedEngine.type === 'patroy' ? '⚡ ' : selectedEngine.type === 'playtrafi' ? '🛡️ ' : '🚀 '}
                 {selectedEngine.name}
               </strong>
+              <span className="rounded bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 font-mono text-[11px] font-bold text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700">
+                type: {selectedEngine.type}
+              </span>
             </span>
           )}
         </div>
