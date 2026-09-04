@@ -26,3 +26,11 @@ class ExportTarget(Base):
     runner_selectable: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+
+    @property
+    def format(self) -> str | None:
+        return self.file_format
+
+    @format.setter
+    def format(self, val: str | None) -> None:
+        self.file_format = val

@@ -564,7 +564,7 @@ def _build_exporter(db: Session, job: Job) -> object | None:
         or not target.enabled
         or target.mode != "folder"
         or target.path is None
-        or target.format is None
+        or (getattr(target, "file_format", None) or getattr(target, "format", None)) is None
     ):
         return None
     # Lazy import — `app.exporters` pulls in `openpyxl` which the tests
