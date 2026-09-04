@@ -1,2 +1,19 @@
 #!/bin/sh
-exec "$(dirname "$0")/alfazen-version" hook "$@"
+HOOKDIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+. "$HOOKDIR/versionlib.sh"
+
+msgfile=$1
+[ -f "$msgfile" ] || exit 0
+ver=$(read_version) || exit 1
+validate_identifier "$ver"
+
+tmp=$(mktemp) || exit 1
+awk -v stamp="$ver" '
+  !done && $0 !~ /^#/ {
+    sub(/^v[0-9]+\.[0-9]+\.[0-9]+[+-][0-9][0-9][0-9][0-9][0-9][0-9][0-9a-z] /, "")
+    print stamp " " $0
+    done = 1
+    next
+  }
+  { print }
+' "$msgfile" > "$tmp" && mv -f -- "$tmp" "$msgfile"

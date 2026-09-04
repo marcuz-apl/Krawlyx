@@ -94,12 +94,12 @@ All project documentation, architectural decision records, implementation plans,
 
 ## Versioning
 
-This repo adheres to **Alfazen Versioning (v2.0)**:
-- The root `VERSION` file holds the base Semantic Version `m.n.p` (e.g. `1.9.1`).
-- The Alfazen build identifier `+yymmddc` is computed dynamically as SemVer 2.0.0 build metadata.
-- Git commit messages preserve pure Conventional Commit subjects on row 1, and the `prepare-commit-msg` hook stamps the trailer `Alfazen-Build: v<m.n.p>+<yymmddc>` in the commit footer.
-
-Enable repository Git hooks after cloning with:
+This repo adheres to **Alfazen Versioning (Connected Prefix Standard)**:
+- Stored directly in the tracked root `VERSION` file as `v<m.n.p>+<yymmddc>` (e.g. `v2.1.0+2609044`).
+- Complies strictly with SemVer 2.0.0 (Rule #10) build metadata (`+` delimiter).
+- Every commit subject line is automatically prefixed with the connected identifier:
+  `v<m.n.p>+<yymmddc> <type>(<scope>): <subject>`
+- Enable repository Git hooks after cloning with:
 
 ```sh
 git config core.hooksPath .githooks

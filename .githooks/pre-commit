@@ -1,15 +1,10 @@
 #!/bin/sh
-# pre-commit — validate that root VERSION is a valid SemVer m.n.p string
-set -e
-
 HOOKDIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-ROOTDIR=$(CDPATH= cd -- "$HOOKDIR/.." && pwd)
-VERSION_FILE="$ROOTDIR/VERSION"
+. "$HOOKDIR/versionlib.sh"
 
-if [ -f "$VERSION_FILE" ]; then
-  ver=$(tr -d '\r\n\t ' < "$VERSION_FILE")
-  if ! printf '%s' "$ver" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-    echo "alfazen-versioning: malformed VERSION '$ver' (expected SemVer m.n.p, e.g. 1.9.1)" >&2
-    exit 1
-  fi
-fi
+old=$(read_version)
+validate_identifier "$old"
+new=$(next_identifier "$old" "$(utc_yymmdd)") || exit 1
+
+printf '%s\n' "$new" > "$VERSION_FILE"
+git add -- "$VERSION_FILE"
