@@ -60,7 +60,7 @@ const DOC_SECTIONS: DocSection[] = [
         label: "Quick Health Check",
         code: `# Check API health and running version
 curl -s http://localhost:4040/api/health
-# Response: {"status":"ok","app":"Krawlyx","version":"v2.2.0"}`
+# Response: {"status":"ok","app":"Krawlyx","version":"v2.3.0"}`
       },
       tips: [
         "Backend API runs on port 4040, and the Vite frontend dev server runs on port 4039.",

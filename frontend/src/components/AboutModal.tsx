@@ -6,7 +6,7 @@ interface AboutModalProps {
   version?: string;
 }
 
-export function AboutModal({ isOpen, onClose, version = "v2.2.0" }: AboutModalProps) {
+export function AboutModal({ isOpen, onClose, version = "v2.3.0" }: AboutModalProps) {
   if (!isOpen) return null;
 
   return (

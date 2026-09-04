@@ -7,6 +7,7 @@ import { RequireAuth } from "@/components/RequireAuth";
 import { AdminPanelPage } from "@/pages/AdminPanelPage";
 import { DatasetDetailPage } from "@/pages/DatasetDetailPage";
 import { DatasetsPage } from "@/pages/DatasetsPage";
+import { ExportedFilesPage } from "@/pages/ExportedFilesPage";
 import { JobHistoryPage } from "@/pages/JobHistoryPage";
 import { JobProgressPage } from "@/pages/JobProgressPage";
 import { JobResultDetailPage } from "@/pages/JobResultDetailPage";
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
           { path: "/history", element: <JobHistoryPage /> },
           { path: "/datasets", element: <DatasetsPage /> },
           { path: "/datasets/:id", element: <DatasetDetailPage /> },
+          { path: "/exports", element: <ExportedFilesPage /> },
           { path: "/jobs/merge", element: <MergedResultsPage /> },
           { path: "/schedules", element: <SchedulesPage /> },
           { path: "/admin", element: <AdminPanelPage /> },
