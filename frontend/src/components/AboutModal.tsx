@@ -6,7 +6,7 @@ interface AboutModalProps {
   version?: string;
 }
 
-export function AboutModal({ isOpen, onClose, version = "v1.5.5" }: AboutModalProps) {
+export function AboutModal({ isOpen, onClose, version = "v2.1.0" }: AboutModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -29,7 +29,7 @@ export function AboutModal({ isOpen, onClose, version = "v1.5.5" }: AboutModalPr
         <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
           Krawlyx Workbench
         </h2>
-        <span className="mt-1 rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-semibold text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
+        <span className="mt-1 rounded-full bg-brand-50 px-3 py-0.5 font-mono text-[11px] font-semibold text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
           Version {version}
         </span>
 
