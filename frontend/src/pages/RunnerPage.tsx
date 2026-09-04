@@ -485,42 +485,37 @@ export function RunnerPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className={`grid gap-4 ${exportTargetId ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:w-1/2'}`}>
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              Save results to
-            </span>
-            <div className="mt-1">
-              <ExportTargetSelector value={exportTargetId} onChange={setExportTargetId} />
+            <div className="flex items-center h-5 mb-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                Save results to
+              </span>
             </div>
+            <ExportTargetSelector value={exportTargetId} onChange={setExportTargetId} />
           </div>
 
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                Export File Name (Optional)
-              </span>
-              {exportTargetId && exportFilename.trim() && (
-                <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 truncate max-w-[180px]">
-                  {exportFilename.trim().replace(/[^a-zA-Z0-9_-]/g, '-')}_...
+          {exportTargetId && (
+            <div>
+              <div className="flex items-center justify-between h-5 mb-1.5">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  Export File Name (Optional)
                 </span>
-              )}
-            </div>
-            <div className="mt-1">
+                {exportFilename.trim() && (
+                  <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 truncate max-w-[180px]">
+                    {exportFilename.trim().replace(/[^a-zA-Z0-9_-]/g, '-')}_...
+                  </span>
+                )}
+              </div>
               <input
                 type="text"
                 value={exportFilename}
                 onChange={(e) => setExportFilename(e.target.value)}
-                disabled={!exportTargetId}
-                placeholder={
-                  exportTargetId
-                    ? "e.g. autotrader_sedans (default: job slug)"
-                    : "Select an export target to customize filename"
-                }
-                className="block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-brand-400 dark:disabled:bg-slate-800/50 dark:disabled:text-slate-500 transition"
+                placeholder="e.g. autotrader_sedans (default: job slug)"
+                className="block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-brand-400 transition"
               />
             </div>
-          </div>
+          )}
         </div>
 
         <label className="block">
@@ -542,16 +537,16 @@ export function RunnerPage() {
           </ul>
         )}
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
           <button
             type="submit"
             disabled={!engineId || submit.isPending}
-            className="rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-brand-500/20 hover:bg-brand-500 transition active:scale-[0.98] disabled:opacity-60 cursor-pointer flex items-center gap-2"
+            className="rounded-xl bg-brand-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-brand-500/20 hover:bg-brand-500 transition active:scale-[0.98] disabled:opacity-60 cursor-pointer flex items-center gap-2"
           >
             {submit.isPending ? 'Submitting…' : 'Run Crawl'}
           </button>
           {selectedEngine && (
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300">
+            <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300">
               <span className="text-slate-400">Target Engine:</span>
               <strong className="text-brand-600 dark:text-brand-400 font-semibold">
                 {selectedEngine.type === 'patroy' ? '⚡ ' : selectedEngine.type === 'playtrafi' ? '🛡️ ' : '🚀 '}
