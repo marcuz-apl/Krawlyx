@@ -4,9 +4,11 @@ Copyright 2026 marcuz-apl / Alfazen
 This product includes software developed by marcuz-apl / Alfazen
 (https://github.com/marcuz-apl/Krawlyx).
 
-This product bundles or integrates with:
-- Playtrafi (Apache License 2.0)
-- Patroy (Apache License 2.0)
+Core Engines:
+- Patroy (https://github.com/marcuz-apl/patroy) — Apache License 2.0
+- Playtrafi (https://github.com/marcuz-apl/playtrafi) — Apache License 2.0
+
+Third-party dependencies:
 - Trafilatura (Apache License 2.0)
 - Scrapy (BSD 3-Clause License)
 - FastAPI (MIT License)
