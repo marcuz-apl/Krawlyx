@@ -1,4 +1,4 @@
-# Crawl Engines Comparison — Patroy vs. Patchtroy vs. Scrapy
+# Crawl Engines Comparison — Patroy vs. Playtrafi vs. Scrapy
 
 Krawlyx includes three pluggable crawl engines. **Patroy is the flagship default engine**, tailored for high-speed, lightweight stealth scraping. Choose the engine that best fits your target website, performance requirements, and data structure.
 
@@ -6,9 +6,9 @@ Krawlyx includes three pluggable crawl engines. **Patroy is the flagship default
 
 ## Quick Comparison Matrix
 
-| Feature / Aspect | ⚡ **Patroy (Default)** | 🛡️🐴 **Patchtroy** | 🚀 **Scrapy** |
+| Feature / Aspect | ⚡ **Patroy (Default)** | 🛡️🐴 **Playtrafi** | 🚀 **Scrapy** |
 | :--- | :--- | :--- | :--- |
-| **Engine Core** | **Go** (compiled native static binary) | **Python** (async runtime) | **Python** (Twisted asynchronous engine) |
+| **Engine Core** | **Go** (compiled native static binary) | **Python** (async runtime & PyPI package) | **Python** (Twisted asynchronous engine) |
 | **How it fetches** | **Go-Rod + Rod-Stealth** (Chromium) + HTTP fallback | Undetected **Chromium browser** (Patchright + Trafilatura) + HTTP fallback | Direct asynchronous **HTTP requests** (Twisted reactor) |
 | **Browser Stealth & Masking** | **Yes** (Masks `navigator.webdriver`, CDP leakages, platform flags) | **Yes** (Strips CDP leakages & automation flags via C++ patches) | **Standard** (User-Agent headers & download delays) |
 | **JavaScript Rendering** | **Yes** (Executes client-side React, Vue, Next.js hydration, lazy-loading) | **Yes** (Executes client-side React, Vue, Next.js hydration, lazy-loading) | **No** (Fetches raw HTML directly from the server) |
@@ -36,16 +36,16 @@ Choose **Patroy** when:
 
 ---
 
-## 2. 🛡️🐴 When to Choose **Patchtroy**
+## 2. 🛡️🐴 When to Choose **Playtrafi**
 
-Choose **Patchtroy** when scraping editorial content or text-dense dynamic applications:
+Choose **Playtrafi** when scraping editorial content or text-dense dynamic applications:
 
-1. **Pristine Markdown & Boilerplate Filtering**: Patchtroy pairs headless Chromium with Trafilatura to automatically remove navigation bars, cookie consent modals, footers, and ads, outputting clean, publication-ready Markdown.
+1. **Pristine Markdown & Boilerplate Filtering**: Playtrafi pairs headless Chromium with Trafilatura to automatically remove navigation bars, cookie consent modals, footers, and ads, outputting clean, publication-ready Markdown.
 2. **Alternative Browser Driver**: Websites where Playwright's specific browser event simulation or navigation lifecycle events provide specific advantages over Chrome DevTools Protocol.
 3. **Python In-Process Integration**: Jobs where Python-based post-processing or Trafilatura's heuristic text evaluation algorithms are desired.
 
 > [!NOTE]
-> In Krawlyx, Patchtroy is guarded by a **25-second execution timeout** and an automatic high-speed HTTP fallback if browser contexts experience resource contention.
+> In Krawlyx, Playtrafi is guarded by a **25-second execution timeout** and an automatic high-speed HTTP fallback if browser contexts experience resource contention.
 
 ---
 

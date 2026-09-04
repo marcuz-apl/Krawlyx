@@ -93,7 +93,11 @@ def create_app() -> FastAPI:
             from starlette.responses import FileResponse
 
             target_file = FRONTEND_DIST / full_path
-            if full_path and target_file.is_file() and target_file.resolve().is_relative_to(FRONTEND_DIST):
+            if (
+                full_path
+                and target_file.is_file()
+                and target_file.resolve().is_relative_to(FRONTEND_DIST)
+            ):
                 return FileResponse(str(target_file))
 
             return FileResponse(
@@ -104,6 +108,7 @@ def create_app() -> FastAPI:
                     "Expires": "0",
                 },
             )
+
     return app
 
 

@@ -6,7 +6,6 @@ or appending specified keys.
 
 from __future__ import annotations
 
-import os
 import re
 from pathlib import Path
 from typing import Any
@@ -32,7 +31,7 @@ def format_env_value(val: Any) -> str:
 
 def update_env_file(env_path: Path, updates: dict[str, Any]) -> None:
     """Update or append keys in an existing or new .env file.
-    
+
     Args:
         env_path: Path to the .env file.
         updates: Mapping of environment variable names to their new values.

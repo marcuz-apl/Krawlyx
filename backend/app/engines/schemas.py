@@ -8,14 +8,14 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
-EngineType = Literal["patchtroy", "scrapy", "patroy"]
+EngineType = Literal["playtrafi", "patchtroy", "scrapy", "patroy"]
 
 
 class _StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
 
-class PatchtroyConfig(_StrictModel):
+class PlaytrafiConfig(_StrictModel):
     headless: bool = True
     browser_timeout_s: int = Field(default=30, ge=1, le=300)
     text_mode: bool = False
@@ -27,8 +27,8 @@ class PatchtroyConfig(_StrictModel):
 
 
 # Backward-compatibility aliases
-PlaytrafiConfig = PatchtroyConfig
-Crawl4AIConfig = PatchtroyConfig
+PatchtroyConfig = PlaytrafiConfig
+Crawl4AIConfig = PlaytrafiConfig
 
 
 class ScrapyConfig(_StrictModel):
