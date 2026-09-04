@@ -4,7 +4,7 @@ A self-hosted web scraping workbench: paste URLs, pick a crawl engine from an
 admin-curated pool, run batch crawls on demand or on a cron schedule, and land
 results in SQLite or as auto-splitting CSV/XLSX files in a shared folder.
 
-Free and open source (MIT) — every dependency is open source and runs locally;
+Free and open source (Apache 2.0) — every dependency is open source and runs locally;
 no paid APIs or third-party cloud lock-in.
 
 ---
@@ -19,9 +19,14 @@ no paid APIs or third-party cloud lock-in.
 
 ## Status
 
-M6 Hardening & Workbench Enhancements complete (`v1.8.9`). See [`PRD.md`](PRD.md) §12 and commit log. Key additions: SuperAdmin role hierarchy, SQLite database browser & SQL query console, unified full-dataset view with single-tier row pagination, multi-worker session time gaps, SSRF guard, per-host throttle, per-job rotating logs, and full Docker deployment suite.
+**Production Stable (`v2.1.0`)** — All core development milestones (M1–M6) and post-milestone workbench expansions are fully delivered, validated, and hardened. Krawlyx operates as an all-in-one web scraping workbench featuring:
+- **Triple Crawl Engine Suite**: Built-in native support for **Patroy** (default Go engine), **Playtrafi** (Chromium browser engine), and **Scrapy** (async HTTP subprocess).
+- **Persistent Datasets & Universal Schema**: Dynamic SQLite schema extraction, structured JSON-LD / HTML table capture, and zero-loss persistence.
+- **In-Browser SQL Console**: Interactive SQL workspace with live preview, dynamic schema inspection, and instant data transformations.
+- **Dataset Operations & Multi-Job Merger**: Column union merging, single-tier pagination, regex filtering, in-place splitting, and streaming CSV/XLSX export with size-based chunk rollover.
+- **Security & Ops**: SuperAdmin role hierarchy, in-process APScheduler cron engine, SSRF guardrails default-on, per-host throttling, rotating job logs, and production-ready Docker Compose & Synology NAS deployments.
 
-## Quick test (final product)
+## Quick Start & Verification
 
 ```bash
 # 1. Verify env and dependencies
@@ -38,7 +43,7 @@ curl -H "Cookie: session=..." http://localhost:4040/api/settings | jq '.ssrf_gua
 ```
 See [`AGENTS.md`](AGENTS.md) for the engineering contract used by AI agents and humans.
 
-## Planned stack
+## Technology Stack
 
 | Layer | Choice |
 | --- | --- |
