@@ -8,7 +8,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
-EngineType = Literal["playtrafi", "patchtroy", "scrapy", "patroy"]
+EngineType = Literal["playtrafi", "scrapy", "patroy"]
 
 
 class _StrictModel(BaseModel):
@@ -27,7 +27,6 @@ class PlaytrafiConfig(_StrictModel):
 
 
 # Backward-compatibility aliases
-PatchtroyConfig = PlaytrafiConfig
 Crawl4AIConfig = PlaytrafiConfig
 
 
@@ -63,8 +62,7 @@ class PatroyConfig(_StrictModel):
 
 def config_model_for(engine_type: str) -> type[BaseModel]:
     return {
-        "patchtroy": PatchtroyConfig,
-        "playtrafi": PatchtroyConfig,
+        "playtrafi": PlaytrafiConfig,
         "scrapy": ScrapyConfig,
         "patroy": PatroyConfig,
     }[engine_type]
@@ -73,7 +71,6 @@ def config_model_for(engine_type: str) -> type[BaseModel]:
 __all__ = [
     "Crawl4AIConfig",
     "EngineType",
-    "PatchtroyConfig",
     "PatroyConfig",
     "PlaytrafiConfig",
     "ScrapyConfig",

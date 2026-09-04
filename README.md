@@ -11,7 +11,7 @@ no paid APIs or third-party cloud lock-in.
 
 ## Overview
 
-![Krawlyx Authentication & Patchtroy Stealth Engine Showcase](docs/assets/ui-0-login.png)
+![Krawlyx Authentication & Playtrafi Browser Engine Showcase](docs/assets/ui-0-login.png)
 
 > 📖 **Looking for a full tour?** Explore the [**Interactive UI & Feature Gallery (7 Modules)**](docs/0008-get-started.md#7-workbench-visual-tour) in the Quick Start Guide.
 
@@ -109,7 +109,7 @@ git config core.hooksPath .githooks
 
 Krawlyx is built upon outstanding open-source projects:
 
-- **[Patroy](https://github.com/marcuz-apl/patroy)** & **[Go-Rod](https://github.com/go-rod/rod)** — High-speed, lightweight Go browser engine with stealth anti-bot evasion.
+- **[Patroy](https://github.com/marcuz-apl/patroy)** & **[Go-Rod](https://github.com/go-rod/rod)** — High-speed, lightweight Go browser engine with stealth automation.
 - **[Playtrafi](https://pypi.org/project/playtrafi/)** / **[Patchright](https://github.com/Kaliiiiiiiiii-Vinyzu/patchright)** — Undetected headless browser automation eliminating CDP leakages paired with [Trafilatura](https://github.com/adbar/trafilatura) clean Markdown extraction.
 - **[Scrapy](https://github.com/scrapy/scrapy)** — The battle-tested fast high-level web crawling and scraping framework for Python.
 - **[FastAPI](https://github.com/fastapi/fastapi)** — Modern, fast (high-performance) web framework for building APIs.

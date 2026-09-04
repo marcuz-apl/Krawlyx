@@ -39,7 +39,7 @@ uvicorn app.main:app --port 4040 --reload
 ## 4. Basic usage flow
 
 1. **Login** (`/api/auth/login`) with bootstrap admin → receive session cookie.
-2. **Admin**: register an engine instance (`POST /api/engines`) — e.g. `patchtroy` with `{"headless": true}` or `scrapy` with `{"concurrency": 2}`.
+2. **Admin**: register an engine instance (`POST /api/engines`) — e.g. `playtrafi` with `{"headless": true}` or `scrapy` with `{"concurrency": 2}`.
 3. **Enable** the instance (`PUT /api/engines/{id}/pool` or toggle via settings) so it appears in the user pool.
 4. **Runner** (`/` or SPA): paste URLs (one per line), pick pooled engine, submit (`POST /api/jobs`).
 5. **Watch progress**: live target table (`GET /api/jobs/{id}`); per-target status updates via polling (≤2 s).
@@ -79,13 +79,13 @@ No live network in tests: engine adapters use monkeypatched fixtures / canned pa
 
 ## 7. Workbench Visual Tour
 
-### 0. Authentication & Patchtroy Stealth Engine Showcase
-![Authentication & Stealth Engine Showcase](assets/ui-0-login.png)
-Secure role-based authentication interface highlighting Krawlyx's Patchtroy stealth engine, headless Chromium automation, and single-node self-hosted architecture.
+### 0. Authentication & Playtrafi Browser Engine Showcase
+![Authentication & Browser Engine Showcase](assets/ui-0-login.png)
+Secure role-based authentication interface highlighting Krawlyx's Playtrafi browser engine, headless Chromium automation, and single-node self-hosted architecture.
 
 ### 1. Multi-Worker Crawl Runner
 ![Crawl Runner](assets/ui-1-newjob.png)
-Configure batch target URLs, toggle randomized multi-worker session gaps (0.5m–10m), choose between Patchtroy and Scrapy, or define custom structured extraction schemas.
+Configure batch target URLs, toggle randomized multi-worker session gaps (0.5m–10m), choose between Patroy, Playtrafi, and Scrapy, or define custom structured extraction schemas.
 
 ### 2. Job History & Live Telemetry
 ![Job History](assets/ui-2-history.png)

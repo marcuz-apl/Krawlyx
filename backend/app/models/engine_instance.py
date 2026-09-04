@@ -15,9 +15,7 @@ from app.models.base import Base, utcnow
 class EngineInstance(Base):
     __tablename__ = "engines"
     __table_args__ = (
-        CheckConstraint(
-            "type IN ('playtrafi','patchtroy','scrapy','patroy')", name="ck_engines_type"
-        ),
+        CheckConstraint("type IN ('playtrafi','scrapy','patroy')", name="ck_engines_type"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)

@@ -180,7 +180,7 @@ export function SettingsReadOnlyCard() {
             envVar="MYKRAWL_MAX_CONCURRENT_JOBS"
             badgeColor="indigo"
             reason="Hardware Protection & Out-Of-Memory (OOM) Guardrail"
-            tip="Each active crawl job can launch headless Chromium browser contexts (Patchtroy) or isolated multiprocessing Scrapy spiders consuming 200MB–500MB RAM each. The default of 2 guarantees safe execution on minimal 2GB–4GB VPS servers without crashing the host OS."
+            tip="Each active crawl job can launch headless Chromium browser contexts (Playtrafi) or isolated multiprocessing Scrapy spiders consuming 200MB–500MB RAM each. The default of 2 guarantees safe execution on minimal 2GB–4GB VPS servers without crashing the host OS."
             howToChange="On servers with ≥8GB RAM and multi-core CPUs, you can safely set MYKRAWL_MAX_CONCURRENT_JOBS=4 or 8 in backend/.env and restart."
           />
 

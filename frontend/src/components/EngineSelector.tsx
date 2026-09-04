@@ -27,7 +27,7 @@ export function EngineSelector({ value, onChange }: Props) {
   });
 
   const priority = (type: string) =>
-    type === 'patroy' ? 0 : type === 'playtrafi' || type === 'patchtroy' ? 1 : 2;
+    type === 'patroy' ? 0 : type === 'playtrafi' ? 1 : 2;
   const engines: EngineOut[] = (data ?? [])
     .slice()
     .sort((a, b) => priority(a.type) - priority(b.type));

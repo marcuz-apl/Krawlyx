@@ -2,7 +2,7 @@
 
 These tests guard the engine TYPE contract (capabilities per type, factory
 isolation, extensibility) without depending on any concrete adapter
-implementation. Concrete adapters (Patchtroy, Scrapy) come in M2 with their
+implementation. Concrete adapters (Playtrafi, Scrapy) come in M2 with their
 own fixture-driven tests.
 """
 
@@ -13,8 +13,8 @@ from app.engines.base import CrawlEngine, HealthReport
 
 
 def test_default_capabilities_match_prd_section_7_2() -> None:
-    # Patchtroy is the default engine; supports deep crawl, render, wait_for.
-    pt = registry.capabilities_for("patchtroy")
+    # Playtrafi is the default browser engine; supports deep crawl, render, wait_for.
+    pt = registry.capabilities_for("playtrafi")
     assert pt is not None
     assert pt.deep_crawl is True
     assert pt.supports_render is True

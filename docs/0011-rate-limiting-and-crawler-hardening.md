@@ -11,7 +11,7 @@ Large multi-page crawls on JavaScript-heavy websites face two main challenges: a
 - Target 0 starts immediately.
 - Subsequent workers $i \ge 1$ pause for a randomized time interval ($T_{min} \dots T_{max}$, e.g. 1–4 minutes) to simulate natural browsing behavior and avoid traffic bursts.
 
-### B. Dual-Mode Fetch Engine (`engines/patchtroy_engine.py`)
+### B. Dual-Mode Fetch Engine (`engines/playtrafi_engine.py`)
 ```text
 Crawl Target URL
        │

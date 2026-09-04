@@ -28,10 +28,10 @@ class Capabilities:
 def user_agent(template: str | None = None) -> str:
     """Build the identifiable User-Agent (NFR-05).
 
-    `template` is the engine's per-adapter UA prefix (e.g. ``"patchtroy"``).
+    `template` is the engine's per-adapter UA prefix (e.g. ``"playtrafi"``).
     The admin contact from ``Settings.admin_contact_email`` is appended
-    when set, e.g. ``"Krawlyx/0.1 (+ops@example.com) via patchtroy"``.
-    An empty contact degrades to ``"Krawlyx/0.1 via patchtroy"``.
+    when set, e.g. ``"Krawlyx/0.1 (+ops@example.com) via playtrafi"``.
+    An empty contact degrades to ``"Krawlyx/0.1 via playtrafi"``.
     """
     from app.core.config import get_settings
 

@@ -55,7 +55,7 @@ def isolated_engine_registry():
 
     Lets job tests register fake adapters (`fake-ok`, `fake-slow`,
     `fake-error`) without leaking them into other tests. The default
-    `patchtroy` / `scrapy` types are preserved.
+    `playtrafi` / `scrapy` types are preserved.
     """
     from app.engines import registry as _reg
 

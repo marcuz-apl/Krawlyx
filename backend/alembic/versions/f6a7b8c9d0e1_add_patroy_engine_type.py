@@ -19,7 +19,7 @@ def upgrade() -> None:
     with op.batch_alter_table("engines", recreate="always") as batch_op:
         batch_op.create_check_constraint(
             "ck_engines_type",
-            "type IN ('patchtroy','scrapy','patroy')",
+            "type IN ('playtrafi','scrapy','patroy')",
         )
 
 
@@ -27,5 +27,5 @@ def downgrade() -> None:
     with op.batch_alter_table("engines", recreate="always") as batch_op:
         batch_op.create_check_constraint(
             "ck_engines_type",
-            "type IN ('patchtroy','scrapy')",
+            "type IN ('playtrafi','scrapy')",
         )

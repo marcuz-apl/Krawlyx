@@ -48,7 +48,7 @@ const DOC_SECTIONS: DocSection[] = [
     badge: "Core",
     description: "High-performance web scraping workbench with asynchronous job queues, pluggable engines, and SQLite storage.",
     content: {
-      overview: "Krawlyx is a production-grade, self-hosted web scraping workbench built on FastAPI, React SPA, and SQLite in WAL mode. It unifies ultra-fast compiled Go stealth crawling (Patroy - default engine), browser automation (Patchtroy), and high-throughput spiders (Scrapy) behind a single engine protocol.",
+      overview: "Krawlyx is a production-grade, self-hosted web scraping workbench built on FastAPI, React SPA, and SQLite in WAL mode. It unifies ultra-fast compiled Go stealth crawling (Patroy - default engine), browser automation (Playtrafi), and high-throughput spiders (Scrapy) behind a single engine protocol.",
       highlights: [
         { title: "Pluggable Engine Protocol", desc: "Standardized contract for both browser-based dynamic crawlers and high-volume static spiders." },
         { title: "Streaming Importers & Exporters", desc: "Append row-by-row with automatic file splitting for large datasets (CSV bytes & XLSX adaptive rows)." },
@@ -78,10 +78,10 @@ curl -s http://localhost:4040/api/health
     content: {
       overview: "Patroy is Krawlyx's flagship default scraping engine, built natively in Go using Go-Rod and Rod-Stealth. It provides undetected headless browser automation and client-side JavaScript rendering with sub-50ms cold starts, less than 50MB RAM overhead, and automatic binary self-installation.",
       highlights: [
-        { title: "Flagship Default Engine", desc: "First-choice engine for modern websites, SPAs, and anti-bot protected targets." },
+        { title: "Flagship Default Engine", desc: "First-choice engine for modern websites, SPAs, and dynamic web targets." },
         { title: "Ultra-Low Memory (<50MB)", desc: "Lightweight compiled binary with 80% less memory usage than standard Python browser drivers, ideal for high concurrency." },
         { title: "Sub-50ms Instant Cold Starts", desc: "Near-instant startup and browser execution without Python interpreter launch lag." },
-        { title: "Stealth & Dynamic JS Rendering", desc: "Evades bot detection (masks navigator.webdriver & CDP leaks) while rendering client-side React, Vue, Next.js, and AJAX content." },
+        { title: "Stealth & Dynamic JS Rendering", desc: "Automates browser rendering (masks navigator.webdriver & CDP leaks) while rendering client-side React, Vue, Next.js, and AJAX content." },
         { title: "Automatic Zero-Config Installation", desc: "Krawlyx automatically detects OS & architecture (Linux, macOS, Windows) and self-provisions the portable binary on first launch." },
         { title: "Native Tabular & JSON-LD Extraction", desc: "Directly extracts HTML <table> elements into structured datasets and unwraps Schema.org JSON-LD graphs with automatic metadata hydration." }
       ],

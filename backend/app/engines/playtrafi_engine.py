@@ -1,11 +1,10 @@
 """Playtrafi adapter — standalone Playtrafi browser engine with Trafilatura extraction.
 
-Wraps the standalone `playtrafi` package (pairing undetected headless Chromium via Patchright
+Wraps the standalone `playtrafi` package (pairing headless Chromium
 with Trafilatura and schema graph extraction, context pooling, and fast HTTP fallback)
 while maintaining Krawlyx's perimeter controls:
   - validates config through PlaytrafiConfig
-  - delegates browser lifecycle, stealth masking, and extraction to playtrafi.AsyncPlaytrafi
-    (with automatic fallback to patchtroy if playtrafi is pending PyPI installation)
+  - delegates browser lifecycle, masking, and extraction to playtrafi.AsyncPlaytrafi
   - applies the SSRF guard before touching the network (PRD §6.5)
   - applies per-host throttling (FR-SET-02) and identifiable User-Agent (NFR-05)
   - yields normalized CrawlRecord items (including structured data graphs)
@@ -46,25 +45,20 @@ CAPABILITIES = Capabilities(
 
 
 def _load_playtrafi_module():
-    """Import official playtrafi library with fallback to patchtroy for backwards compatibility."""
+    """Import official playtrafi library."""
     try:
         import playtrafi
 
         return playtrafi
     except ImportError:
-        try:
-            import patchtroy
-
-            return patchtroy
-        except ImportError:
-            return None
+        return None
 
 
 def _get_crawler_instance(client_config: dict):
     mod = _load_playtrafi_module()
     if mod is None:
         raise ImportError("'playtrafi' package is not installed.")
-    cls = getattr(mod, "AsyncPlaytrafi", getattr(mod, "AsyncPatchtroy", None))
+    cls = getattr(mod, "AsyncPlaytrafi", None)
     if cls is None:
         raise AttributeError(f"Module {mod.__name__} has no AsyncPlaytrafi crawler class")
     return cls(client_config)
@@ -153,12 +147,12 @@ class PlaytrafiEngine:
 
         mod = _load_playtrafi_module()
         if mod is None:
-            logger.error("playtrafi/patchtroy import failed")
+            logger.error("playtrafi import failed")
             yield CrawlRecord(
                 target_id=target.target_id,
                 source_url=target.url,
                 status="error",
-                error="playtrafi/patchtroy import failed",
+                error="playtrafi import failed",
             )
             return
 

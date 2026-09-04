@@ -25,10 +25,10 @@ from app.services import jobs as jobs_svc
 from app.services.engines import encrypt_config
 from tests._helpers import make_user
 
-# ---- fake engine (shadowed on the real `patchtroy` slot) ----
+# ---- fake engine (shadowed on the real `playtrafi` slot) ----
 
 
-def _shadow_with_fake(type_id: str = "patchtroy") -> None:
+def _shadow_with_fake(type_id: str = "playtrafi") -> None:
     class _Fake(CrawlEngine):
         type = type_id
         capabilities = Capabilities(deep_crawl=False)
@@ -56,7 +56,7 @@ def _shadow_with_fake(type_id: str = "patchtroy") -> None:
     registry._REGISTRY[type_id] = lambda config=None: _Fake(config)
 
 
-def _make_engine(name: str = "sched-eng", type_id: str = "patchtroy") -> int:
+def _make_engine(name: str = "sched-eng", type_id: str = "playtrafi") -> int:
     with SessionLocal() as db:
         make_user("u", "admin")
         row = EngineInstance(
