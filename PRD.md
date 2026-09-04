@@ -27,7 +27,7 @@ SQLite database or an external/shared folder as auto-splitting CSV/Excel files.
 - G5 — Scheduled (cron) crawling without external cron tooling.
 - G6 — Safe by default: auth, role separation, SSRF guardrails, robots.txt opt-out.
 - G7 — **Zero-cost**: every bundled component is free/open source; no paid API is
-  required for any core feature. Krawlyx itself is released under MIT.
+  required for any core feature. Krawlyx itself is released under Apache-2.0.
 
 ## 3. Non-goals (v1)
 
@@ -126,7 +126,7 @@ ecosystem/talent pool).
 ### 4.7 Zero-cost constraint (stakeholder directive, 2026-08-26)
 
 There is no budget for paid services; Krawlyx exists for the public good and is
-released under MIT.
+released under Apache-2.0.
 
 - **Bundled core engines (free, run locally): Playtrafi + Scrapy.** Both are fully
   open source (Apache-2.0 / BSD) and execute on the host machine — these are the

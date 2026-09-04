@@ -117,4 +117,4 @@ Krawlyx is built upon outstanding open-source projects:
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE). Free to use, modify, and distribute for personal and commercial applications.
+This project is licensed under the [Apache License 2.0](LICENSE). Free to use, modify, and distribute for personal and commercial applications.
