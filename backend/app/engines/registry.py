@@ -32,7 +32,7 @@ def register_engine(
 
 
 def available_types() -> list[str]:
-    order = {"patroy": 0, "patchtroy": 1, "scrapy": 2}
+    order = {"patroy": 0, "playtrafi": 1, "patchtroy": 2, "scrapy": 3}
     return sorted(_REGISTRY, key=lambda t: (order.get(t, 99), t))
 
 

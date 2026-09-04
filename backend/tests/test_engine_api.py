@@ -43,7 +43,7 @@ def test_capabilities_endpoint_returns_registered_types(client: TestClient, db) 
     r = client.get("/api/engines/capabilities")
     assert r.status_code == 200
     types = {t["type"] for t in r.json()["types"]}
-    assert types == {"patchtroy", "scrapy", "patroy"}
+    assert types == {"playtrafi", "patchtroy", "scrapy", "patroy"}
 
 
 def test_runner_cannot_create_engine(client: TestClient, db) -> None:

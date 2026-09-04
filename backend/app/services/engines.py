@@ -6,6 +6,8 @@ imports a concrete engine module — it talks to the registry through the
 CrawlEngine protocol.
 """
 
+from __future__ import annotations
+
 import base64
 import hashlib
 import json
@@ -15,7 +17,7 @@ from typing import Any
 
 from cryptography.fernet import Fernet, InvalidToken
 from pydantic import ValidationError
-from sqlalchemy import select
+from sqlalchemy import case, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -78,16 +80,15 @@ def validate_config(engine_type: str, config: dict[str, Any]) -> dict[str, Any]:
 
 
 def list_engines(db: Session) -> list[EngineInstance]:
-    from sqlalchemy import case
-
     return list(
         db.scalars(
             select(EngineInstance).order_by(
                 case(
                     (EngineInstance.type == "patroy", 0),
-                    (EngineInstance.type == "patchtroy", 1),
-                    (EngineInstance.type == "scrapy", 2),
-                    else_=3,
+                    (EngineInstance.type == "playtrafi", 1),
+                    (EngineInstance.type == "patchtroy", 2),
+                    (EngineInstance.type == "scrapy", 3),
+                    else_=4,
                 ),
                 EngineInstance.name,
             )
@@ -96,8 +97,6 @@ def list_engines(db: Session) -> list[EngineInstance]:
 
 
 def list_pooled(db: Session) -> list[EngineInstance]:
-    from sqlalchemy import case
-
     return list(
         db.scalars(
             select(EngineInstance)
@@ -105,9 +104,10 @@ def list_pooled(db: Session) -> list[EngineInstance]:
             .order_by(
                 case(
                     (EngineInstance.type == "patroy", 0),
-                    (EngineInstance.type == "patchtroy", 1),
-                    (EngineInstance.type == "scrapy", 2),
-                    else_=3,
+                    (EngineInstance.type == "playtrafi", 1),
+                    (EngineInstance.type == "patchtroy", 2),
+                    (EngineInstance.type == "scrapy", 3),
+                    else_=4,
                 ),
                 EngineInstance.name,
             )
@@ -137,7 +137,6 @@ def create(
     except IntegrityError as exc:
         db.rollback()
         raise ValueError(f"engine name {name!r} is already taken") from exc
-    db.refresh(row)
     return row
 
 
@@ -164,8 +163,6 @@ def delete(db: Session, engine: EngineInstance) -> None:
     from app.models import Job, Schedule
 
     job_ref = db.scalar(select(Job.id).where(Job.engine_id == engine.id).limit(1))
-    # Schedules carry engine_id inside their JSON payload; use json_extract for
-    # a portable lookup until we add a typed FK column.
     schedule_ref = db.scalar(
         select(Schedule.id).where(Schedule.payload["engine_id"].as_integer() == engine.id).limit(1)
     )
@@ -192,40 +189,46 @@ def bootstrap_default_engines(db: Session) -> None:
     patroy = db.scalar(select(EngineInstance).where(EngineInstance.type == "patroy"))
     if not patroy:
         patroy = EngineInstance(
-            name="Patroy (Lightweight Stealth Browser & Dynamic JS)",
+            name="Patroy (Go Stealth Browser & Dynamic JS)",
             type="patroy",
             config_encrypted=encrypt_config({}),
             pooled=True,
         )
         db.add(patroy)
     else:
-        if patroy.name in {"patroy", "Patroy", "Patroy (Go Stealth Browser)"}:
-            patroy.name = "Patroy (Lightweight Stealth Browser & Dynamic JS)"
+        if patroy.name in {
+            "patroy",
+            "Patroy",
+            "Patroy (Go Stealth Browser)",
+            "Patroy (Lightweight Stealth Browser & Dynamic JS)",
+        }:
+            patroy.name = "Patroy (Go Stealth Browser & Dynamic JS)"
         if not patroy.pooled and patroy.disabled_at is None:
             patroy.pooled = True
 
-    # 2. Patchtroy: Python headless browser engine with Patchright & Trafilatura
-    # Migrate any legacy crawl4ai or playtrafi row to patchtroy if present
-    legacy_engine = db.scalar(
-        select(EngineInstance).where(EngineInstance.type.in_(["crawl4ai", "playtrafi"]))
-    )
-    if legacy_engine:
-        legacy_engine.type = "patchtroy"
-        legacy_engine.name = "Patchtroy (Stealth Browser & Dynamic JS)"
-        if not legacy_engine.pooled and legacy_engine.disabled_at is None:
-            legacy_engine.pooled = True
-
-    patchtroy = db.scalar(select(EngineInstance).where(EngineInstance.type == "patchtroy"))
-    if not patchtroy:
-        patchtroy = EngineInstance(
-            name="Patchtroy (Stealth Browser & Dynamic JS)",
-            type="patchtroy",
-            config_encrypted=encrypt_config({}),
-            pooled=True,
+    # 2. Playtrafi: Python headless browser engine with Patchright & Trafilatura
+    playtrafi = db.scalar(select(EngineInstance).where(EngineInstance.type == "playtrafi"))
+    if not playtrafi:
+        # Check if there is a legacy engine to migrate
+        legacy_engine = db.scalar(
+            select(EngineInstance).where(EngineInstance.type.in_(["crawl4ai", "patchtroy"]))
         )
-        db.add(patchtroy)
+        if legacy_engine:
+            legacy_engine.type = "playtrafi"
+            legacy_engine.name = "Playtrafi (Patchright & Trafilatura)"
+            if not legacy_engine.pooled and legacy_engine.disabled_at is None:
+                legacy_engine.pooled = True
+            playtrafi = legacy_engine
+        else:
+            playtrafi = EngineInstance(
+                name="Playtrafi (Patchright & Trafilatura)",
+                type="playtrafi",
+                config_encrypted=encrypt_config({}),
+                pooled=True,
+            )
+            db.add(playtrafi)
     else:
-        if patchtroy.name in {
+        if playtrafi.name in {
             "e",
             "crawl4ai",
             "Crawl4AI",
@@ -235,10 +238,11 @@ def bootstrap_default_engines(db: Session) -> None:
             "Playtrafi (Browser & JS Dynamic)",
             "patchtroy",
             "Patchtroy",
+            "Patchtroy (Stealth Browser & Dynamic JS)",
         }:
-            patchtroy.name = "Patchtroy (Stealth Browser & Dynamic JS)"
-        if not patchtroy.pooled and patchtroy.disabled_at is None:
-            patchtroy.pooled = True
+            playtrafi.name = "Playtrafi (Patchright & Trafilatura)"
+        if not playtrafi.pooled and playtrafi.disabled_at is None:
+            playtrafi.pooled = True
 
     # 3. Scrapy: High-throughput async HTTP spider
     scrapy = db.scalar(select(EngineInstance).where(EngineInstance.type == "scrapy"))

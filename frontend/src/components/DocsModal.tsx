@@ -113,14 +113,14 @@ curl -s http://localhost:4040/api/health
     }
   },
   {
-    id: "patchtroy",
+    id: "playtrafi",
     category: "Crawl Engines",
-    title: "Patchtroy Engine",
+    title: "Playtrafi Engine",
     icon: Zap,
     badge: "Patchright + Trafilatura",
     description: "Undetected stealth browser extraction engine pairing Patchright Chromium with Trafilatura Markdown extraction.",
     content: {
-      overview: "Patchtroy pairs an undetected Patchright headless Chromium browser instance with Trafilatura to execute client-side JavaScript, render dynamic content, and generate pristine Markdown alongside structured JSON items.",
+      overview: "Playtrafi pairs an undetected Patchright headless Chromium browser instance with Trafilatura to execute client-side JavaScript, render dynamic content, and generate pristine Markdown alongside structured JSON items.",
       highlights: [
         { title: "Browser Automation", desc: "Patches CDP runtime leakages and masks automation flags for seamless web navigation." },
         { title: "JavaScript Execution", desc: "Renders modern client-side SPAs (React, Vue, Next.js, Angular) before extracting DOM content." },
@@ -133,7 +133,7 @@ curl -s http://localhost:4040/api/health
   "wait_for": ".listing-card",
   "browser_timeout_s": 30,
   "headless": true,
-  "user_agent": "Krawlyx/0.1 via patchtroy"
+  "user_agent": "Krawlyx/0.1 via playtrafi"
 }`
       },
       table: {
@@ -146,7 +146,7 @@ curl -s http://localhost:4040/api/health
         ]
       },
       tips: [
-        "Use Patchtroy when scraping sites that rely on JavaScript rendering and require Trafilatura boilerplate filtering.",
+        "Use Playtrafi when scraping sites that rely on JavaScript rendering and require Trafilatura boilerplate filtering.",
         "Ensure Chromium dependencies are installed via `patchright install chromium`."
       ]
     }
