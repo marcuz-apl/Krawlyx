@@ -44,15 +44,15 @@ See [`AGENTS.md`](AGENTS.md) for the engineering contract used by AI agents and 
 | --- | --- |
 | Backend | Python · FastAPI · SQLAlchemy · APScheduler |
 | Frontend | React + TypeScript + Vite + Tailwind CSS + shadcn/ui |
-| Engines | Patchtroy, Scrapy (pluggable adapter registry) |
+| Engines | Patroy (default), Patchtroy, Scrapy (pluggable adapter registry) |
 | Storage | SQLite (WAL) + CSV/XLSX export with size-based splitting |
 
-## Crawl Engines (Patchtroy, Patroy & Scrapy)
+## Crawl Engines (Patroy, Patchtroy & Scrapy)
 
-Krawlyx provides built-in crawl engines tailored for different scraping tasks:
+Krawlyx provides built-in crawl engines tailored for different scraping tasks, with **Patroy set as the primary default**:
 
-- **🛡️🐴 [Patchtroy](docs/0013-engines-comparison.md)**: Undetected Patchright headless Chromium browser engine paired with Trafilatura for pristine Markdown extraction, full client-side JavaScript execution, Next.js/React hydration support, and automatic HTTP fallback. Best for dynamic, JS-rendered SPAs and modern web applications.
-- **⚡ [Patroy](docs/0013-engines-comparison.md)**: High-speed, low-memory Go engine (<50MB RAM) with sub-50ms cold starts and stealth browser profiles via Go-Rod.
+- **⚡ [Patroy](docs/0013-engines-comparison.md) (Default Engine)**: Ultra-fast, lightweight compiled Go engine (<50MB RAM) featuring sub-50ms instant cold starts, native Go-Rod + Stealth headless Chromium automation, full client-side JavaScript rendering (React/Vue/Next.js DOM hydration), zero-config portable binary self-downloading, and native HTML `<table>` and Schema.org JSON-LD extraction. The recommended first choice for modern web scraping and e-commerce listings.
+- **🛡️🐴 [Patchtroy](docs/0013-engines-comparison.md)**: Undetected Patchright headless Chromium browser engine paired with Trafilatura for pristine Markdown extraction, full client-side JavaScript execution, Next.js/React hydration support, and automatic HTTP fallback. Best for dynamic, text-heavy editorial pages and article archives.
 - **🚀 [Scrapy](https://github.com/scrapy/scrapy)**: Ultra-fast, lightweight asynchronous HTTP engine running in an isolated subprocess. Best for large-scale bulk scraping, server-rendered HTML, and deep link crawling.
 
 ## SuperAdmin Password Recovery
@@ -88,7 +88,7 @@ All project documentation, architectural decision records, implementation plans,
 - `0010` — [Universal SQL Query & Transform Console](docs/0010-universal-sql-console.md) — In-browser dynamic SQL transforms and data cleaning.
 - `0011` — [Multi-Worker Rate Limiting & Engine Hardening](docs/0011-rate-limiting-and-crawler-hardening.md) — Staggered sessions, 25s timeouts, and HTTP fallbacks.
 - `0012` — [Multi-Job Dataset Merger](docs/0012-multi-job-merger.md) — Multi-job selection, column union, and unified export.
-- `0013` — [⚙️ Crawl Engines Comparison: Patchtroy vs. Scrapy](docs/0013-engines-comparison.md) — Deep dive into engine differences, speeds, and use cases.
+- `0013` — [⚙️ Crawl Engines Comparison: Patroy vs. Patchtroy vs. Scrapy](docs/0013-engines-comparison.md) — Deep dive into engine differences, speeds, and use cases.
 - `0014` — [Dataset Filters, Splitting, Sorting & Maintenance](docs/0014-dataset-filters-splitting-sorting-maintenance.md) — Dataset browser operations and maintenance.
 - `0015` — [🐳 Production Deployment Guide (Docker, Compose & Synology NAS)](docs/0015-production-deployment-guide.md) — Complete 1-click Docker, Compose, and DSM Reverse Proxy guide.
 
@@ -109,6 +109,7 @@ git config core.hooksPath .githooks
 
 Krawlyx is built upon outstanding open-source projects:
 
+- **[Patroy](https://github.com/marcuz-apl/patroy)** & **[Go-Rod](https://github.com/go-rod/rod)** — High-speed, lightweight Go browser engine with stealth anti-bot evasion.
 - **[Patchright](https://github.com/Kaliiiiiiiiii-Vinyzu/patchright)** (Undetected Playwright for Python) — Undetected headless browser automation eliminating CDP leakages.
 - **[Trafilatura](https://github.com/adbar/trafilatura)** — High-performance web text extraction and clean Markdown generation.
 - **[Scrapy](https://github.com/scrapy/scrapy)** — The battle-tested fast high-level web crawling and scraping framework for Python.

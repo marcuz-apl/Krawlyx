@@ -57,7 +57,7 @@ def decrypt_config(blob: str | None) -> dict[str, Any]:
         return {}
     try:
         return json.loads(_fernet().decrypt(blob.encode("utf-8")))
-    except (ValueError, OSError, InvalidToken, Exception) as exc:
+    except (ValueError, OSError, InvalidToken, Exception) as exc:  # noqa: BLE001
         logger.warning("failed to decrypt engine config (key mismatch or malformed): %s", exc)
         return {}
 
@@ -78,14 +78,38 @@ def validate_config(engine_type: str, config: dict[str, Any]) -> dict[str, Any]:
 
 
 def list_engines(db: Session) -> list[EngineInstance]:
-    return list(db.scalars(select(EngineInstance).order_by(EngineInstance.name)))
+    from sqlalchemy import case
+
+    return list(
+        db.scalars(
+            select(EngineInstance).order_by(
+                case(
+                    (EngineInstance.type == "patroy", 0),
+                    (EngineInstance.type == "patchtroy", 1),
+                    (EngineInstance.type == "scrapy", 2),
+                    else_=3,
+                ),
+                EngineInstance.name,
+            )
+        )
+    )
 
 
 def list_pooled(db: Session) -> list[EngineInstance]:
+    from sqlalchemy import case
+
     return list(
         db.scalars(
-            select(EngineInstance).where(
-                EngineInstance.pooled.is_(True), EngineInstance.disabled_at.is_(None)
+            select(EngineInstance)
+            .where(EngineInstance.pooled.is_(True), EngineInstance.disabled_at.is_(None))
+            .order_by(
+                case(
+                    (EngineInstance.type == "patroy", 0),
+                    (EngineInstance.type == "patchtroy", 1),
+                    (EngineInstance.type == "scrapy", 2),
+                    else_=3,
+                ),
+                EngineInstance.name,
             )
         )
     )
@@ -164,6 +188,23 @@ def test_engine(engine: EngineInstance) -> tuple[bool, str, int]:
 
 def bootstrap_default_engines(db: Session) -> None:
     """Ensure default engine instances exist and have descriptive, clean names."""
+    # 1. Patroy: Default lightweight, ultra-fast Go stealth browser engine
+    patroy = db.scalar(select(EngineInstance).where(EngineInstance.type == "patroy"))
+    if not patroy:
+        patroy = EngineInstance(
+            name="Patroy (Lightweight Stealth Browser & Dynamic JS)",
+            type="patroy",
+            config_encrypted=encrypt_config({}),
+            pooled=True,
+        )
+        db.add(patroy)
+    else:
+        if patroy.name in {"patroy", "Patroy", "Patroy (Go Stealth Browser)"}:
+            patroy.name = "Patroy (Lightweight Stealth Browser & Dynamic JS)"
+        if not patroy.pooled and patroy.disabled_at is None:
+            patroy.pooled = True
+
+    # 2. Patchtroy: Python headless browser engine with Patchright & Trafilatura
     # Migrate any legacy crawl4ai or playtrafi row to patchtroy if present
     legacy_engine = db.scalar(
         select(EngineInstance).where(EngineInstance.type.in_(["crawl4ai", "playtrafi"]))
@@ -199,6 +240,7 @@ def bootstrap_default_engines(db: Session) -> None:
         if not patchtroy.pooled and patchtroy.disabled_at is None:
             patchtroy.pooled = True
 
+    # 3. Scrapy: High-throughput async HTTP spider
     scrapy = db.scalar(select(EngineInstance).where(EngineInstance.type == "scrapy"))
     if not scrapy:
         scrapy = EngineInstance(
@@ -213,18 +255,5 @@ def bootstrap_default_engines(db: Session) -> None:
             scrapy.name = "Scrapy (High-Speed HTML)"
         if not scrapy.pooled and scrapy.disabled_at is None:
             scrapy.pooled = True
-
-    patroy = db.scalar(select(EngineInstance).where(EngineInstance.type == "patroy"))
-    if not patroy:
-        patroy = EngineInstance(
-            name="Patroy (Go Stealth Browser)",
-            type="patroy",
-            config_encrypted=encrypt_config({}),
-            pooled=True,
-        )
-        db.add(patroy)
-    else:
-        if not patroy.pooled and patroy.disabled_at is None:
-            patroy.pooled = True
 
     db.commit()

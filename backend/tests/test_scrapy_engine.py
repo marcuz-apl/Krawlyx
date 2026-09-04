@@ -52,9 +52,12 @@ def test_scrapy_rejects_bad_config() -> None:
         ScrapyEngine(config={"concurrency": 0})
 
 
-def test_scrapy_env_uses_configured_values() -> None:
+def test_scrapy_env_uses_configured_values(monkeypatch) -> None:
     """The env we hand to the subprocess must mirror the engine config."""
+    from app.core.config import get_settings
     from app.engines.scrapy_engine import ScrapyEngine
+
+    monkeypatch.setattr(get_settings(), "per_domain_interval_s", 1.0)
 
     engine = ScrapyEngine(
         config={
