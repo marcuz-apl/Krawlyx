@@ -41,7 +41,8 @@ export function LoginPage() {
     queryFn: () => api.health(),
     staleTime: 60000,
   });
-  const version = healthData?.version || "v2.1.0";
+  const rawVersion = healthData?.version || "v2.1.0";
+  const version = rawVersion.split("+")[0].split("-")[0] || "v2.1.0";
 
   useEffect(() => {
     setUsername("");
@@ -199,7 +200,10 @@ export function LoginPage() {
         <div className="flex flex-wrap items-center justify-center gap-2 mt-7 text-xs sm:text-sm text-slate-400 dark:text-slate-500 font-medium">
           <span>Krawlyx Workbench</span>
           <span className="text-slate-300 dark:text-slate-700">·</span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full font-mono text-xs font-semibold bg-slate-200/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-300/70 dark:border-slate-700/70 shadow-xs">
+          <span
+            title={rawVersion}
+            className="inline-flex items-center px-2.5 py-0.5 rounded-full font-mono text-xs font-semibold bg-slate-200/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-300/70 dark:border-slate-700/70 shadow-xs"
+          >
             {version}
           </span>
           <span className="text-slate-300 dark:text-slate-700">·</span>
