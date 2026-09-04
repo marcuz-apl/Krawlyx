@@ -27,8 +27,8 @@ export function Header() {
     queryFn: () => api.health(),
     staleTime: 30000,
   });
-  const rawVersion = healthData?.version || "v1.5.9";
-  const dynamicVersion = rawVersion.split("-")[0] || "v1.5.9";
+  const rawVersion = healthData?.version || "v2.1.0";
+  const dynamicVersion = rawVersion.split("+")[0].split("-")[0] || "v2.1.0";
   const me = useMe();
   const logout = useLogout();
   const location = useLocation();
@@ -140,7 +140,7 @@ export function Header() {
                 <span className="font-extrabold text-base tracking-tight bg-gradient-to-r from-brand-600 via-indigo-600 to-sky-500 bg-clip-text text-transparent dark:from-brand-400 dark:via-indigo-300 dark:to-sky-300">
                   Krawlyx
                 </span>
-                <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
+                <span title={`Build: ${rawVersion}`} className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 font-mono">
                   {dynamicVersion}
                 </span>
               </div>
@@ -218,7 +218,7 @@ export function Header() {
       <AboutModal
         isOpen={showAboutModal}
         onClose={() => setShowAboutModal(false)}
-        version={dynamicVersion}
+        version={rawVersion}
       />
       <DocsModal
         isOpen={showDocsModal}
