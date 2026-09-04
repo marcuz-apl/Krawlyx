@@ -27,8 +27,8 @@ export function Header() {
     queryFn: () => api.health(),
     staleTime: 30000,
   });
-  const rawVersion = healthData?.version || "v2.1.0";
-  const dynamicVersion = rawVersion.split("+")[0].split("-")[0] || "v2.1.0";
+  const rawVersion = healthData?.version || "v2.2.0";
+  const dynamicVersion = rawVersion.split("+")[0].split("-")[0] || "v2.2.0";
   const me = useMe();
   const logout = useLogout();
   const location = useLocation();
