@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Bug, Lock, User, ArrowRight, ShieldCheck, Zap, Sparkles } from "lucide-react";
 import { useLogin } from "@/hooks/useAuth";
+import { api } from "@/lib/api/client";
 
 interface LocationState {
   from?: { pathname: string };
@@ -33,6 +35,13 @@ export function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [sloganIndex, setSloganIndex] = useState(0);
+
+  const { data: healthData } = useQuery({
+    queryKey: ["health"],
+    queryFn: () => api.health(),
+    staleTime: 60000,
+  });
+  const version = healthData?.version || "v2.1.0";
 
   useEffect(() => {
     setUsername("");
@@ -187,8 +196,14 @@ export function LoginPage() {
           </button>
         </form>
 
-        <div className="text-center mt-7 text-xs sm:text-sm text-slate-400 dark:text-slate-500 font-medium">
-          Krawlyx Workbench · © {new Date().getFullYear()} Alfazen Inc.
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-7 text-xs sm:text-sm text-slate-400 dark:text-slate-500 font-medium">
+          <span>Krawlyx Workbench</span>
+          <span className="text-slate-300 dark:text-slate-700">·</span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full font-mono text-xs font-semibold bg-slate-200/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-300/70 dark:border-slate-700/70 shadow-xs">
+            {version}
+          </span>
+          <span className="text-slate-300 dark:text-slate-700">·</span>
+          <span>© {new Date().getFullYear()} Alfazen Inc.</span>
         </div>
       </div>
     </div>
