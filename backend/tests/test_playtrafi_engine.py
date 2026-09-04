@@ -66,3 +66,12 @@ def test_playtrafi_skips_blocked_targets(monkeypatch) -> None:
     assert len(records) == 1
     assert records[0].status == "blocked"
     assert "SSRF guard" in (records[0].error or "")
+
+
+def test_playtrafi_health_reports_ok() -> None:
+    from app.engines.playtrafi_engine import PlaytrafiEngine
+
+    engine = PlaytrafiEngine(config={})
+    report = engine.health()
+    assert report.ok is True
+    assert "playtrafi" in report.detail

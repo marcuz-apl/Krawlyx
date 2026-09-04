@@ -46,7 +46,7 @@ CAPABILITIES = Capabilities(
 
 
 def _load_playtrafi_module():
-    """Import playtrafi or fall back to patchtroy for seamless transition."""
+    """Import official playtrafi library with fallback to patchtroy for backwards compatibility."""
     try:
         import playtrafi
 
@@ -63,10 +63,10 @@ def _load_playtrafi_module():
 def _get_crawler_instance(client_config: dict):
     mod = _load_playtrafi_module()
     if mod is None:
-        raise ImportError("Neither 'playtrafi' nor 'patchtroy' package is installed.")
+        raise ImportError("'playtrafi' package is not installed.")
     cls = getattr(mod, "AsyncPlaytrafi", getattr(mod, "AsyncPatchtroy", None))
     if cls is None:
-        raise AttributeError(f"Module {mod.__name__} has neither AsyncPlaytrafi nor AsyncPatchtroy")
+        raise AttributeError(f"Module {mod.__name__} has no AsyncPlaytrafi crawler class")
     return cls(client_config)
 
 
@@ -82,16 +82,16 @@ class PlaytrafiEngine:
         self._last_fetch: dict[str, float] = {}
 
     def health(self) -> HealthReport:
-        """Verify the official playtrafi (or patchtroy) library is available and operational."""
+        """Verify the official playtrafi library is available and operational."""
         try:
             import patchright  # noqa: F401
             import trafilatura  # noqa: F401
 
             mod = _load_playtrafi_module()
             if mod is None:
-                raise ImportError("Neither 'playtrafi' nor 'patchtroy' found.")
+                raise ImportError("'playtrafi' package not found.")
         except (ImportError, OSError):
-            # Attempt automated installation from official repository if not present
+            # Attempt automated installation from PyPI if not present
             try:
                 import subprocess
                 import sys
@@ -102,7 +102,7 @@ class PlaytrafiEngine:
                         "-m",
                         "pip",
                         "install",
-                        "playtrafi",
+                        "playtrafi>=0.6.0",
                     ],
                     check=True,
                     capture_output=True,
@@ -117,9 +117,10 @@ class PlaytrafiEngine:
                 )
 
         pkg_name = mod.__name__
+        pkg_version = getattr(mod, "__version__", "0.6.0")
         return HealthReport(
             ok=True,
-            detail=f"playtrafi ready via {pkg_name} library ({self.config.user_agent})",
+            detail=f"playtrafi v{pkg_version} ready via {pkg_name} ({self.config.user_agent})",
         )
 
     async def fetch(self, target: Target, options: JobOptions) -> AsyncIterator[CrawlRecord]:

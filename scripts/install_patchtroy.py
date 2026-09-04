@@ -14,20 +14,29 @@ import sys
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Install Patchtroy engine for Krawlyx")
-    parser.add_argument(
-        "--url",
-        default="git+https://github.com/marcuz-apl/patchtroy.git",
-        help="Git repository URL or wheel path for patchtroy",
+    parser = argparse.ArgumentParser(
+        description="Install Playtrafi (formerly Patchtroy) engine for Krawlyx"
     )
-    parser.add_argument("--skip-browsers", action="store_true", help="Skip running patchright install chromium")
+    parser.add_argument(
+        "--package",
+        default="playtrafi",
+        help="PyPI package name or Git repository URL (default: 'playtrafi')",
+    )
+    parser.add_argument(
+        "--skip-browsers",
+        action="store_true",
+        help="Skip running patchright install chromium",
+    )
     args = parser.parse_args()
 
-    print(f"Installing Patchtroy from: {args.url}...")
-    cmd = [sys.executable, "-m", "pip", "install", "--upgrade", args.url]
+    print(f"Installing Playtrafi engine from: {args.package}...")
+    cmd = [sys.executable, "-m", "pip", "install", "--upgrade", args.package]
     res = subprocess.run(cmd, check=False)
     if res.returncode != 0:
-        print(f"Failed to install Patchtroy via pip (code {res.returncode})", file=sys.stderr)
+        print(
+            f"Failed to install Patchtroy via pip (code {res.returncode})",
+            file=sys.stderr,
+        )
         return res.returncode
 
     if not args.skip_browsers:
@@ -35,7 +44,10 @@ def main() -> int:
         cmd_browsers = [sys.executable, "-m", "patchright", "install", "chromium"]
         res_browsers = subprocess.run(cmd_browsers, check=False)
         if res_browsers.returncode != 0:
-            print("Warning: patchright install chromium returned non-zero. System packages may be needed.", file=sys.stderr)
+            print(
+                "Warning: patchright install chromium returned non-zero. System packages may be needed.",
+                file=sys.stderr,
+            )
 
     print("✅ Patchtroy engine is successfully installed and ready.")
     return 0
