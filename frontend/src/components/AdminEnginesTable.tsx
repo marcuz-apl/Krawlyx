@@ -32,7 +32,7 @@ export function AdminEnginesTable() {
     mutationFn: () => api.engines.bootstrap(),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['engines'] });
-      setSuccessMsg('Default engines (Patchtroy and Scrapy) restored and pooled successfully!');
+      setSuccessMsg('Default engines (Patroy, Patchtroy, and Scrapy) restored and pooled successfully!');
       setTimeout(() => setSuccessMsg(null), 4000);
     },
   });
@@ -43,7 +43,10 @@ export function AdminEnginesTable() {
   const [deleteEngine, setDeleteEngine] = useState<EngineOut | null>(null);
 
   if (isLoading) return <p className="text-slate-500 dark:text-slate-400">Loading engines…</p>;
-  const engines: EngineOut[] = data ?? [];
+  const priority = (type: string) => (type === 'patroy' ? 0 : type === 'patchtroy' ? 1 : 2);
+  const engines: EngineOut[] = (data ?? [])
+    .slice()
+    .sort((a, b) => priority(a.type) - priority(b.type));
 
   return (
     <div className="space-y-4">
@@ -60,7 +63,7 @@ export function AdminEnginesTable() {
             onClick={() => restore.mutate()}
             disabled={restore.isPending}
             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
-            title="Re-creates default Patchtroy and Scrapy engines if missing or unpooled"
+            title="Re-creates default Patroy, Patchtroy, and Scrapy engines if missing or unpooled"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             {restore.isPending ? 'Restoring…' : 'Restore Defaults'}

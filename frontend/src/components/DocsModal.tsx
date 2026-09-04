@@ -48,7 +48,7 @@ const DOC_SECTIONS: DocSection[] = [
     badge: "Core",
     description: "High-performance web scraping workbench with asynchronous job queues, pluggable engines, and SQLite storage.",
     content: {
-      overview: "Krawlyx is a production-grade, self-hosted web scraping workbench built on FastAPI, React SPA, and SQLite in WAL mode. It unifies undetected stealth browser crawling (Patchtroy) and high-throughput spiders (Scrapy) behind a single engine protocol.",
+      overview: "Krawlyx is a production-grade, self-hosted web scraping workbench built on FastAPI, React SPA, and SQLite in WAL mode. It unifies ultra-fast compiled Go stealth crawling (Patroy - default engine), browser automation (Patchtroy), and high-throughput spiders (Scrapy) behind a single engine protocol.",
       highlights: [
         { title: "Pluggable Engine Protocol", desc: "Standardized contract for both browser-based dynamic crawlers and high-volume static spiders." },
         { title: "Streaming Importers & Exporters", desc: "Append row-by-row with automatic file splitting for large datasets (CSV bytes & XLSX adaptive rows)." },
@@ -60,11 +60,55 @@ const DOC_SECTIONS: DocSection[] = [
         label: "Quick Health Check",
         code: `# Check API health and running version
 curl -s http://localhost:4040/api/health
-# Response: {"status":"ok","app":"Krawlyx","version":"v1.8.5"}`
+# Response: {"status":"ok","app":"Krawlyx","version":"v2.1.0"}`
       },
       tips: [
         "Backend API runs on port 4040, and the Vite frontend dev server runs on port 4039.",
         "In production, FastAPI automatically serves the built frontend single-page application directly on port 4040."
+      ]
+    }
+  },
+  {
+    id: "patroy",
+    category: "Crawl Engines",
+    title: "Patroy Go Engine (Default)",
+    icon: Gauge,
+    badge: "Go-Rod + Stealth (Default)",
+    description: "Ultra-fast, lightweight (<50MB RAM) Go browser engine with sub-50ms cold starts, dynamic JS rendering, and stealth profiles.",
+    content: {
+      overview: "Patroy is Krawlyx's flagship default scraping engine, built natively in Go using Go-Rod and Rod-Stealth. It provides undetected headless browser automation and client-side JavaScript rendering with sub-50ms cold starts, less than 50MB RAM overhead, and automatic binary self-installation.",
+      highlights: [
+        { title: "Flagship Default Engine", desc: "First-choice engine for modern websites, SPAs, and anti-bot protected targets." },
+        { title: "Ultra-Low Memory (<50MB)", desc: "Lightweight compiled binary with 80% less memory usage than standard Python browser drivers, ideal for high concurrency." },
+        { title: "Sub-50ms Instant Cold Starts", desc: "Near-instant startup and browser execution without Python interpreter launch lag." },
+        { title: "Stealth & Dynamic JS Rendering", desc: "Evades bot detection (masks navigator.webdriver & CDP leaks) while rendering client-side React, Vue, Next.js, and AJAX content." },
+        { title: "Automatic Zero-Config Installation", desc: "Krawlyx automatically detects OS & architecture (Linux, macOS, Windows) and self-provisions the portable binary on first launch." },
+        { title: "Native Tabular & JSON-LD Extraction", desc: "Directly extracts HTML <table> elements into structured datasets and unwraps Schema.org JSON-LD graphs with automatic metadata hydration." }
+      ],
+      codeBlock: {
+        language: "json",
+        label: "Sample Patroy Engine Options",
+        code: `{
+  "mode": "cli",
+  "binary_path": "patroy",
+  "wait_for": "#main-content",
+  "timeout_s": 30,
+  "user_agent": "Krawlyx/0.1 (+local; patroy)"
+}`
+      },
+      table: {
+        headers: ["Option", "Type", "Default", "Description"],
+        rows: [
+          ["mode", "string", "cli", "Execution mode: 'cli' (subprocess) or 'daemon' (HTTP microservice)"],
+          ["binary_path", "string", "patroy", "Path to patroy static binary when running in CLI mode"],
+          ["daemon_url", "string", "http://127.0.0.1:4023", "Daemon HTTP endpoint when running in daemon mode"],
+          ["wait_for", "string", "null", "CSS selector to await prior to page extraction"],
+          ["timeout_s", "number", "30", "Scrape timeout in seconds"]
+        ]
+      },
+      tips: [
+        "Patroy is recommended for all general scraping, e-commerce listings, and dynamic modern websites.",
+        "Zero setup required: Krawlyx automatically manages the binary under data/bin/patroy."
       ]
     }
   },
@@ -102,7 +146,7 @@ curl -s http://localhost:4040/api/health
         ]
       },
       tips: [
-        "Use Patchtroy when scraping sites that rely on JavaScript rendering, dynamic AJAX pagination, or complex DOM hydration.",
+        "Use Patchtroy when scraping sites that rely on JavaScript rendering and require Trafilatura boilerplate filtering.",
         "Ensure Chromium dependencies are installed via `patchright install chromium`."
       ]
     }
@@ -131,48 +175,6 @@ curl -s http://localhost:4040/api/health
       tips: [
         "Scrapy is best suited for static HTML catalogs, blogs, documentation sites, and deep crawl jobs.",
         "Never import Scrapy directly into the web process; Krawlyx handles process lifecycle automatically."
-      ]
-    }
-  },
-  {
-    id: "patroy",
-    category: "Crawl Engines",
-    title: "Patroy Go Engine",
-    icon: Gauge,
-    badge: "Go-Rod + Stealth",
-    description: "Ultra-fast, low-memory Go browser engine with sub-50ms cold starts and resilient browsing profiles.",
-    content: {
-      overview: "Patroy provides a native compiled Go scraping engine built on Go-Rod and Stealth. It executes as a lightweight CLI binary or local microservice daemon, consuming under 50MB RAM while offering native CDP stealth emulation.",
-      highlights: [
-        { title: "Ultra-Low Memory (<50MB)", desc: "Static binary with minimal footprint, ideal for memory-constrained VPS or massive concurrency." },
-        { title: "Sub-50ms Cold Starts", desc: "Instant startup and browser process leasing without Python interpreter overhead." },
-        { title: "Dual Architecture (CLI & Daemon)", desc: "Can run as a direct one-shot CLI subprocess (`patroy scrape <url> -o json`) or against a persistent daemon (`patroy serve` on port 4023)." },
-        { title: "Native Tabular & JSON-LD Extraction", desc: "Directly extracts HTML <table> elements into structured datasets and unwraps Schema.org JSON-LD graphs with automatic metadata hydration." }
-      ],
-      codeBlock: {
-        language: "json",
-        label: "Sample Patroy Engine Options",
-        code: `{
-  "mode": "cli",
-  "binary_path": "patroy",
-  "wait_for": "#main-content",
-  "timeout_s": 30,
-  "user_agent": "Krawlyx/0.1 (+local; patroy)"
-}`
-      },
-      table: {
-        headers: ["Option", "Type", "Default", "Description"],
-        rows: [
-          ["mode", "string", "cli", "Execution mode: 'cli' (subprocess) or 'daemon' (HTTP microservice)"],
-          ["binary_path", "string", "patroy", "Path to patroy static binary when running in CLI mode"],
-          ["daemon_url", "string", "http://127.0.0.1:4023", "Daemon HTTP endpoint when running in daemon mode"],
-          ["wait_for", "string", "null", "CSS selector to await prior to page extraction"],
-          ["timeout_s", "number", "30", "Scrape timeout in seconds"]
-        ]
-      },
-      tips: [
-        "Use Patroy when memory usage and instant startup speed are your primary constraints.",
-        "Drop the pre-compiled `patroy` single binary into `/usr/local/bin` or your PATH for zero-config CLI operation."
       ]
     }
   },
