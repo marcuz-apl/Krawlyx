@@ -107,11 +107,13 @@ git config core.hooksPath .githooks
 
 ## Credits & Acknowledgements
 
-Krawlyx is built upon outstanding open-source projects:
+Krawlyx is powered by core in-house engines and outstanding open-source projects:
 
-- **[Patroy](https://github.com/marcuz-apl/patroy)** & **[Go-Rod](https://github.com/go-rod/rod)** — High-speed, lightweight Go browser engine with stealth automation.
-- **[Playtrafi](https://pypi.org/project/playtrafi/)** / **[Patchright](https://github.com/Kaliiiiiiiiii-Vinyzu/patchright)** — Undetected headless browser automation eliminating CDP leakages paired with [Trafilatura](https://github.com/adbar/trafilatura) clean Markdown extraction.
+- **[Patroy](https://github.com/marcuz-apl/patroy)** — Lightweight, high-speed Go native browser extraction engine with clean Markdown generation.
+- **[Playtrafi](https://github.com/marcuz-apl/playtrafi)** ([PyPI](https://pypi.org/project/playtrafi/)) — Standalone Python headless browser automation engine with context pooling and Trafilatura structured extraction.
 - **[Scrapy](https://github.com/scrapy/scrapy)** — The battle-tested fast high-level web crawling and scraping framework for Python.
+- **[Go-Rod](https://github.com/go-rod/rod)** & **[Patchright](https://github.com/Kaliiiiiiiiii-Vinyzu/patchright)** — Headless browser drivers powering native and Python browser automation.
+- **[Trafilatura](https://github.com/adbar/trafilatura)** — High-precision web text and metadata extraction library.
 - **[FastAPI](https://github.com/fastapi/fastapi)** — Modern, fast (high-performance) web framework for building APIs.
 - **[shadcn/ui](https://ui.shadcn.com/)** & **[Tailwind CSS](https://tailwindcss.com/)** — UI components and responsive styling.
 
