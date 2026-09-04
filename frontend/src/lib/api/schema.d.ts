@@ -1400,6 +1400,10 @@ export interface components {
             id: number;
             /** Engine Id */
             engine_id: number;
+            /** Engine Name */
+            engine_name?: string | null;
+            /** Engine Type */
+            engine_type?: string | null;
             /** Status */
             status: string;
             counts: components["schemas"]["JobCounts"];

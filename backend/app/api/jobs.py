@@ -75,9 +75,12 @@ def _counts(db: Session, job_id: int) -> JobCounts:
 
 
 def _job_to_out(db: Session, job: Job) -> JobOut:
+    engine = db.get(EngineInstance, job.engine_id) if job.engine_id else None
     return JobOut(
         id=job.id,
         engine_id=job.engine_id,
+        engine_name=engine.name if engine else None,
+        engine_type=engine.type if engine else None,
         status=job.status,
         counts=_counts(db, job.id),
         started_at=job.started_at,
@@ -567,7 +570,7 @@ def get_all_results_export_csv(
         ]
         all_keys = set()
         for it, _ in all_structured_items:
-            all_keys.update(k for k in it.keys() if k != "type")
+            all_keys.update(k for k in it if k != "type")
         headers = [k for k in preferred_order if k in all_keys] + sorted(
             k for k in all_keys if k not in preferred_order
         )
@@ -796,7 +799,7 @@ def merge_jobs(
                         row_copy = dict(it)
                         row_copy["_job_id"] = jid
                         all_rows.append(row_copy)
-                        all_columns.update(k for k in it.keys() if k != "type")
+                        all_columns.update(k for k in it if k != "type")
             else:
                 if url in seen_urls:
                     continue

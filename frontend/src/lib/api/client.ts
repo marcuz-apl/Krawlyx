@@ -96,6 +96,8 @@ export interface JobCounts {
 export interface JobOut {
   id: number;
   engine_id: number;
+  engine_name?: string | null;
+  engine_type?: string | null;
   status: string;
   counts: JobCounts;
   started_at: string | null;

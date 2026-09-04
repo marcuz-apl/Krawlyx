@@ -182,11 +182,12 @@ def test_engine(engine: EngineInstance) -> tuple[bool, str, int]:
 
 
 def bootstrap_default_engines(db: Session) -> None:
-    """Ensure default engine instances exist and have descriptive, clean names."""
-    # 1. Patroy: Default lightweight, ultra-fast Go stealth browser engine
+    """Ensure default engine instances exist and have IDs #1 (Patroy), #2 (Playtrafi), #3 (Scrapy)."""
+    # 1. Patroy: Default lightweight, ultra-fast Go stealth browser engine (ID #1)
     patroy = db.scalar(select(EngineInstance).where(EngineInstance.type == "patroy"))
     if not patroy:
         patroy = EngineInstance(
+            id=1,
             name="Patroy (Go Stealth Browser & Dynamic JS)",
             type="patroy",
             config_encrypted=encrypt_config({}),
@@ -204,7 +205,7 @@ def bootstrap_default_engines(db: Session) -> None:
         if not patroy.pooled and patroy.disabled_at is None:
             patroy.pooled = True
 
-    # 2. Playtrafi: Python headless browser engine with Patchright & Trafilatura
+    # 2. Playtrafi: Python headless browser engine with Patchright & Trafilatura (ID #2)
     playtrafi = db.scalar(select(EngineInstance).where(EngineInstance.type == "playtrafi"))
     if not playtrafi:
         # Check if there is a legacy engine to migrate
@@ -219,6 +220,7 @@ def bootstrap_default_engines(db: Session) -> None:
             playtrafi = legacy_engine
         else:
             playtrafi = EngineInstance(
+                id=2,
                 name="Playtrafi (Patchright & Trafilatura)",
                 type="playtrafi",
                 config_encrypted=encrypt_config({}),
@@ -239,10 +241,11 @@ def bootstrap_default_engines(db: Session) -> None:
         if not playtrafi.pooled and playtrafi.disabled_at is None:
             playtrafi.pooled = True
 
-    # 3. Scrapy: High-throughput async HTTP spider
+    # 3. Scrapy: High-throughput async HTTP spider (ID #3)
     scrapy = db.scalar(select(EngineInstance).where(EngineInstance.type == "scrapy"))
     if not scrapy:
         scrapy = EngineInstance(
+            id=3,
             name="Scrapy (High-Speed HTML)",
             type="scrapy",
             config_encrypted=encrypt_config({}),

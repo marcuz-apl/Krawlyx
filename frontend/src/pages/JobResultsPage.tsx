@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Table, Globe, Download, RefreshCw, FileText, Database } from 'lucide-react';
 
@@ -11,6 +11,7 @@ import { api } from '@/lib/api/client';
 export function JobResultsPage() {
   const params = useParams<{ id: string }>();
   const id = Number(params.id);
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const pageSize = 50;
@@ -35,12 +36,19 @@ export function JobResultsPage() {
     queryFn: () => api.jobs.records(id),
   });
 
+  // 3. Fetch Job metadata (for engine name/type)
+  const { data: jobData } = useQuery({
+    queryKey: ['job', id],
+    queryFn: () => api.jobs.get(id),
+  });
+
   const rerun = useMutation({
     mutationFn: () => api.jobs.rerun(id),
-    onSuccess: () => {
+    onSuccess: (newJob) => {
       qc.invalidateQueries({ queryKey: ['job', id] });
       qc.invalidateQueries({ queryKey: ['job-results', id] });
       qc.invalidateQueries({ queryKey: ['job-records', id] });
+      navigate(`/jobs/${newJob.id}`);
     },
   });
 
@@ -81,7 +89,7 @@ export function JobResultsPage() {
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <span>Job #{targetsData.job_id} — Results</span>
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
             {totalRecords > 0 ? (
               <span>
                 <strong className="text-slate-900 dark:text-white font-bold">{totalRecords.toLocaleString()}</strong> total extracted records across{' '}
@@ -90,7 +98,16 @@ export function JobResultsPage() {
             ) : (
               <span>{targetsData.total} crawled target page(s)</span>
             )}
-          </p>
+            {jobData && (
+              <>
+                <span>•</span>
+                <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                  {jobData.engine_type === 'patroy' ? '⚡ ' : jobData.engine_type === 'playtrafi' ? '🛡️ ' : jobData.engine_type === 'scrapy' ? '🚀 ' : '⚙️ '}
+                  Engine: {jobData.engine_name || `Engine #${jobData.engine_id}`}
+                </span>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -295,7 +312,19 @@ export function JobResultsPage() {
       <ConfirmModal
         isOpen={confirmRerun}
         title={`Re-run Crawl Job #${id}?`}
-        message="Launch a new crawl job with identical targets, engine configuration, and extraction settings?"
+        message={
+          jobData
+            ? `Launch a new crawl job with identical targets using engine ${
+                jobData.engine_type === 'patroy'
+                  ? '⚡ '
+                  : jobData.engine_type === 'playtrafi'
+                  ? '🛡️ '
+                  : jobData.engine_type === 'scrapy'
+                  ? '🚀 '
+                  : '⚙️ '
+              }${jobData.engine_name || `Engine #${jobData.engine_id}`} and original extraction settings?`
+            : "Launch a new crawl job with identical targets, engine configuration, and extraction settings?"
+        }
         confirmText="Re-run Crawl"
         cancelText="Cancel"
         variant="primary"
