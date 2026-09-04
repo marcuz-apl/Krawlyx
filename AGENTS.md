@@ -7,7 +7,7 @@ requirement IDs (`FR-*`, `NFR-*`) used in code, tests, and issues come from ther
 ## What this is
 
 A self-hosted web scraping workbench: FastAPI backend, React SPA frontend,
-SQLite storage, pluggable crawl engines (Patchtroy + Scrapy in v1; registry
+SQLite storage, pluggable crawl engines (Patroy + Playtrafi + Scrapy; registry
 extensible — see PRD §4.7 for why Firecrawl is deferred),
 cron scheduling, CSV/XLSX export with size-based file splitting.
 
@@ -38,7 +38,7 @@ backend/
     schemas/           # Pydantic API schemas — the contract source of truth
     engines/
       base.py          # CrawlEngine protocol + Capabilities + CrawlRecord (contract)
-      patchtroy_engine.py  scrapy_engine.py    # firecrawl deferred (PRD §4.7)
+      playtrafi_engine.py  patroy_engine.py  scrapy_engine.py
       registry.py      # instance lookup, pool filtering, factory
     services/          # jobs.py (queue/workers), scheduler.py, settings_svc.py
     exporters/         # csv_writer.py, xlsx_writer.py, splitter logic, manifest
@@ -60,7 +60,7 @@ frontend/
 # — inside backend/ —
 python -m venv .venv && source .venv/Scripts/activate   # Windows Git Bash
 pip install -e ".[dev]"
-patchright install chromium        # for Patchtroy
+patchright install chromium        # for Playtrafi
 uvicorn app.main:app --port 4040 --reload # API on :4040
 pytest                             # all tests
 pytest -m "not integration"        # fast unit pass

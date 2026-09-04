@@ -86,9 +86,8 @@ def list_engines(db: Session) -> list[EngineInstance]:
                 case(
                     (EngineInstance.type == "patroy", 0),
                     (EngineInstance.type == "playtrafi", 1),
-                    (EngineInstance.type == "patchtroy", 2),
-                    (EngineInstance.type == "scrapy", 3),
-                    else_=4,
+                    (EngineInstance.type == "scrapy", 2),
+                    else_=3,
                 ),
                 EngineInstance.name,
             )
@@ -105,9 +104,8 @@ def list_pooled(db: Session) -> list[EngineInstance]:
                 case(
                     (EngineInstance.type == "patroy", 0),
                     (EngineInstance.type == "playtrafi", 1),
-                    (EngineInstance.type == "patchtroy", 2),
-                    (EngineInstance.type == "scrapy", 3),
-                    else_=4,
+                    (EngineInstance.type == "scrapy", 2),
+                    else_=3,
                 ),
                 EngineInstance.name,
             )
@@ -211,7 +209,7 @@ def bootstrap_default_engines(db: Session) -> None:
     if not playtrafi:
         # Check if there is a legacy engine to migrate
         legacy_engine = db.scalar(
-            select(EngineInstance).where(EngineInstance.type.in_(["crawl4ai", "patchtroy"]))
+            select(EngineInstance).where(EngineInstance.type.in_(["crawl4ai"]))
         )
         if legacy_engine:
             legacy_engine.type = "playtrafi"
@@ -236,9 +234,6 @@ def bootstrap_default_engines(db: Session) -> None:
             "playtrafi",
             "Playtrafi",
             "Playtrafi (Browser & JS Dynamic)",
-            "patchtroy",
-            "Patchtroy",
-            "Patchtroy (Stealth Browser & Dynamic JS)",
         }:
             playtrafi.name = "Playtrafi (Patchright & Trafilatura)"
         if not playtrafi.pooled and playtrafi.disabled_at is None:

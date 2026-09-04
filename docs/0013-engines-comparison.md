@@ -30,7 +30,7 @@ Choose **Patroy** when:
 1. **Lightweight & High Concurrency**: You need stealth browser automation with minimal resource consumption (<50MB RAM). Because it is a native compiled Go binary, multiple workers can run concurrently on budget VPS instances without memory thrashing.
 2. **Instant Sub-50ms Cold Starts**: You want fast turnarounds without Python runtime startup latency.
 3. **Dynamic Single-Page Applications (SPAs)**: The target site relies on React, Vue, Next.js, or client-side AJAX requests to populate listing data.
-4. **Anti-Bot & Bot-Detection Bypassing**: The site deploys basic-to-intermediate bot mitigations (inspecting `navigator.webdriver`, browser features, or CDP signatures). Patroy automatically activates `rod/stealth` masking.
+4. **Stealth Chromium Emulation**: The site inspects browser automation indicators (such as `navigator.webdriver`, platform flags, or CDP signatures). Patroy automatically activates `rod/stealth` masking.
 5. **Direct Table & Listing Extraction**: The target website displays tabular records (such as vehicle listings, financial tables, directory listings, or product specs) that land directly into structured datasets.
 6. **Zero Setup**: Krawlyx automatically provisions the correct platform binary (`linux_amd64`, `linux_arm64`, `darwin_amd64`, `darwin_arm64`, or `windows_amd64`) on demand without manual browser driver installation.
 

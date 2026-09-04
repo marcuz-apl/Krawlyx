@@ -32,7 +32,7 @@ def register_engine(
 
 
 def available_types() -> list[str]:
-    order = {"patroy": 0, "playtrafi": 1, "patchtroy": 2, "scrapy": 3}
+    order = {"patroy": 0, "playtrafi": 1, "scrapy": 2}
     return sorted(_REGISTRY, key=lambda t: (order.get(t, 99), t))
 
 
@@ -51,13 +51,6 @@ def build(type_id: str, config: dict | None = None) -> CrawlEngine:
 # deferral, PRD §4.7). The UI reads capabilities_for() to render form fields.
 _DEFAULT_CAPABILITIES: dict[str, Capabilities] = {
     "patroy": Capabilities(
-        deep_crawl=True,
-        max_depth=5,
-        max_pages_per_target=200,
-        supports_wait_for=True,
-        supports_render=True,
-    ),
-    "patchtroy": Capabilities(
         deep_crawl=True,
         max_depth=5,
         max_pages_per_target=200,

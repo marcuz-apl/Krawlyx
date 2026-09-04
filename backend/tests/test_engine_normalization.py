@@ -2,7 +2,7 @@
 
 Same fixture URL fed through both engines' adapters must produce structurally
 equivalent normalized records. We use two in-process FakeEngines (one that
-ingests HTML, one that ingests plain text) to model the real Patchtroy and
+ingests HTML, one that ingests plain text) to model the real Playtrafi and
 Scrapy adapters — both run the same normalize_record() pipeline so the
 contract under test is "the shared normalizer produces equivalent records",
 not "the concrete engines agree" (that needs a real environment, tested in
@@ -22,9 +22,9 @@ from tests.fixtures import SOURCES, Fixture
 
 
 class _HtmlEngine:
-    """Models the Patchtroy adapter path: receives a full HTML response."""
+    """Models the Playtrafi adapter path: receives a full HTML response."""
 
-    type = "patchtroy"
+    type = "playtrafi"
     capabilities = Capabilities(deep_crawl=True, supports_render=True, supports_wait_for=True)
 
     def health(self) -> HealthReport:

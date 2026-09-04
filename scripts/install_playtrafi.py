@@ -20,12 +20,6 @@ def main() -> int:
         help="PyPI package name, wheel path, or Git URL for Playtrafi (default: 'playtrafi')",
     )
     parser.add_argument(
-        "--fallback-patchtroy",
-        action="store_true",
-        default=True,
-        help="Fallback to patchtroy if playtrafi is not yet available on PyPI",
-    )
-    parser.add_argument(
         "--skip-browsers",
         action="store_true",
         help="Skip running patchright install chromium",
@@ -36,29 +30,11 @@ def main() -> int:
     cmd = [sys.executable, "-m", "pip", "install", "--upgrade", args.package]
     res = subprocess.run(cmd, check=False)
     if res.returncode != 0:
-        if args.fallback_patchtroy:
-            print(
-                f"Notice: '{args.package}' not yet reachable on PyPI. Falling back to transition package 'patchtroy'...",
-                file=sys.stderr,
-            )
-            fallback_cmd = [
-                sys.executable,
-                "-m",
-                "pip",
-                "install",
-                "--upgrade",
-                "git+https://github.com/marcuz-apl/patchtroy.git",
-            ]
-            fallback_res = subprocess.run(fallback_cmd, check=False)
-            if fallback_res.returncode != 0:
-                print("Failed to install fallback package.", file=sys.stderr)
-                return fallback_res.returncode
-        else:
-            print(
-                f"Failed to install Playtrafi via pip (code {res.returncode})",
-                file=sys.stderr,
-            )
-            return res.returncode
+        print(
+            f"Failed to install Playtrafi via pip (code {res.returncode})",
+            file=sys.stderr,
+        )
+        return res.returncode
 
     if not args.skip_browsers:
         print("Ensuring browser drivers are installed via patchright...")

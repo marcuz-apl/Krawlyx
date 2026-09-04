@@ -44,7 +44,7 @@ export function AdminEnginesTable() {
 
   if (isLoading) return <p className="text-slate-500 dark:text-slate-400">Loading engines…</p>;
   const priority = (type: string) =>
-    type === 'patroy' ? 0 : type === 'playtrafi' || type === 'patchtroy' ? 1 : 2;
+    type === 'patroy' ? 0 : type === 'playtrafi' ? 1 : 2;
   const engines: EngineOut[] = (data ?? [])
     .slice()
     .sort((a, b) => priority(a.type) - priority(b.type));
@@ -234,7 +234,7 @@ export function AdminEnginesTable() {
 
 function CreateForm({ onDone }: { onDone: () => void }) {
   const [name, setName] = useState('');
-  const [type, setType] = useState('patchtroy');
+  const [type, setType] = useState('playtrafi');
   const [pooled, setPooled] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
@@ -243,7 +243,7 @@ function CreateForm({ onDone }: { onDone: () => void }) {
     queryFn: () => api.engines.capabilities(),
   });
 
-  const availableTypes = capData?.types?.map((t) => t.type) ?? ['patchtroy', 'scrapy', 'patroy'];
+  const availableTypes = capData?.types?.map((t) => t.type) ?? ['playtrafi', 'scrapy', 'patroy'];
 
   const create = useMutation({
     mutationFn: (body: EngineCreateBody) => api.engines.create(body),
@@ -272,7 +272,7 @@ function CreateForm({ onDone }: { onDone: () => void }) {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. My Custom Patchtroy"
+            placeholder="e.g. My Custom Playtrafi"
             className="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2.5 py-1.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           />
         </label>
