@@ -23,6 +23,14 @@ function badge(status: string): string {
   return map[status] ?? 'bg-slate-100 text-slate-700';
 }
 
+function shortEngineName(name?: string | null, type?: string | null): string {
+  if (type === 'patroy') return 'Patroy';
+  if (type === 'playtrafi') return 'Playtrafi';
+  if (type === 'scrapy') return 'Scrapy';
+  if (!name) return 'Unknown';
+  return name.split(' (')[0];
+}
+
 export function JobHistoryList({ jobs }: Props) {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -203,7 +211,12 @@ export function JobHistoryList({ jobs }: Props) {
                   className="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                 />
               </th>
-              <th className="px-3 py-3 w-14">#</th>
+              <th className="px-4 py-3 whitespace-nowrap font-bold text-slate-900 dark:text-slate-100">
+                Job #
+              </th>
+              <th className="px-3 py-3 whitespace-nowrap font-bold text-slate-700 dark:text-slate-300">
+                Engine
+              </th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Counts</th>
               <th className="px-4 py-3">Started</th>
@@ -230,10 +243,22 @@ export function JobHistoryList({ jobs }: Props) {
                       className="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                     />
                   </td>
-                  <td className="px-3 py-3 font-mono font-medium text-brand-600 dark:text-brand-400">
-                    <Link to={`/jobs/${j.id}`} className="hover:underline">
-                      #{j.id}
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <Link
+                      to={`/jobs/${j.id}`}
+                      className="inline-flex items-center font-mono font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 hover:underline"
+                    >
+                      Job #{j.id}
                     </Link>
+                  </td>
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    <span
+                      title={j.engine_name ? `${j.engine_name} (Engine #${j.engine_id})` : `Engine #${j.engine_id}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-0.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700/60 shadow-2xs"
+                    >
+                      {j.engine_type === 'patroy' ? '⚡ ' : j.engine_type === 'playtrafi' ? '🛡️ ' : j.engine_type === 'scrapy' ? '🚀 ' : '⚙️ '}
+                      <span>{shortEngineName(j.engine_name, j.engine_type)}</span>
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     <span
@@ -320,7 +345,19 @@ export function JobHistoryList({ jobs }: Props) {
       <ConfirmModal
         isOpen={confirmRerunId !== null}
         title={`Re-run Crawl Job #${confirmRerunId}?`}
-        message="Launch a new crawl job with identical targets, engine configuration, and extraction settings?"
+        message={
+          jobs.find((x) => x.id === confirmRerunId)
+            ? `Launch a new crawl job with identical targets using engine ${
+                jobs.find((x) => x.id === confirmRerunId)?.engine_type === 'patroy'
+                  ? '⚡ '
+                  : jobs.find((x) => x.id === confirmRerunId)?.engine_type === 'playtrafi'
+                  ? '🛡️ '
+                  : jobs.find((x) => x.id === confirmRerunId)?.engine_type === 'scrapy'
+                  ? '🚀 '
+                  : '⚙️ '
+              }${jobs.find((x) => x.id === confirmRerunId)?.engine_name || `Engine #${jobs.find((x) => x.id === confirmRerunId)?.engine_id}`} and original extraction settings?`
+            : "Launch a new crawl job with identical targets, engine configuration, and extraction settings?"
+        }
         confirmText="Re-run Crawl"
         cancelText="Cancel"
         variant="primary"

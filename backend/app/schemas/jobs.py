@@ -45,6 +45,8 @@ class JobCounts(BaseModel):
 class JobOut(BaseModel):
     id: int
     engine_id: int
+    engine_name: str | None = None
+    engine_type: str | None = None
     status: str
     counts: JobCounts
     started_at: datetime | None

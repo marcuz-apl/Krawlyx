@@ -28,7 +28,8 @@ export function RunnerPage() {
     queryKey: ['engines', 'pooled'],
     queryFn: () => api.engines.list({ pooled_only: true }),
   });
-  const engineType = engines.data?.find((e) => e.id === engineId)?.type ?? null;
+  const selectedEngine = engines.data?.find((e) => e.id === engineId) ?? null;
+  const engineType = selectedEngine?.type ?? null;
 
   // Custom Schema builder state
   const [schemaMode, setSchemaMode] = useState<'auto' | 'custom' | 'raw'>('auto');
@@ -497,13 +498,24 @@ export function RunnerPage() {
           </ul>
         )}
 
-        <button
-          type="submit"
-          disabled={!engineId || submit.isPending}
-          className="rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-brand-500/20 hover:bg-brand-500 transition active:scale-[0.98] disabled:opacity-60 cursor-pointer"
-        >
-          {submit.isPending ? 'Submitting…' : 'Run crawl'}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="submit"
+            disabled={!engineId || submit.isPending}
+            className="rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-brand-500/20 hover:bg-brand-500 transition active:scale-[0.98] disabled:opacity-60 cursor-pointer flex items-center gap-2"
+          >
+            {submit.isPending ? 'Submitting…' : selectedEngine ? `Run crawl with ${selectedEngine.name}` : 'Run crawl'}
+          </button>
+          {selectedEngine && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300">
+              <span className="text-slate-400">Target Engine:</span>
+              <strong className="text-brand-600 dark:text-brand-400 font-semibold">
+                {selectedEngine.type === 'patroy' ? '⚡ ' : selectedEngine.type === 'playtrafi' ? '🛡️ ' : '🚀 '}
+                {selectedEngine.name}
+              </strong>
+            </span>
+          )}
+        </div>
       </form>
     </div>
   );

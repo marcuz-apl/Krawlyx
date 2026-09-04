@@ -9,6 +9,7 @@ The pure function here is also the right place to clamp values to the
 size cap (FR-SET-04) and to drop content that fails validation.
 """
 
+import contextlib
 from collections.abc import Iterable
 from html.parser import HTMLParser
 from typing import Any
@@ -123,33 +124,49 @@ def normalize_record(
     metadata: dict[str, Any] | None = None,
     options: dict[str, Any] | None = None,
     content_size_cap: int = 5 * 1024 * 1024,
+    raw_html: str | None = None,
+    duration_ms: int | None = None,
+    engine_name: str | None = None,
+    custom_schema: Any = None,
+    **kwargs: Any,
 ) -> CrawlRecord:
     """Re-key engine-specific output to the canonical record (PRD §7.1)."""
-    if html is None and text is None and markdown is None:
+    effective_html = html if html is not None else raw_html
+    if effective_html is None and text is None and markdown is None:
         raise ValueError("normalize_record requires either html or text")
-    title = _extract_title(html) if html is not None else None
-    content_text = (text if text is not None else _strip_tags(html or "")) or ""
+    title = _extract_title(effective_html) if effective_html is not None else None
+    content_text = (text if text is not None else _strip_tags(effective_html or "")) or ""
     content_md = markdown if markdown is not None else content_text
-    if links is None and html is not None:
-        links = _extract_links(html, source_url)
+    if links is None and effective_html is not None:
+        links = _extract_links(effective_html, source_url)
 
     meta = dict(metadata or {})
-    meta.setdefault("engine", "normalized")
+    if engine_name:
+        meta["engine"] = engine_name
+    else:
+        meta.setdefault("engine", "normalized")
+
+    opt_dict = dict(options or {})
+    if custom_schema is not None and "custom_schema" not in opt_dict:
+        opt_dict["custom_schema"] = custom_schema
 
     # Extract structured dataset items if HTML is available
-    if html:
-        try:
+    if effective_html:
+        with contextlib.suppress(Exception):
             from app.engines.extractors import extract_structured_data
 
-            items = extract_structured_data(html, source_url, options)
+            items = extract_structured_data(effective_html, source_url, opt_dict)
             if items:
                 meta["items"] = items
                 meta["item_count"] = len(items)
                 meta["schema"] = items[0].get("type", "dataset")
-        except Exception:
-            pass
 
-    return CrawlRecord(
+    # Save any remaining kwargs into metadata
+    for k, v in kwargs.items():
+        if v is not None and k not in meta:
+            meta[k] = v
+
+    rec = CrawlRecord(
         target_id=target_id,
         source_url=source_url,
         final_url=final_url or source_url,
@@ -161,6 +178,9 @@ def normalize_record(
         links=list(links or []),
         metadata=meta,
     )
+    if duration_ms is not None:
+        rec.duration_ms = duration_ms
+    return rec
 
 
 def normalize_many(records: Iterable[dict[str, Any]]) -> list[CrawlRecord]:

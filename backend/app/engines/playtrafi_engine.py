@@ -208,13 +208,15 @@ class PlaytrafiEngine:
         record = normalize_record(
             target_id=target.target_id,
             source_url=target.url,
-            raw_html=getattr(result, "html", None),
+            html=getattr(result, "html", None),
             markdown=getattr(result, "markdown", None),
+            final_url=getattr(result, "url", None) or target.url,
             http_status=getattr(result, "status_code", 200),
             duration_ms=int((time.monotonic() - t0) * 1000),
             engine_name=ENGINE_TYPE,
             links=getattr(result, "links", None),
             custom_schema=custom_schema,
+            options=options_dict,
         )
 
         metadata_dict = record.metadata or {}

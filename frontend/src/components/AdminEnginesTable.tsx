@@ -43,11 +43,9 @@ export function AdminEnginesTable() {
   const [deleteEngine, setDeleteEngine] = useState<EngineOut | null>(null);
 
   if (isLoading) return <p className="text-slate-500 dark:text-slate-400">Loading engines…</p>;
-  const priority = (type: string) =>
-    type === 'patroy' ? 0 : type === 'playtrafi' ? 1 : 2;
   const engines: EngineOut[] = (data ?? [])
     .slice()
-    .sort((a, b) => priority(a.type) - priority(b.type));
+    .sort((a, b) => a.id - b.id);
 
   return (
     <div className="space-y-4">
@@ -83,9 +81,9 @@ export function AdminEnginesTable() {
       </div>
 
       {successMsg && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/40 p-3 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2 animate-fadeIn">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span>{successMsg}</span>
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/40 p-3 text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-between shadow-sm">
+          <span>✓ {successMsg}</span>
+          <button onClick={() => setSuccessMsg(null)} className="text-emerald-600 hover:text-emerald-800 font-bold ml-2">✕</button>
         </div>
       )}
 
@@ -112,6 +110,7 @@ export function AdminEnginesTable() {
         <table className="w-full text-sm">
           <thead className="bg-slate-50 dark:bg-slate-800/80 text-left text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 font-bold border-b border-slate-200 dark:border-slate-800">
             <tr>
+              <th className="px-3.5 py-2.5 w-16">ID</th>
               <th className="px-3.5 py-2.5">Name</th>
               <th className="px-3.5 py-2.5">Type</th>
               <th className="px-3.5 py-2.5">Status</th>
@@ -121,7 +120,7 @@ export function AdminEnginesTable() {
           <tbody>
             {engines.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
+                <td colSpan={5} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
                   <p className="font-medium text-slate-700 dark:text-slate-300">No engines found.</p>
                   <p className="text-xs text-slate-500 mt-1">Click &ldquo;Restore Defaults&rdquo; above to automatically bootstrap default engines.</p>
                 </td>
@@ -129,9 +128,15 @@ export function AdminEnginesTable() {
             )}
             {engines.map((e) => (
               <tr key={e.id} className="border-t border-slate-100 dark:border-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
+                <td className="px-3.5 py-2.5 font-mono text-xs font-bold text-brand-600 dark:text-brand-400 whitespace-nowrap">
+                  #{e.id}
+                </td>
                 <td className="px-3.5 py-2.5 font-medium text-slate-900 dark:text-white">
                   <div className="flex items-center gap-2">
-                    <span>{e.name}</span>
+                    <span>
+                      {e.type === 'patroy' ? '⚡ ' : e.type === 'playtrafi' ? '🛡️ ' : e.type === 'scrapy' ? '🚀 ' : '⚙️ '}
+                      {e.name}
+                    </span>
                     {e.has_secret && (
                       <span className="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">
                         secret
@@ -351,7 +356,7 @@ function EditForm({ engine, onDone }: { engine: EngineOut; onDone: () => void })
       className="space-y-3 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50/40 dark:bg-indigo-950/20 p-4 shadow-sm"
     >
       <h3 className="text-xs font-bold text-indigo-900 dark:text-indigo-200">
-        Edit Engine: <span className="font-mono">{engine.name}</span> ({engine.type})
+        Edit Engine #{engine.id}: <span className="font-mono">{engine.name}</span> ({engine.type})
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <label className="text-xs font-semibold">

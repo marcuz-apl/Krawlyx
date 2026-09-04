@@ -315,3 +315,20 @@ def test_404s_on_unknown_job_and_result(client: TestClient) -> None:
     assert r.status_code == 404
     r = client.get("/api/jobs/1/results/9999")
     assert r.status_code == 404
+
+
+def test_job_out_includes_engine_name_and_type(client: TestClient, db) -> None:
+    csrf = _auth(client, "u_engine_meta", "admin")
+    eid = _make_engine(db, "Patroy (Default)", "patroy", pooled=True)
+    r = client.post(
+        "/api/jobs",
+        json={"engine_id": eid, "urls": ["https://example.com/engine-meta"]},
+        headers={"X-CSRF-Token": csrf},
+    )
+    jid = r.json()["job_id"]
+    job_res = client.get(f"/api/jobs/{jid}")
+    assert job_res.status_code == 200
+    data = job_res.json()
+    assert data["engine_id"] == eid
+    assert data["engine_name"] == "Patroy (Default)"
+    assert data["engine_type"] == "patroy"

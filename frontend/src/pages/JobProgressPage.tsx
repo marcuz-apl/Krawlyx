@@ -77,9 +77,14 @@ export function JobProgressPage() {
               </span>
             )}
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Started {data.started_at ? new Date(data.started_at).toLocaleTimeString() : 'Queued'} • Engine ID #{data.engine_id}
-          </p>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <span>Started {data.started_at ? new Date(data.started_at).toLocaleTimeString() : 'Queued'}</span>
+            <span>•</span>
+            <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+              {data.engine_type === 'patroy' ? '⚡ ' : data.engine_type === 'playtrafi' ? '🛡️ ' : data.engine_type === 'scrapy' ? '🚀 ' : '⚙️ '}
+              Engine: {data.engine_name || `Engine #${data.engine_id}`}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -130,7 +135,15 @@ export function JobProgressPage() {
       <ConfirmModal
         isOpen={showRerunModal}
         title={`Re-run Crawl Job #${data.id}?`}
-        message="Launch a new crawl job with the identical target URLs, engine configuration, and extraction settings?"
+        message={`Launch a new crawl job with the identical target URLs using engine ${
+          data.engine_type === 'patroy'
+            ? '⚡ '
+            : data.engine_type === 'playtrafi'
+            ? '🛡️ '
+            : data.engine_type === 'scrapy'
+            ? '🚀 '
+            : '⚙️ '
+        }${data.engine_name || `Engine #${data.engine_id}`} and original extraction settings?`}
         confirmText="Launch New Job"
         cancelText="Cancel"
         variant="primary"
