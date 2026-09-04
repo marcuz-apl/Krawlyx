@@ -253,11 +253,16 @@ export function JobHistoryList({ jobs }: Props) {
                   </td>
                   <td className="px-3 py-3 whitespace-nowrap">
                     <span
-                      title={j.engine_name ? `${j.engine_name} (Engine #${j.engine_id})` : `Engine #${j.engine_id}`}
-                      className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-0.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700/60 shadow-2xs"
+                      title={j.engine_name ? `${j.engine_name} (Type: ${j.engine_type || 'unknown'}, ID #${j.engine_id})` : `Type: ${j.engine_type || 'unknown'}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700/60 shadow-2xs"
                     >
                       {j.engine_type === 'patroy' ? '⚡ ' : j.engine_type === 'playtrafi' ? '🛡️ ' : j.engine_type === 'scrapy' ? '🚀 ' : '⚙️ '}
                       <span>{shortEngineName(j.engine_name, j.engine_type)}</span>
+                      {j.engine_type && (
+                        <span className="rounded bg-slate-200/90 dark:bg-slate-700 px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-700 dark:text-slate-200">
+                          {j.engine_type}
+                        </span>
+                      )}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -355,7 +360,7 @@ export function JobHistoryList({ jobs }: Props) {
                   : jobs.find((x) => x.id === confirmRerunId)?.engine_type === 'scrapy'
                   ? '🚀 '
                   : '⚙️ '
-              }${jobs.find((x) => x.id === confirmRerunId)?.engine_name || `Engine #${jobs.find((x) => x.id === confirmRerunId)?.engine_id}`} and original extraction settings?`
+              }${jobs.find((x) => x.id === confirmRerunId)?.engine_name || `Engine #${jobs.find((x) => x.id === confirmRerunId)?.engine_id}`} [type: ${jobs.find((x) => x.id === confirmRerunId)?.engine_type || 'unknown'}] and original extraction settings?`
             : "Launch a new crawl job with identical targets, engine configuration, and extraction settings?"
         }
         confirmText="Re-run Crawl"

@@ -101,9 +101,14 @@ export function JobResultsPage() {
             {jobData && (
               <>
                 <span>•</span>
-                <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                <span className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
                   {jobData.engine_type === 'patroy' ? '⚡ ' : jobData.engine_type === 'playtrafi' ? '🛡️ ' : jobData.engine_type === 'scrapy' ? '🚀 ' : '⚙️ '}
-                  Engine: {jobData.engine_name || `Engine #${jobData.engine_id}`}
+                  <span>Engine: {jobData.engine_name || `Engine #${jobData.engine_id}`}</span>
+                  {jobData.engine_type && (
+                    <span className="rounded bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-700 dark:text-slate-200">
+                      type: {jobData.engine_type}
+                    </span>
+                  )}
                 </span>
               </>
             )}
@@ -322,7 +327,7 @@ export function JobResultsPage() {
                   : jobData.engine_type === 'scrapy'
                   ? '🚀 '
                   : '⚙️ '
-              }${jobData.engine_name || `Engine #${jobData.engine_id}`} and original extraction settings?`
+              }${jobData.engine_name || `Engine #${jobData.engine_id}`} [type: ${jobData.engine_type || 'unknown'}] and original extraction settings?`
             : "Launch a new crawl job with identical targets, engine configuration, and extraction settings?"
         }
         confirmText="Re-run Crawl"
