@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Clock, RotateCcw, ShieldCheck, Square, Zap } from 'lucide-react';
+import { AlertCircle, Clock, RotateCcw, ShieldCheck, Square, Zap } from 'lucide-react';
 
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { Counters } from '@/components/Counters';
@@ -193,6 +193,19 @@ export function JobProgressPage() {
                 <span className="font-bold text-indigo-600 dark:text-indigo-400 font-mono">{totalTargets} workers</span>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Job Failure Banner */}
+      {data.status === 'failed' && (
+        <div className="rounded-2xl border border-rose-300 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 p-4 text-xs text-rose-800 dark:text-rose-300 flex items-start gap-3 shadow-xs">
+          <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-0.5" />
+          <div className="space-y-1.5 flex-1">
+            <h4 className="font-bold text-rose-900 dark:text-rose-200 text-sm">Crawl Job Failed</h4>
+            <p className="font-mono text-xs bg-white/80 dark:bg-slate-900/80 p-2.5 rounded-xl border border-rose-200 dark:border-rose-900/40 text-rose-950 dark:text-rose-200 break-all">
+              {(data.options as Record<string, any>)?._error || 'The job encountered an unexpected error during execution.'}
+            </p>
           </div>
         </div>
       )}
