@@ -20,7 +20,7 @@ from pathlib import Path
 
 logger = logging.getLogger("mykrawl.engines.patroy.installer")
 
-FALLBACK_PATROY_VERSION = "1.1.0"
+FALLBACK_PATROY_VERSION = "1.2.0"
 DEFAULT_PATROY_VERSION = "latest"
 GITHUB_REPO = "marcuz-apl/patroy"
 

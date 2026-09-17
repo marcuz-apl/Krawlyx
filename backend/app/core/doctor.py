@@ -124,6 +124,22 @@ def _check_engines() -> Check:
     )
 
 
+def _check_patchright_browser() -> Check:
+    """NFR-03: Playtrafi's Chromium is a separate download from its wheel.
+
+    Without this check the doctor passed on hosts where every browser scrape
+    silently degraded to the library's bare-HTTP fallback.
+    """
+    try:
+        from app.engines.playtrafi_engine import missing_browser_detail
+    except Exception as exc:  # noqa: BLE001 — playtrafi not installed is fine here
+        return Check(name="Patchright Chromium", ok=True, detail=f"skipped ({exc})")
+    detail = missing_browser_detail(headless=True)
+    if detail:
+        return Check(name="Patchright Chromium", ok=False, detail=detail)
+    return Check(name="Patchright Chromium", ok=True, detail="installed")
+
+
 def _check_settings_summary() -> Check:
     s = get_settings()
     return Check(
@@ -170,6 +186,7 @@ _CHECKS = [
     _check_db_path,
     _check_log_dir,
     _check_engines,
+    _check_patchright_browser,
     _check_settings_summary,
     _check_admin_exists,
 ]

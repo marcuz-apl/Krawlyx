@@ -195,6 +195,133 @@ def test_patroy_v110_native_tables_and_metadata_hydration() -> None:
         assert rec.metadata["next_data"] == {"page": "pricing"}
 
 
+def test_patroy_cli_forwards_pacing_and_ssrf_flags(monkeypatch) -> None:
+    """FR-SET-02 / FR-SET-03 — the CLI gets the admin's interval and SSRF toggle."""
+    from app.core.config import get_settings
+    from app.engines.patroy_engine import PatroyEngine
+
+    monkeypatch.setattr("shutil.which", lambda _bin: "/usr/local/bin/patroy")
+    # Binary supports the flag (patroy >= 1.2.0).
+    monkeypatch.setattr("app.engines.patroy_engine._binary_supports_user_agent", lambda _bin: True)
+    monkeypatch.setattr(
+        "app.engines.ssrf.socket.getaddrinfo",
+        lambda *_a, **_kw: [(2, 1, 6, "", ("93.184.216.34", 0))],
+    )
+    # Pin the setting explicitly — other tests persist settings to ./backend/.env.
+    monkeypatch.setenv("MYKRAWL_PER_DOMAIN_INTERVAL_S", "2.5")
+    get_settings.cache_clear()
+
+    mock_proc = AsyncMock()
+    payload = json.dumps({"url": "x", "html": "<html/>"}).encode("utf-8")
+    mock_proc.communicate.return_value = (payload, b"")
+    mock_proc.returncode = 0
+
+    try:
+        with patch("asyncio.create_subprocess_exec", return_value=mock_proc) as spawn:
+            engine = PatroyEngine({"mode": "cli"})
+            records = asyncio.run(
+                _drain(engine.fetch(Target("t1", "https://example.test/"), JobOptions()))
+            )
+    finally:
+        get_settings.cache_clear()
+
+    assert len(records) == 1
+    argv = list(spawn.call_args.args)
+    assert argv[0] == "/usr/local/bin/patroy"
+    assert argv[1] == "https://example.test/"
+    # per_domain_interval_s is forwarded to the binary as a Go duration.
+    assert argv[argv.index("--delay") + 1] == "2.5s"
+    # ssrf_guard_enabled defaults to True → mirrored inside the binary.
+    assert "--block-private-ips" in argv
+    # NFR-05: the configured UA is forwarded to the binary on the CLI path too.
+    assert argv[argv.index("--user-agent") + 1] == "Krawlyx/0.1 (+local; patroy)"
+
+
+def test_patroy_cli_omits_user_agent_for_old_binary(monkeypatch) -> None:
+    """A pre-1.2.0 patroy binary must not receive --user-agent (unknown flag)."""
+    from app.engines.patroy_engine import PatroyEngine
+
+    monkeypatch.setattr("shutil.which", lambda _bin: "/usr/local/bin/patroy")
+    monkeypatch.setattr("app.engines.patroy_engine._binary_supports_user_agent", lambda _bin: False)
+    monkeypatch.setattr(
+        "app.engines.ssrf.socket.getaddrinfo",
+        lambda *_a, **_kw: [(2, 1, 6, "", ("93.184.216.34", 0))],
+    )
+
+    mock_proc = AsyncMock()
+    payload = json.dumps({"url": "x", "html": "<html/>"}).encode("utf-8")
+    mock_proc.communicate.return_value = (payload, b"")
+    mock_proc.returncode = 0
+
+    with patch("asyncio.create_subprocess_exec", return_value=mock_proc) as spawn:
+        engine = PatroyEngine({"mode": "cli"})
+        records = asyncio.run(
+            _drain(engine.fetch(Target("t1", "https://example.test/"), JobOptions()))
+        )
+
+    assert len(records) == 1
+    assert records[0].status == "ok"
+    assert "--user-agent" not in list(spawn.call_args.args)
+
+
+def test_patroy_403_payload_is_recorded_as_an_error(monkeypatch) -> None:
+    """NFR-03 — a non-2xx payload must not be normalized into a success."""
+    from app.engines.patroy_engine import PatroyEngine
+
+    async def _fake_daemon(self, url: str, ua: str):
+        return {"url": url, "status_code": 403, "html": "<html>blocked</html>"}, None
+
+    monkeypatch.setattr(PatroyEngine, "_fetch_via_daemon", _fake_daemon)
+    monkeypatch.setattr(
+        "app.engines.ssrf.socket.getaddrinfo",
+        lambda *_a, **_kw: [(2, 1, 6, "", ("93.184.216.34", 0))],
+    )
+
+    engine = PatroyEngine({"mode": "daemon"})
+    records = list(
+        asyncio.run(_drain(engine.fetch(Target("t1", "https://example.test/"), JobOptions())))
+    )
+
+    assert len(records) == 1
+    rec = records[0]
+    assert rec.status == "error"
+    assert rec.http_status == 403
+    assert rec.content_markdown is None
+    assert "403" in (rec.error or "")
+
+
+def test_patroy_cli_403_payload_is_recorded_as_an_error(monkeypatch) -> None:
+    """patroy >= 1.2.0 reports status_code on the CLI path too — classify it."""
+    from app.engines.patroy_engine import PatroyEngine
+
+    monkeypatch.setattr("shutil.which", lambda _bin: "/usr/local/bin/patroy")
+    monkeypatch.setattr("app.engines.patroy_engine._binary_supports_user_agent", lambda _bin: True)
+    monkeypatch.setattr(
+        "app.engines.ssrf.socket.getaddrinfo",
+        lambda *_a, **_kw: [(2, 1, 6, "", ("93.184.216.34", 0))],
+    )
+
+    mock_proc = AsyncMock()
+    payload = json.dumps(
+        {"url": "https://example.test/", "status_code": 403, "html": "<html>denied</html>"}
+    ).encode("utf-8")
+    mock_proc.communicate.return_value = (payload, b"")
+    mock_proc.returncode = 0
+
+    with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
+        engine = PatroyEngine({"mode": "cli"})
+        records = asyncio.run(
+            _drain(engine.fetch(Target("t1", "https://example.test/"), JobOptions()))
+        )
+
+    assert len(records) == 1
+    rec = records[0]
+    assert rec.status == "error"
+    assert rec.http_status == 403
+    assert rec.content_markdown is None
+    assert "403" in (rec.error or "")
+
+
 def test_patroy_installer_dynamic_latest_version() -> None:
     """Verify patroy installer defaults to 'latest' and dynamically resolves URLs."""
     from app.engines.patroy_installer import (

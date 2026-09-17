@@ -6,22 +6,29 @@ and undetected stealth browsing via Go-Rod + Stealth.
 
 The adapter:
   - validates config through PatroyConfig
-  - supports both CLI execution (`patroy scrape <url> -o json`) and local daemon mode
+  - supports both CLI execution (`patroy <url> -f json`) and local daemon mode
   - applies the SSRF guard before touching the network (PRD §6.5)
-  - applies per-host throttling (FR-SET-02) and identifiable User-Agent
+  - applies per-host throttling (FR-SET-02); the identifiable UA (NFR-05) is
+    forwarded on both the CLI (--user-agent) and daemon (user_agent) paths; an empty
+    config UA uses the engine stealth default (CLI forwarding needs patroy
+    >= 1.2.0; older binaries are detected and skipped)
   - normalizes output into CrawlRecord items
 """
+
+from __future__ import annotations
 
 import asyncio
 import dataclasses
 import json
 import logging
 import os
+import re
 import shutil
+import subprocess
 import time
 from collections.abc import AsyncIterator
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
 
@@ -36,10 +43,44 @@ from app.engines.base import (
 from app.engines.normalize import normalize_record
 from app.engines.schemas import PatroyConfig
 from app.engines.ssrf import resolve_safe
+from app.engines.throttle import wait_for_host
+
+if TYPE_CHECKING:
+    from app.core.config import Settings
 
 logger = logging.getLogger("mykrawl.engines.patroy")
 
 ENGINE_TYPE = "patroy"
+
+# --user-agent was introduced in patroy 1.2.0; older released binaries reject
+# it as an unknown flag, so the adapter probes the version once and skips the
+# flag for anything older.
+_UA_FLAG_MIN_VERSION = (1, 2, 0)
+_user_agent_flag_support: dict[str, bool] = {}
+
+
+def _binary_supports_user_agent(bin_path: str) -> bool:
+    """True if the resolved binary understands --user-agent (cached per path)."""
+    cached = _user_agent_flag_support.get(bin_path)
+    if cached is not None:
+        return cached
+    supported = False
+    try:
+        proc = subprocess.run(
+            [bin_path, "--version"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        match = re.search(r"(\d+)\.(\d+)\.(\d+)", proc.stdout or "")
+        if match:
+            supported = tuple(int(g) for g in match.groups()) >= _UA_FLAG_MIN_VERSION
+    except Exception:  # noqa: BLE001 — probe failures must never break a job
+        supported = False
+    _user_agent_flag_support[bin_path] = supported
+    return supported
+
 
 CAPABILITIES = Capabilities(
     deep_crawl=True,
@@ -58,7 +99,6 @@ class PatroyEngine:
 
     def __init__(self, config: dict | None = None) -> None:
         self.config = PatroyConfig.model_validate(config or {})
-        self._last_fetch: dict[str, float] = {}
 
     def _get_binary_path(self, auto_download: bool = True) -> str | None:
         from app.engines.patroy_installer import find_or_install_patroy
@@ -126,13 +166,8 @@ class PatroyEngine:
             )
             return
 
-        # FR-SET-02: per-host rate limiting
-        interval = cfg.per_domain_interval_s
-        now = time.monotonic()
-        last = self._last_fetch.get(host)
-        if last is not None and (now - last) < interval:
-            await asyncio.sleep(interval - (now - last))
-        self._last_fetch[host] = time.monotonic()
+        # FR-SET-02: process-wide per-host pacing (see app/engines/throttle.py).
+        await wait_for_host(host, cfg.per_domain_interval_s)
 
         t0 = time.monotonic()
         ua = self.config.user_agent or user_agent("patroy")
@@ -143,7 +178,10 @@ class PatroyEngine:
         if self.config.mode == "daemon":
             data, error_msg = await self._fetch_via_daemon(target.url, ua)
         else:
-            data, error_msg = await self._fetch_via_cli(target.url, ua)
+            # patroy >= 1.2.0 accepts --user-agent (skipped for older binaries,
+            # see `_fetch_via_cli`) and reports the real HTTP status in
+            # `status_code`, so bot-blocked pages are classified below.
+            data, error_msg = await self._fetch_via_cli(target.url, cfg)
 
         if error_msg or not data:
             yield CrawlRecord(
@@ -152,6 +190,24 @@ class PatroyEngine:
                 status="error",
                 http_status=data.get("status_code", 500) if data else 500,
                 error=error_msg or "patroy returned empty payload",
+                duration_ms=int((time.monotonic() - t0) * 1000),
+            )
+            return
+
+        # patroy >= 1.2.0 reports the real HTTP status in `status_code` on both
+        # the CLI and daemon paths. A >= 400 payload must never be normalized
+        # into a "successful" record: a 403 body from a bot-protection edge
+        # would otherwise be stored as real content. Older binaries omit the
+        # field entirely, so absence is treated as a success.
+        reported_status = data.get("status_code")
+        if isinstance(reported_status, int) and reported_status >= 400:
+            logger.warning("patroy reported HTTP %s for %s", reported_status, target.url)
+            yield CrawlRecord(
+                target_id=target.target_id,
+                source_url=target.url,
+                status="error",
+                http_status=reported_status,
+                error=f"target returned HTTP {reported_status}",
                 duration_ms=int((time.monotonic() - t0) * 1000),
             )
             return
@@ -255,7 +311,21 @@ class PatroyEngine:
 
         yield rec
 
-    async def _fetch_via_cli(self, url: str, ua: str) -> tuple[dict[str, Any], str | None]:
+    async def _fetch_via_cli(
+        self, url: str, cfg: Settings | None = None
+    ) -> tuple[dict[str, Any], str | None]:
+        """Run `patroy <url> -f json` and parse the JSON envelope it prints.
+
+        patroy >= 1.2.0 accepts --user-agent (injected only when the binary
+        supports it, see `_binary_supports_user_agent`) and reports the real
+        HTTP status in `status_code`; older binaries supply neither, so rod's
+        browser UA is used and absence of the field is treated as success.
+        The admin's per-domain interval and SSRF toggle *are* forwarded, so the
+        binary enforces them itself even during `--concurrency` batch runs.
+        """
+        from app.core.config import get_settings
+
+        settings = cfg or get_settings()
         bin_path = self._get_binary_path()
         if not bin_path:
             return {}, f"patroy binary '{self.config.binary_path}' not found in PATH"
@@ -269,8 +339,16 @@ class PatroyEngine:
         ]
         if self.config.wait_for:
             cmd.extend(["--wait-for", self.config.wait_for])
+        if self.config.user_agent and _binary_supports_user_agent(bin_path):
+            cmd.extend(["--user-agent", self.config.user_agent])
         if self.config.timeout_s:
             cmd.extend(["--timeout", f"{int(self.config.timeout_s)}s"])
+        # FR-SET-02: let the binary pace itself too (mirrors the adapter gate).
+        if settings.per_domain_interval_s > 0:
+            cmd.extend(["--delay", f"{settings.per_domain_interval_s:g}s"])
+        # FR-SET-03: mirror the SSRF guard inside the binary (defence in depth).
+        if settings.ssrf_guard_enabled:
+            cmd.append("--block-private-ips")
 
         timeout = min(self.config.timeout_s, 120)
         try:
@@ -313,7 +391,7 @@ class PatroyEngine:
             "url": url,
             "user_agent": ua,
             "wait_for": self.config.wait_for,
-            "timeout_s": self.config.timeout_s,
+            "timeout_sec": self.config.timeout_s,
         }
         try:
             async with httpx.AsyncClient(timeout=float(self.config.timeout_s)) as client:
@@ -326,7 +404,7 @@ class PatroyEngine:
 
 
 # Register the engine with the type-extensible registry.
-from app.engines.registry import register_engine
+from app.engines.registry import register_engine  # noqa: E402
 
 register_engine(ENGINE_TYPE, CAPABILITIES)(PatroyEngine)
 
