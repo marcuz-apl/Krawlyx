@@ -101,7 +101,10 @@ def test_delete_unreferenced_target_succeeds(client: TestClient) -> None:
     tid = r.json()["id"]
     r = client.delete(f"/api/export-targets/{tid}", headers={"X-CSRF-Token": csrf})
     assert r.status_code == 204
-    assert client.get("/api/export-targets").json() == []
+    # The list is not empty — startup bootstraps the default "Server Exports
+    # (data/exports)" target — but the deleted target must be gone.
+    remaining = client.get("/api/export-targets").json()
+    assert all(t["id"] != tid for t in remaining)
 
 
 def test_delete_referenced_target_refused(client: TestClient) -> None:
