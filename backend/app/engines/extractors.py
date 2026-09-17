@@ -187,15 +187,17 @@ def _extract_nextjs_marketplace(soup: BeautifulSoup, source_url: str) -> list[di
     today = datetime.date.today().isoformat()
     rows: list[dict[str, Any]] = []
 
-    for l in listings:
-        veh = l.get("vehicle") or {}
-        seller = l.get("seller") or {}
-        loc = l.get("location") or {}
-        pr = l.get("price") or {}
-        desc = str(l.get("description") or "")
-        trim = str(veh.get("modelVersionInput") or l.get("trim") or "")
-        title = str(l.get("title") or "")
-        combined_text = f"{desc} {trim} {title} {json.dumps(l.get('vehicleDetails') or [])}".upper()
+    for listing in listings:
+        veh = listing.get("vehicle") or {}
+        seller = listing.get("seller") or {}
+        loc = listing.get("location") or {}
+        pr = listing.get("price") or {}
+        desc = str(listing.get("description") or "")
+        trim = str(veh.get("modelVersionInput") or listing.get("trim") or "")
+        title = str(listing.get("title") or "")
+        combined_text = (
+            f"{desc} {trim} {title} {json.dumps(listing.get('vehicleDetails') or [])}".upper()
+        )
 
         # Robust drivetrain detection
         drivetrain = veh.get("drivetrain") or "Unknown"
@@ -232,19 +234,19 @@ def _extract_nextjs_marketplace(soup: BeautifulSoup, source_url: str) -> list[di
 
         # Mileage detection fallback & clean to pure integer
         raw_mileage = veh.get("mileageInKm")
-        if not raw_mileage and l.get("vehicleDetails"):
-            for vd in l.get("vehicleDetails", []):
+        if not raw_mileage and listing.get("vehicleDetails"):
+            for vd in listing.get("vehicleDetails", []):
                 if isinstance(vd, dict) and "mileage" in str(vd.get("ariaLabel", "")).lower():
                     raw_mileage = vd.get("data")
                     break
         mileage_km = _clean_numeric(raw_mileage)
 
         # Images
-        images = l.get("images") or []
+        images = listing.get("images") or []
         image_url = images[0] if images else None
 
         # Clean listing URL
-        rel_url = l.get("url")
+        rel_url = listing.get("url")
         listing_url = None
         if rel_url:
             if rel_url.startswith("http"):
@@ -275,7 +277,7 @@ def _extract_nextjs_marketplace(soup: BeautifulSoup, source_url: str) -> list[di
                     or pr.get("value")
                 )
                 if isinstance(pr, dict)
-                else (pr or l.get("price")),
+                else (pr or listing.get("price")),
                 "seller_type": seller_type,
                 "city": loc.get("city"),
                 "province": loc.get("provinceCode"),

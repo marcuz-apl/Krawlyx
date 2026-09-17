@@ -193,7 +193,7 @@ class ScrapyEngine:
 
 
 # Register the engine with the type-extensible registry.
-from app.engines.registry import register_engine
+from app.engines.registry import register_engine  # noqa: E402
 
 register_engine(ENGINE_TYPE, CAPABILITIES)(ScrapyEngine)
 
