@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import json
 import logging
+import re
 from typing import Any
 from urllib.parse import urljoin, urlparse
 
@@ -60,7 +61,94 @@ def extract_structured_data(
     if ld_items:
         return ld_items
 
+    # 5. Semantic DOM fallback: repeated card clusters for hydrated SPAs that
+    # ship no machine-readable metadata (their JSON-LD/`__NEXT_DATA__` is
+    # empty and products only exist as rendered tiles).
+    card_items = _extract_semantic_cards(soup, source_url)
+    if card_items:
+        return card_items
+
     return items
+
+
+def _extract_semantic_cards(soup: BeautifulSoup, source_url: str) -> list[dict[str, Any]]:
+    """Conservative fallback for repeated, explicitly marked product cards.
+
+    Do not infer products from arbitrary repeated links or guess missing prices.
+    Keep variant query strings: different colours may legitimately be separate rows.
+    """
+    marker = re.compile(r"(?:^|[-_])product[-_](?:card|tile)(?:$|[-_])", re.I)
+    candidates = []
+    for tag in soup.find_all(["div", "li", "article"]):
+        labels = [str(tag.get("data-testid", "")), *tag.get("class", [])]
+        if not any(marker.search(label) for label in labels):
+            continue
+        if tag.find_parent(["nav", "header", "footer", "aside"]):
+            continue
+        if any(
+            parent.has_attr("hidden")
+            or parent.get("aria-hidden") == "true"
+            or parent.get("role") in {"navigation", "menu"}
+            for parent in [tag, *tag.parents]
+        ):
+            continue
+        candidates.append(tag)
+
+    candidate_ids = {id(tag) for tag in candidates}
+    rows: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    today = datetime.date.today().isoformat()
+    for card in candidates:
+        # Nested wrappers must not duplicate a tile or merge several inner tiles.
+        if any(id(child) in candidate_ids for child in card.find_all(True)):
+            continue
+        name_el = card.select_one(
+            '[data-testid*="product-name"], [itemprop="name"], '
+            ".product-name, .product-title, h2, h3"
+        )
+        if name_el is None:
+            continue
+        name = name_el.get_text(" ", strip=True)
+        if not name:
+            continue
+        anchor = name_el.find_parent("a", href=True)
+        if anchor is None or not any(parent is card for parent in anchor.parents):
+            anchor = card.find("a", href=True)
+        if anchor is None:
+            continue
+        href = str(anchor.get("href", "")).strip()
+        if not href or href.startswith("#"):
+            continue
+        url = urljoin(source_url, href)
+        parsed = urlparse(url)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc or url in seen:
+            continue
+        price_el = card.select_one(
+            '[data-testid*="product-price"], [itemprop="price"], .product-price, .price'
+        )
+        price = None
+        if price_el is not None:
+            value = str(price_el.get("content") or price_el.get_text(" ", strip=True))
+            loading = price_el.select_one('[class*="skeleton"], [aria-busy="true"]')
+            if (
+                not loading
+                and "skeleton" not in " ".join(price_el.get("class", []))
+                and price_el.get("aria-busy") != "true"
+                and re.search(r"\d", value)
+            ):
+                price = value
+        rows.append(
+            {
+                "type": "product",
+                "name": name,
+                "url": url,
+                "product_id": card.get("data-mpid") or card.get("data-product-id"),
+                "price": price,
+                "date_observed": today,
+            }
+        )
+        seen.add(url)
+    return rows
 
 
 def _clean_numeric(val: Any) -> int | None:
