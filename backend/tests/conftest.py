@@ -16,11 +16,11 @@ _DATA_DIR = Path(tempfile.mkdtemp(prefix="mykrawl-test-"))
 os.environ.setdefault("MYKRAWL_DB_PATH", str(_DATA_DIR / "test.db"))
 os.environ.setdefault("MYKRAWL_SECRET_KEY", "test-secret-key-do-not-use-in-prod")
 
-import pytest
-from sqlalchemy import text
+import pytest  # noqa: E402
+from sqlalchemy import text  # noqa: E402
 
-from app.core.db import SessionLocal, engine
-from app.models import Base
+from app.core.db import SessionLocal, engine  # noqa: E402
+from app.models import Base  # noqa: E402
 
 
 @pytest.fixture(autouse=True)

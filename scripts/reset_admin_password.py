@@ -31,11 +31,15 @@ def reset_password(username: str, new_password: str | None = None) -> None:
         from app.models.user import User
     except ImportError as e:
         print(f"❌ Error importing Krawlyx backend modules: {e}")
-        print("Please ensure your virtual environment is active: source backend/.venv/bin/activate")
+        print(
+            "Please ensure your virtual environment is active: source backend/.venv/bin/activate"
+        )
         sys.exit(1)
 
     if not new_password:
-        prompt_pw = getpass.getpass(f"Enter new password for user '{username}' (min 8 chars): ")
+        prompt_pw = getpass.getpass(
+            f"Enter new password for user '{username}' (min 8 chars): "
+        )
         confirm_pw = getpass.getpass("Confirm new password: ")
         if prompt_pw != confirm_pw:
             print("❌ Passwords do not match. Aborting.")
@@ -54,7 +58,9 @@ def reset_password(username: str, new_password: str | None = None) -> None:
             user.password_hash = hashed
             user.role = "superadmin"
             db.commit()
-            print(f"✅ Success: Password for SuperAdmin '{username}' (ID #{user.id}) has been reset.")
+            print(
+                f"✅ Success: Password for SuperAdmin '{username}' (ID #{user.id}) has been reset."
+            )
             print(f"🔒 Role verified: {user.role.upper()}")
         else:
             # Create user if it doesn't exist
@@ -62,17 +68,28 @@ def reset_password(username: str, new_password: str | None = None) -> None:
             db.add(user)
             db.commit()
             db.refresh(user)
-            print(f"✅ Created new SuperAdmin account '{username}' (ID #{user.id}) with the specified password.")
+            print(
+                f"✅ Created new SuperAdmin account '{username}' (ID #{user.id}) with the specified password."
+            )
 
-    print("\nYou can now sign in at http://localhost:4039/login (or http://localhost:4040/login) with:")
+    print(
+        "\nYou can now sign in at http://localhost:4039/login (or http://localhost:4040/login) with:"
+    )
     print(f"  • Username: {username}")
     print(f"  • Password: {'*' * len(new_password)}")
 
 
 def main():
     parser = argparse.ArgumentParser(description="Reset Krawlyx SuperAdmin password.")
-    parser.add_argument("password", nargs="?", default=None, help="New password (optional; prompted if omitted)")
-    parser.add_argument("--username", default="admin", help="Username to reset (default: 'admin')")
+    parser.add_argument(
+        "password",
+        nargs="?",
+        default=None,
+        help="New password (optional; prompted if omitted)",
+    )
+    parser.add_argument(
+        "--username", default="admin", help="Username to reset (default: 'admin')"
+    )
     args = parser.parse_args()
 
     reset_password(username=args.username, new_password=args.password)

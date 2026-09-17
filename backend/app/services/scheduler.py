@@ -158,7 +158,7 @@ async def run_now(schedule_id: int) -> int | None:
 # ---- cron helpers ----
 
 
-import re
+import re  # noqa: E402
 
 
 def _resolve_timezone(tz: str) -> ZoneInfo:

@@ -8,7 +8,7 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=128)
 
 
-from datetime import datetime
+from datetime import datetime  # noqa: E402
 
 
 class UserOut(BaseModel):

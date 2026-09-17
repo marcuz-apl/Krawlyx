@@ -10,14 +10,14 @@ if sys.platform == "win32":
 
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
-from contextlib import asynccontextmanager
-from pathlib import Path
+from contextlib import asynccontextmanager  # noqa: E402
+from pathlib import Path  # noqa: E402
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from fastapi.staticfiles import StaticFiles  # noqa: E402
 
-from app.api import (
+from app.api import (  # noqa: E402
     auth,
     database,
     datasets,
@@ -29,13 +29,13 @@ from app.api import (
     schedules,
     users,
 )
-from app.api import settings as settings_api
-from app.core.config import get_settings
-from app.core.db import SessionLocal, upgrade_db
-from app.core.logging_config import configure_logging
-from app.services import jobs as jobs_svc
-from app.services import scheduler as scheduler_svc
-from app.services.users import bootstrap_admin
+from app.api import settings as settings_api  # noqa: E402
+from app.core.config import get_settings  # noqa: E402
+from app.core.db import SessionLocal, upgrade_db  # noqa: E402
+from app.core.logging_config import configure_logging  # noqa: E402
+from app.services import jobs as jobs_svc  # noqa: E402
+from app.services import scheduler as scheduler_svc  # noqa: E402
+from app.services.users import bootstrap_admin  # noqa: E402
 
 FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 
@@ -117,4 +117,4 @@ def create_app() -> FastAPI:
     return app
 
 
-app = create_app()
+app = create_app()  # noqa: E402
