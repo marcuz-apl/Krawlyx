@@ -19,7 +19,7 @@ no paid APIs or third-party cloud lock-in.
 
 ## Status
 
-**Production Stable (`v2.3.0`)** — All core development milestones (M1–M6) and post-milestone workbench expansions are fully delivered, validated, and hardened. Krawlyx operates as an all-in-one web scraping workbench featuring:
+**Production Stable (`v2.4.0`)** — All core development milestones (M1–M6) and post-milestone workbench expansions are fully delivered, validated, and hardened. Krawlyx operates as an all-in-one web scraping workbench featuring:
 - **Autonomous Server-Side Exports & File Hub**: Dedicated **Exported Files** workbench with 1-click cross-platform downloads, search, and automatic overnight crawl exports saved to persistent server storage.
 - **Triple Crawl Engine Suite**: Built-in native support for **Patroy** (default Go engine), **Playtrafi** (Chromium browser engine), and **Scrapy** (async HTTP subprocess).
 - **Persistent Datasets & Universal Schema**: Dynamic SQLite schema extraction, structured JSON-LD / HTML entity streaming, and zero-loss persistence.
@@ -101,7 +101,7 @@ All project documentation, architectural decision records, implementation plans,
 ## Versioning
 
 This repo adheres to **Alfazen Versioning (Connected Prefix Standard)**:
-- Stored directly in the tracked root `VERSION` file as `v<m.n.p>+<yymmddc>` (e.g. `v2.3.0+2609041`).
+- Stored directly in the tracked root `VERSION` file as `v<m.n.p>+<yymmddc>` (e.g. `v2.4.0+260916c`).
 - Complies strictly with SemVer 2.0.0 (Rule #10) build metadata (`+` delimiter).
 - Every commit subject line is automatically prefixed with the connected identifier:
   `v<m.n.p>+<yymmddc> <type>(<scope>): <subject>`
