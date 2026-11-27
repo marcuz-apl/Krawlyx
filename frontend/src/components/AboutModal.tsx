@@ -6,7 +6,8 @@ interface AboutModalProps {
   version?: string;
 }
 
-export function AboutModal({ isOpen, onClose, version = "v2.4.0" }: AboutModalProps) {
+export function AboutModal({ isOpen, onClose, version }: AboutModalProps) {
+  const displayVersion = (version ?? "v2.5.0").split("+")[0].split("-")[0] || "v2.5.0";
   if (!isOpen) return null;
 
   return (
@@ -30,17 +31,17 @@ export function AboutModal({ isOpen, onClose, version = "v2.4.0" }: AboutModalPr
           Krawlyx Workbench
         </h2>
         <span className="mt-1 rounded-full bg-brand-50 px-3 py-0.5 font-mono text-[11px] font-semibold text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
-          Version {version}
+          Version {displayVersion}
         </span>
 
         {/* Intro */}
         <p className="mt-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
           <strong className="text-slate-900 dark:text-white">
-            Krawlyx = Modern, Self-Hosted Web Scraping & Structured Extraction Workbench
+            Krawlyx — Collect and organize data from websites, effortlessly.
           </strong>
           <br /><br />
-          Krawlyx empowers data engineers and analysts to execute high-throughput web scraping, 
-          manage crawl queues with Patroy, Playtrafi & Scrapy engines, extract structured datasets with JSON schema, and stream results directly into CSV, XLSX, or SQLite.
+          Krawlyx helps you gather information from web pages and save it in neat,
+          ready-to-use files and tables — no coding required.
         </p>
 
         {/* Separator Line */}

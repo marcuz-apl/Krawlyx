@@ -2,24 +2,23 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { 
-  BookOpen, 
-  Info, 
-  Sun, 
-  Moon, 
-  LogOut, 
-  User, 
-  Bug, 
-  PlusCircle, 
-  History, 
-  Database, 
+import {
+  Home,
+  BookOpen,
+  Sun,
+  Moon,
+  LogOut,
+  User,
+  Bug,
+  PlusCircle,
+  History,
+  Database,
   FolderDown,
-  Calendar, 
-  Shield 
+  Calendar,
+  Shield
 } from "lucide-react";
 import { useLogout, useMe } from "@/hooks/useAuth";
 import { getTimezoneThemeInfo } from "@/lib/themeHelper";
-import { AboutModal } from "./AboutModal";
 import { DocsModal } from "./DocsModal";
 
 export function Header() {
@@ -28,8 +27,8 @@ export function Header() {
     queryFn: () => api.health(),
     staleTime: 30000,
   });
-  const rawVersion = healthData?.version || "v2.4.0";
-  const dynamicVersion = rawVersion.split("+")[0].split("-")[0] || "v2.4.0";
+  const rawVersion = healthData?.version || "v2.5.0";
+  const dynamicVersion = rawVersion.split("+")[0].split("-")[0] || "v2.5.0";
   const me = useMe();
   const logout = useLogout();
   const location = useLocation();
@@ -37,7 +36,6 @@ export function Header() {
   const [isDark, setIsDark] = useState(false);
   const [themeMode, setThemeMode] = useState<"auto" | "light" | "dark">("auto");
   const [tzInfo, setTzInfo] = useState("");
-  const [showAboutModal, setShowAboutModal] = useState(false);
   const [showDocsModal, setShowDocsModal] = useState(false);
 
   // Sync theme based on stored preference or browser timezone solar calculation
@@ -111,8 +109,16 @@ export function Header() {
     <>
       <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/85 dark:border-slate-800 dark:bg-slate-950/85 backdrop-blur-md transition-colors duration-150">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><div className="flex h-14 items-center justify-between">
-          {/* Left section: Docs & About */}
+          {/* Left section: Home & Docs */}
           <div className="flex items-center gap-1.5 sm:gap-3">
+            <Link
+              to="/"
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-400 transition"
+              title="Home"
+            >
+              <Home className="h-4 w-4" />
+              <span className="hidden sm:inline">Home</span>
+            </Link>
             <button
               onClick={() => setShowDocsModal(true)}
               className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-400 transition"
@@ -120,14 +126,6 @@ export function Header() {
             >
               <BookOpen className="h-4 w-4" />
               <span className="hidden sm:inline">Docs</span>
-            </button>
-            <button
-              onClick={() => setShowAboutModal(true)}
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-400 transition"
-              title="About Krawlyx"
-            >
-              <Info className="h-4 w-4" />
-              <span className="hidden sm:inline">About</span>
             </button>
           </div>
 
@@ -192,11 +190,6 @@ export function Header() {
               }
             >
               {isDark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-600" />}
-              {themeMode === "auto" && (
-                <span className="text-[9px] font-bold tracking-wider px-1 py-0.5 rounded bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-300 uppercase">
-                  Auto
-                </span>
-              )}
             </button>
           </div>
         </div></div>
@@ -217,11 +210,6 @@ export function Header() {
       </header>
 
       {/* Modals */}
-      <AboutModal
-        isOpen={showAboutModal}
-        onClose={() => setShowAboutModal(false)}
-        version={rawVersion}
-      />
       <DocsModal
         isOpen={showDocsModal}
         onClose={() => setShowDocsModal(false)}

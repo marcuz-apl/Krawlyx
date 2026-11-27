@@ -356,6 +356,24 @@ export interface SettingsUpdateBody {
   admin_contact_email?: string;
 }
 
+// ---- contact messages ----
+
+export interface ContactMessageBody {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+export interface ContactMessageOut {
+  id: number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  created_at: string;
+}
+
 const BASE = '';
 
 let inMemoryCsrf: string | null = null;
@@ -429,6 +447,15 @@ export const api = {
     }
   },
   me: () => request<UserOut>('/api/auth/me'),
+
+  messages: {
+    submit: (body: ContactMessageBody) =>
+      request<ContactMessageOut>('/api/messages', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    list: () => request<ContactMessageOut[]>('/api/messages'),
+  },
 
   engines: {
     capabilities: () => request<CapabilityList>('/api/engines/capabilities'),
