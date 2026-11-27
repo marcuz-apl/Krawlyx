@@ -13,6 +13,7 @@ import { JobProgressPage } from "@/pages/JobProgressPage";
 import { JobResultDetailPage } from "@/pages/JobResultDetailPage";
 import { JobResultsPage } from "@/pages/JobResultsPage";
 import { LoginPage } from "@/pages/LoginPage";
+import { ContactPage } from "@/pages/ContactPage";
 import { MergedResultsPage } from "@/pages/MergedResultsPage";
 import { RunnerPage } from "@/pages/RunnerPage";
 import { SchedulesPage } from "@/pages/SchedulesPage";
@@ -33,6 +34,7 @@ function RootLayout() {
 
 const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
+  { path: "/contact", element: <ContactPage /> },
   {
     element: <RequireAuth />,
     children: [

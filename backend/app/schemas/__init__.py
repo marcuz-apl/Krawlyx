@@ -1,6 +1,7 @@
 """Pydantic API schemas — the contract source of truth (see AGENTS.md)."""
 
 from app.schemas.auth import LoginRequest, LoginResponse, UserOut
+from app.schemas.contact_messages import ContactMessageCreate, ContactMessageOut
 from app.schemas.engines import (
     CapabilityList,
     EngineCapabilities,
@@ -37,6 +38,8 @@ from app.schemas.users import UserCreate, UserUpdate
 
 __all__ = [
     "CapabilityList",
+    "ContactMessageCreate",
+    "ContactMessageOut",
     "EngineCapabilities",
     "EngineCreate",
     "EngineOut",

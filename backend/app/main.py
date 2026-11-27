@@ -26,6 +26,7 @@ from app.api import (  # noqa: E402
     exports,
     health,
     jobs,
+    messages,
     schedules,
     users,
 )
@@ -82,6 +83,7 @@ def create_app() -> FastAPI:
     app.include_router(exports.router)
     app.include_router(schedules.router)
     app.include_router(users.router)
+    app.include_router(messages.router)
     app.include_router(database.router)
     app.include_router(settings_api.router)
     # Serve the built SPA in production. The Vite dev server handles this in dev mode.

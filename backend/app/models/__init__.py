@@ -5,6 +5,7 @@ before `upgrade_db()` / Alembic autogenerate run.
 """
 
 from app.models.base import Base, utcnow
+from app.models.contact_message import ContactMessage
 from app.models.dataset import Dataset, DatasetRow
 from app.models.engine_instance import EngineInstance
 from app.models.export_target import ExportTarget
@@ -15,6 +16,7 @@ from app.models.user import User
 
 __all__ = [
     "Base",
+    "ContactMessage",
     "Dataset",
     "DatasetRow",
     "EngineInstance",
