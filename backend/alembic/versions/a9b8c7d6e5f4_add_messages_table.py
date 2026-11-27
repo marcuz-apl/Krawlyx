@@ -21,6 +21,9 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
+    # init_db()/a previous interrupted run may have created the table already.
+    if sa.inspect(op.get_bind()).has_table("messages"):
+        return
     op.create_table(
         "messages",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),

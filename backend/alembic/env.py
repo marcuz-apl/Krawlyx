@@ -12,8 +12,8 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
-from app.core.config import get_settings  # noqa: E402
-from app.models import Base  # noqa: E402
+from app.core.config import get_settings
+from app.models import Base
 
 config = context.config
 if config.config_file_name is not None:
@@ -44,7 +44,12 @@ def run_migrations_online() -> None:
     )
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata, render_as_batch=True
+            connection=connection,
+            target_metadata=target_metadata,
+            render_as_batch=True,
+            # SQLite supports transactional DDL; without this Alembic assumes
+            # DDL cannot roll back and a failed batch leaves temp tables behind.
+            transactional_ddl=True,
         )
         with context.begin_transaction():
             context.run_migrations()

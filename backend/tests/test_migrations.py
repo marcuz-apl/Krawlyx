@@ -26,3 +26,13 @@ def test_upgrade_creates_core_schema() -> None:
 
 def test_upgrade_is_idempotent() -> None:
     upgrade_db()  # second run must be a no-op, not an error
+
+
+def test_upgrade_clears_stale_alembic_temp_table() -> None:
+    """A killed batch migration must not trap container restarts in a loop."""
+    with engine.begin() as conn:
+        conn.exec_driver_sql("CREATE TABLE _alembic_tmp_engines (id INTEGER)")
+
+    upgrade_db()
+
+    assert "_alembic_tmp_engines" not in set(inspect(engine).get_table_names())
