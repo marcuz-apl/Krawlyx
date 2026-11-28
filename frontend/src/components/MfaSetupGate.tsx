@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, LogOut, ShieldCheck } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 import { api, type UserOut } from '@/lib/api/client';
 import { authKeys, useLogout } from '@/hooks/useAuth';
@@ -62,7 +63,7 @@ export function MfaSetupGate({ user }: { user: UserOut }) {
         </div>
         <p className="text-sm text-slate-600 dark:text-slate-400">
           Signed in as <span className="font-mono">{user.username}</span>. This workspace requires an
-          authenticator app. Add the account below to Google Authenticator, Authy, 1Password, or a
+          authenticator app. Scan the QR code with Google Authenticator, Authy, 1Password, or a
           similar TOTP app, then enter the 6-digit code it shows.
         </p>
 
@@ -79,31 +80,38 @@ export function MfaSetupGate({ user }: { user: UserOut }) {
 
         {setup.data && (
           <>
-            <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 p-3">
-              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                Setup key (for manual entry)
-              </p>
-              <div className="mt-1.5 flex items-center gap-2">
+            <div className="flex justify-center">
+              <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700">
+                <QRCodeSVG
+                  value={setup.data.otpauth_uri}
+                  size={176}
+                  level="M"
+                  bgColor="#ffffff"
+                  fgColor="#0f172a"
+                  marginSize={0}
+                  title={`Authenticator setup QR code for ${user.username}`}
+                />
+              </div>
+            </div>
+            <p className="text-center text-xs text-slate-600 dark:text-slate-400">
+              Scan with your authenticator app to add this account.
+            </p>
+            <details className="text-xs text-slate-600 dark:text-slate-400">
+              <summary className="cursor-pointer font-semibold">
+                Can't scan? Enter the setup key manually
+              </summary>
+              <div className="mt-1.5 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950">
                 <code className="flex-1 select-all break-all font-mono text-sm tracking-wider text-slate-900 dark:text-white">
                   {setup.data.secret}
                 </code>
                 <button
                   type="button"
                   onClick={copySecret}
-                  className="shrink-0 rounded-md border border-slate-300 dark:border-slate-700 px-2 py-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="shrink-0 rounded-md border border-slate-300 px-2 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                 >
                   {copied ? 'Copied' : 'Copy'}
                 </button>
               </div>
-            </div>
-            <details className="text-xs text-slate-600 dark:text-slate-400">
-              <summary className="cursor-pointer font-semibold">Or add with a setup link</summary>
-              <a
-                href={setup.data.otpauth_uri}
-                className="mt-1.5 block select-all break-all font-mono text-[11px] text-indigo-600 dark:text-indigo-300 hover:underline"
-              >
-                {setup.data.otpauth_uri}
-              </a>
             </details>
 
             <label className="block text-xs font-semibold">
