@@ -34,7 +34,7 @@ uvicorn app.main:app --port 4040 --reload
 ```
 
 - API: `http://localhost:4040`
-- Static SPA served at `/` in production; use Vite dev server (`npm run dev`) for frontend work (proxies `/api` → `:4040` on port `:4039`).
+- Static SPA served at `/` in production; use Vite dev server (`npm run dev`) for frontend work (proxies `/api` → `:4040` on port `:4179`).
 
 ## 4. Basic usage flow
 
@@ -60,7 +60,27 @@ uvicorn app.main:app --port 4040 --reload
 
 When `SSRF_ALLOW_LIST` is non-empty, **only** listed hosts pass (suffix match, case-insensitive). Empty list = standard block-by-default.
 
-## 6. Testing
+## 6. Account security (password & MFA)
+
+Every signed-in account (Admin and Runner alike) manages its own credentials from **header → Security**:
+
+- **Password** — change with current + new password. Admins never see user passwords.
+- **MFA** — enroll an authenticator app by scanning the QR code (TOTP, RFC 6238; 6 digits, 30 s). A manual setup key is available under the QR for apps that prefer it.
+- **Disable MFA** — requires your password plus a current authenticator code. Refused while an admin has enforcement on your account; the admin must clear the requirement first.
+
+Administrators enforce and recover MFA from **Admin Panel → Users**:
+
+| Action | Where | Notes |
+|---|---|---|
+| Enforce MFA | Users row → **Enforce MFA** | Account must enroll at next sign-in; clearing while pending uses **Clear Requirement**. |
+| Reset MFA | Users row → **Reset MFA** | Requires your own admin password. Admin → Runner, SuperAdmin → Admin. Self-reset refused. |
+| Lost device (any account) | Server shell | `cd backend` then `python ./scripts/reset_mfa.py --username <name>`. Scripts self-hand-off to `backend/.venv`. |
+| Lost admin password | Server shell | `cd backend` then `python ./scripts/reset_admin_password.py --username admin`. |
+| Docker | Host shell | `docker compose exec krawlyx python ./scripts/reset_mfa.py --username admin` (same pattern for the password script). |
+
+The same one-off commands are listed for SuperAdmins in **Admin Panel → Users → Operator scripts**. New accounts created in the Users tab require an email, receive a welcome email, and must set their own password at first sign-in.
+
+## 7. Testing
 
 ```bash
 # Fast (no live network, no integration)
@@ -77,7 +97,7 @@ python -m pytest tests/test_scrapy_engine.py -v
 
 No live network in tests: engine adapters use monkeypatched fixtures / canned payloads (`tests/fixtures/`). Scrapy health/template tests monkeypatch `sys.modules["scrapy"]`.
 
-## 7. Workbench Visual Tour
+## 8. Workbench Visual Tour
 
 ### 0. Authentication & Playtrafi Browser Engine Showcase
 ![Authentication & Browser Engine Showcase](assets/ui-0-login.png)
@@ -107,7 +127,7 @@ Directly explore database tables, inspect row schemas, run raw SQL queries, and 
 ![In-App Documentation](assets/ui-6-docs.png)
 Explore interactive architectural documentation, milestone records, Docker/Synology deployment guides, and OpenAPI schema contracts directly from the top navigation.
 
-## 8. Things never committed
+## 9. Things never committed
 
 - `data/krawlyx.db` — SQLite system of record (`.gitignore`: `data/*.db`).
 - `data/logs/app.log` and `data/logs/jobs/*.log` — runtime artifacts (`.gitignore`: `data/logs/`).

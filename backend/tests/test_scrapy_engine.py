@@ -58,6 +58,7 @@ def test_scrapy_env_uses_configured_values(monkeypatch) -> None:
     from app.engines.scrapy_engine import ScrapyEngine
 
     monkeypatch.setattr(get_settings(), "per_domain_interval_s", 1.0)
+    monkeypatch.setattr(get_settings(), "admin_contact_email", "")
 
     engine = ScrapyEngine(
         config={

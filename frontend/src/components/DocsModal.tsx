@@ -63,7 +63,7 @@ curl -s http://localhost:4040/api/health
 # Response: {"status":"ok","app":"Krawlyx","version":"v2.5.0"}`
       },
       tips: [
-        "Backend API runs on port 4040, and the Vite frontend dev server runs on port 4039.",
+        "FastAPI serves the production SPA on port 4040. For frontend work, run `npm run dev` (Vite on port 4179, proxies `/api` to 4040).",
         "In production, FastAPI automatically serves the built frontend single-page application directly on port 4040."
       ]
     }
@@ -276,17 +276,32 @@ curl -O http://localhost:4040/api/datasets/1/export/csv`
     title: "Security, Auth & Compliance",
     icon: ShieldCheck,
     badge: "Admin",
-    description: "Role-based access control, SSRF loopback protections, encrypted engine secrets, and robots.txt compliance.",
+    description: "Account security (password + QR TOTP MFA), role-based access, per-user MFA enforcement, SSRF protections, and encrypted secrets.",
     content: {
-      overview: "Krawlyx is designed for secure deployment in internal networks, NAS environments, and cloud servers.",
+      overview: "Every account manages its own credentials from the header Security dialog: change the password, enroll an authenticator app by QR code, or disable MFA with password + current code. Administrators additionally manage users and per-account MFA policy from Admin Panel → Users.",
       highlights: [
-        { title: "SSRF Protection", desc: "Default-on guard blocking requests to private, loopback, link-local, and cloud metadata IPs." },
-        { title: "Encrypted Secrets", desc: "Engine API keys and proxy credentials are encrypted at rest and never echoed back in API responses." },
-        { title: "Role-Based Access", desc: "Admin users manage engines and users; Runner users execute and inspect crawl jobs." }
+        { title: "Account Security Dialog", desc: "Header → Security. Change password (current + new), enroll TOTP via QR (RFC 6238, 30 s codes), or disable MFA. Disabling requires your password and a live code, and is blocked while an admin enforces MFA on the account." },
+        { title: "Per-User MFA Enforcement", desc: "Users tab shows each account's state — MFA enabled / Enrollment pending / MFA off. Enforce MFA forces enrollment at the account's next sign-in; Clear Requirement lifts a pending requirement." },
+        { title: "Reset MFA (Admin)", desc: "Admins can reset MFA for a lower-privileged account (Admin → Runner, SuperAdmin → Admin) by entering their own admin password. Self-reset is refused; SuperAdmin accounts are recovered only with the operator script." },
+        { title: "Operator Recovery Scripts", desc: "Break-glass password and MFA recovery run from backend/scripts/. Scripts re-execute themselves inside backend/.venv, so no venv activation is required." },
+        { title: "SSRF & Encrypted Secrets", desc: "Default-on guard blocks private, loopback, link-local, and cloud-metadata IPs. Engine secrets are encrypted at rest and never echoed back." },
+        { title: "Role-Based Access", desc: "SuperAdmin (operator), Admin (engines, users, exports), Runner (jobs and datasets). New accounts require an email and must change the seeded password at first sign-in." }
       ],
+      codeBlock: {
+        language: "bash",
+        label: "Operator Recovery (local)",
+        code: `# Lost authenticator device (admin included)
+cd backend
+python ./scripts/reset_mfa.py --username admin
+
+# Lost admin password (prompts for a new one)
+cd backend
+python ./scripts/reset_admin_password.py --username admin`
+      },
       tips: [
-        "Configure admin credentials via `MYKRAWL_ADMIN_USER` and `MYKRAWL_ADMIN_PASSWORD` in your `.env` file.",
-        "Robots.txt compliance is enabled by default to respect remote website crawling policies."
+        "Docker deployment: docker compose exec krawlyx python ./scripts/reset_mfa.py --username admin — same for reset_admin_password.py.",
+        "Resetting MFA does not change the password or drop active sessions; the account re-enrolls at next sign-in.",
+        "Configure the bootstrap admin via MYKRAWL_ADMIN_USER and MYKRAWL_ADMIN_PASSWORD in .env; robots.txt compliance is on by default."
       ]
     }
   }

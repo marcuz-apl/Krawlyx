@@ -217,3 +217,37 @@ krawlyx.example.com {
     }
 }
 ```
+
+## 6. Operator Recovery: Password & MFA (Break-Glass)
+
+Both recovery scripts live in `backend/scripts/`. They re-execute themselves inside `backend/.venv`, so they work whether or not the virtualenv is activated. Run them on the host from the repository root.
+
+### Local / bare metal
+
+```bash
+cd backend
+
+# Reset an account's MFA (lost phone; admin accounts included)
+python ./scripts/reset_mfa.py --username admin
+
+# Set a new password (prompts interactively)
+python ./scripts/reset_admin_password.py --username admin
+```
+
+### Docker
+
+```bash
+# MFA reset inside the running container
+docker compose exec krawlyx python ./scripts/reset_mfa.py --username admin
+
+# Interactive password reset
+docker compose exec -it krawlyx python ./scripts/reset_admin_password.py --username admin
+```
+
+Notes:
+
+- The scripts write to the SQLite database under `data/` (the mounted volume), so changes persist across container restarts. No rebuild is required.
+- Resetting MFA clears the TOTP secret and enrollment; the account signs in with its password and re-enrolls. Active sessions are not dropped.
+- Resetting a password sets `must_change_password`, forcing a new password at the next sign-in.
+- The same commands are shown to SuperAdmins in **Admin Panel → Users → Operator scripts**, including the Docker variants.
+- Prefer the in-app **Reset MFA** action (Admin Panel → Users) for non-SuperAdmin accounts — it uses the acting admin's own password and preserves the role hierarchy.
