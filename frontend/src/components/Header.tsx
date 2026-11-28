@@ -238,10 +238,9 @@ export function Header() {
         isOpen={showDocsModal}
         onClose={() => setShowDocsModal(false)}
       />
-      <SecurityDialog
-        isOpen={showSecurityDialog}
-        onClose={() => setShowSecurityDialog(false)}
-      />
+      {showSecurityDialog && (
+        <SecurityDialog isOpen onClose={() => setShowSecurityDialog(false)} />
+      )}
     </>
   );
 }
