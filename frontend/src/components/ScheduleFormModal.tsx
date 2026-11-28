@@ -371,7 +371,7 @@ export function ScheduleFormModal({ schedule, isOpen = true, onClose, onToggleOp
                   <button
                     type="button"
                     onClick={() => setShowCheatSheet(!showCheatSheet)}
-                    className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-semibold"
+                    className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-semibold"
                   >
                     <HelpCircle className="w-3 h-3" />
                     {showCheatSheet ? 'Hide Field Reference' : '5-Field Guide'}
@@ -380,7 +380,7 @@ export function ScheduleFormModal({ schedule, isOpen = true, onClose, onToggleOp
 
                 {/* Quick Presets */}
                 <div className="space-y-1">
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold block">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold block">
                     Quick Presets:
                   </span>
                   <div className="flex flex-wrap gap-1.5">
@@ -389,7 +389,7 @@ export function ScheduleFormModal({ schedule, isOpen = true, onClose, onToggleOp
                         key={preset.cron}
                         type="button"
                         onClick={() => setCron(preset.cron)}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border ${
+                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
                           cron === preset.cron
                             ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
                             : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 border-slate-200 dark:border-slate-700'
@@ -414,17 +414,17 @@ export function ScheduleFormModal({ schedule, isOpen = true, onClose, onToggleOp
                 {/* Live Human Translation Pill */}
                 <div className="flex items-center gap-2 p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs shadow-sm">
                   <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                  <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px]">Execution Plan:</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium text-xs">Execution Plan:</span>
                   <strong className="text-slate-900 dark:text-white font-bold text-xs">{humanSummary}</strong>
                 </div>
 
                 {/* 5-Field Breakdown Guide */}
                 {showCheatSheet && (
                   <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs space-y-2 animate-in fade-in">
-                    <div className="font-bold text-slate-800 dark:text-slate-200 text-[11px]">
+                    <div className="font-bold text-slate-800 dark:text-slate-200 text-xs">
                       5-Field Format: <code className="text-indigo-600 dark:text-indigo-400">minute hour day month day-of-week</code>
                     </div>
-                    <div className="grid grid-cols-5 gap-1.5 text-center font-mono text-[10px]">
+                    <div className="grid grid-cols-5 gap-1.5 text-center font-mono text-[0.7rem]">
                       <div className="p-1.5 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                         <div className="font-bold text-indigo-600 dark:text-indigo-400">{cronParts.min}</div>
                         <div className="text-[9px] text-slate-400">Min (0-59)</div>
@@ -462,12 +462,12 @@ export function ScheduleFormModal({ schedule, isOpen = true, onClose, onToggleOp
                     />
                     <span>⏱️ Multi-Worker Time Gap (Rate-Limit Guard)</span>
                   </label>
-                  <span className="rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border dark:border-emerald-800/40 font-semibold px-2 py-0.5 text-[10px]">
+                  <span className="rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border dark:border-emerald-800/40 font-semibold px-2 py-0.5 text-[0.7rem]">
                     Rate Guard Active
                   </span>
                 </div>
 
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Randomized delays between worker sessions to avoid rate limits on recurring runs.
                 </p>
 
@@ -505,7 +505,7 @@ export function ScheduleFormModal({ schedule, isOpen = true, onClose, onToggleOp
                     </div>
 
                     {urlLinesCount > 1 && (
-                      <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] font-mono text-slate-600 dark:text-slate-400">
+                      <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-600 dark:text-slate-400">
                         Estimated Run Span for {urlLinesCount} Targets: ~{Math.round((urlLinesCount - 1) * staggerMinMinutes * 10) / 10}m – {Math.round((urlLinesCount - 1) * staggerMaxMinutes * 10) / 10}m
                       </div>
                     )}

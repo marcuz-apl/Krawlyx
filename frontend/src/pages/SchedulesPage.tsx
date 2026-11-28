@@ -167,7 +167,7 @@ export function SchedulesPage() {
                   <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">
                     <div>{s.name}</div>
                     {s.notes && (
-                      <div className="text-[11px] text-slate-400 font-normal truncate max-w-xs">
+                      <div className="text-xs text-slate-400 font-normal truncate max-w-xs">
                         {s.notes}
                       </div>
                     )}
@@ -176,7 +176,7 @@ export function SchedulesPage() {
                     <div className="font-semibold text-slate-800 dark:text-slate-200">
                       {humanizeCron(s.cron, s.timezone)}
                     </div>
-                    <div className="font-mono text-[11px] text-slate-400">
+                    <div className="font-mono text-xs text-slate-400">
                       {s.cron} · <span className="font-bold text-slate-500 dark:text-slate-400">{s.timezone}</span>
                     </div>
                   </td>
@@ -272,7 +272,7 @@ export function SchedulesPage() {
               <p>
                 Are you sure you want to permanently delete <strong className="text-slate-900 dark:text-white">"{scheduleToDelete.name}"</strong>?
               </p>
-              <ul className="list-disc list-inside text-[11px] text-slate-500 dark:text-slate-400 space-y-1 pt-1 border-t border-rose-200/50 dark:border-rose-900/30">
+              <ul className="list-disc list-inside text-xs text-slate-500 dark:text-slate-400 space-y-1 pt-1 border-t border-rose-200/50 dark:border-rose-900/30">
                 <li>Automated cron triggers (<code className="font-mono text-indigo-600 dark:text-indigo-400">{scheduleToDelete.cron}</code>) will stop immediately.</li>
                 <li>Past scrape results and saved datasets remain safe and unaffected.</li>
               </ul>

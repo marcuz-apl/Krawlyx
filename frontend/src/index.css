@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  /* Global type scale: a slightly larger root so text-xs/text-sm stay legible. */
+  html {
+    font-size: 18px;
+  }
+
   body {
     @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased transition-colors duration-150;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;

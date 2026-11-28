@@ -252,7 +252,7 @@ export function DatasetDetailPage() {
                       <li key={res.dataset_id} className="py-2 flex items-center justify-between">
                         <div>
                           <span className="font-semibold text-slate-900 dark:text-white">{res.name}</span>
-                          <span className="ml-2 rounded bg-emerald-200/80 dark:bg-emerald-900/60 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:text-emerald-200">
+                          <span className="ml-2 rounded bg-emerald-200/80 dark:bg-emerald-900/60 px-2 py-0.5 text-[0.7rem] font-bold text-emerald-800 dark:text-emerald-200">
                             {res.row_count} rows
                           </span>
                         </div>
@@ -307,14 +307,14 @@ export function DatasetDetailPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
                     Preview of Resulting Datasets ({Object.keys(splitPreview).length} new datasets):
                   </label>
                   <div className="max-h-48 overflow-auto rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 p-2 text-xs divide-y divide-slate-200/60">
                     {Object.entries(splitPreview).map(([grp, count]) => (
                       <div key={grp} className="py-1.5 flex items-center justify-between">
                         <span className="font-mono text-slate-800 dark:text-slate-200 font-semibold">{data.name} - {grp}</span>
-                        <span className="rounded bg-purple-100 dark:bg-purple-950/60 px-2 py-0.5 text-[10px] font-bold text-purple-800 dark:text-purple-300">
+                        <span className="rounded bg-purple-100 dark:bg-purple-950/60 px-2 py-0.5 text-[0.7rem] font-bold text-purple-800 dark:text-purple-300">
                           {count} rows
                         </span>
                       </div>
@@ -353,7 +353,7 @@ export function DatasetDetailPage() {
             <div className="flex items-center gap-2">
               <Terminal className="h-4 w-4 text-emerald-400" />
               <h3 className="text-sm font-semibold text-white">Universal SQL Query & Transform Console</h3>
-              <span className="text-[11px] text-slate-400 font-mono">(Table name: <code>dataset</code>)</span>
+              <span className="text-xs text-slate-400 font-mono">(Table name: <code>dataset</code>)</span>
             </div>
             <button
               onClick={() => setSqlConsoleOpen(false)}
@@ -364,7 +364,7 @@ export function DatasetDetailPage() {
           </div>
 
           <div>
-            <span className="text-[11px] font-semibold text-slate-300 block mb-1.5">
+            <span className="text-xs font-semibold text-slate-300 block mb-1.5">
               Available Dataset Columns (click to copy into query):
             </span>
             <div className="flex flex-wrap gap-1.5">
@@ -373,7 +373,7 @@ export function DatasetDetailPage() {
                   key={col}
                   type="button"
                   onClick={() => setSqlQuery((q) => `${q} "${col}"`)}
-                  className="rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2 py-0.5 text-[11px] font-mono text-emerald-300 transition-colors"
+                  className="rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2 py-0.5 text-xs font-mono text-emerald-300 transition-colors"
                   title={`Insert "${col}"`}
                 >
                   {col}
@@ -383,10 +383,10 @@ export function DatasetDetailPage() {
           </div>
 
           <div>
-            <span className="text-[11px] font-semibold text-slate-300 block mb-1.5">
+            <span className="text-xs font-semibold text-slate-300 block mb-1.5">
               ⚡ Quick SQL Templates:
             </span>
-            <div className="flex flex-wrap gap-1.5 text-[11px]">
+            <div className="flex flex-wrap gap-1.5 text-xs">
               <button
                 type="button"
                 onClick={() =>
@@ -488,7 +488,7 @@ export function DatasetDetailPage() {
               <h4 className="text-xs font-semibold text-slate-300 mb-2">
                 Query Result Preview ({queryResult.rows.length} rows):
               </h4>
-              <div className="max-h-60 overflow-auto rounded border border-slate-800 bg-slate-950 text-[11px]">
+              <div className="max-h-60 overflow-auto rounded border border-slate-800 bg-slate-950 text-xs">
                 <table className="w-full text-left font-mono">
                   <thead className="border-b border-slate-800 bg-slate-900 text-slate-400">
                     <tr>

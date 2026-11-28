@@ -438,7 +438,7 @@ export function DatasetsPage() {
                         {d.name}
                       </Link>
                     </div>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 dark:bg-brand-950/60 px-2.5 py-0.5 text-[11px] font-semibold text-brand-700 dark:text-brand-300 border border-brand-200/60 dark:border-brand-900/60 flex-shrink-0">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 dark:bg-brand-950/60 px-2.5 py-0.5 text-xs font-semibold text-brand-700 dark:text-brand-300 border border-brand-200/60 dark:border-brand-900/60 flex-shrink-0">
                       <Layers className="h-3 w-3" />
                       {d.row_count} rows
                     </span>
@@ -451,13 +451,13 @@ export function DatasetsPage() {
                       {d.columns.slice(0, 5).map((col) => (
                         <span
                           key={col}
-                          className="rounded border border-slate-200/80 dark:border-slate-700/80 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-mono font-medium text-slate-700 dark:text-slate-200"
+                          className="rounded border border-slate-200/80 dark:border-slate-700/80 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[0.7rem] font-mono font-medium text-slate-700 dark:text-slate-200"
                         >
                           {col}
                         </span>
                       ))}
                       {d.columns.length > 5 && (
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono font-medium">
+                        <span className="text-[0.7rem] text-slate-500 dark:text-slate-400 font-mono font-medium">
                           +{d.columns.length - 5} more
                         </span>
                       )}
@@ -466,7 +466,7 @@ export function DatasetsPage() {
                 </div>
 
                 <div className="mt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3 text-xs text-slate-500 dark:text-slate-400">
-                  <span className="flex items-center gap-1 text-[11px]">
+                  <span className="flex items-center gap-1 text-xs">
                     <Calendar className="h-3 w-3" />
                     {new Date(d.created_at).toLocaleDateString()}
                   </span>
@@ -495,7 +495,7 @@ export function DatasetsPage() {
                     <a
                       href={api.datasets.exportCsvUrl(d.id)}
                       download
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors shadow-xs"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors shadow-xs"
                       title="Export CSV"
                     >
                       <Download className="h-3 w-3" /> CSV

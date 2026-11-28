@@ -334,11 +334,11 @@ export function DocsModal({ isOpen, onClose }: DocsModalProps) {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-sm text-slate-900 dark:text-white">Krawlyx Documentation</span>
-                <span className="rounded-full bg-brand-100 dark:bg-brand-950/60 px-2 py-0.5 text-[10px] font-semibold text-brand-700 dark:text-brand-300">
+                <span className="rounded-full bg-brand-100 dark:bg-brand-950/60 px-2 py-0.5 text-[0.7rem] font-semibold text-brand-700 dark:text-brand-300">
                   Guide
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">Developer reference & workbench manual</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Developer reference & workbench manual</p>
             </div>
           </div>
 
@@ -382,7 +382,7 @@ export function DocsModal({ isOpen, onClose }: DocsModalProps) {
                   const categories = Array.from(new Set(filteredSections.map((s) => s.category)));
                   return categories.map((cat) => (
                     <div key={cat} className="space-y-1">
-                      <div className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                      <div className="px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                         {cat}
                       </div>
                       {filteredSections
@@ -474,13 +474,13 @@ export function DocsModal({ isOpen, onClose }: DocsModalProps) {
                 {activeSection.content.codeBlock.label && (
                   <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
                     <span>{activeSection.content.codeBlock.label}</span>
-                    <span className="font-mono text-[11px] uppercase">{activeSection.content.codeBlock.language}</span>
+                    <span className="font-mono text-xs uppercase">{activeSection.content.codeBlock.language}</span>
                   </div>
                 )}
                 <div className="relative rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/90 dark:bg-slate-950/60 p-4 font-mono text-xs text-slate-800 dark:text-slate-200 shadow-inner">
                   <button
                     onClick={() => copyToClipboard(activeSection.content.codeBlock!.code)}
-                    className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 text-[11px] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                    className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
                     title="Copy code"
                   >
                     {copiedCode ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
@@ -545,7 +545,7 @@ export function DocsModal({ isOpen, onClose }: DocsModalProps) {
 
         {/* Footer Navigation bar */}
         <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50/80 px-5 py-3 dark:border-slate-800 dark:bg-slate-900/80">
-          <div className="text-[11px] text-slate-500 dark:text-slate-400">
+          <div className="text-xs text-slate-500 dark:text-slate-400">
             Topic {DOC_SECTIONS.findIndex((s) => s.id === activeId) + 1} of {DOC_SECTIONS.length}
           </div>
           <div className="flex items-center gap-2">

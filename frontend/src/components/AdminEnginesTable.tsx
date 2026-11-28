@@ -138,7 +138,7 @@ export function AdminEnginesTable() {
                       {e.name}
                     </span>
                     {e.has_secret && (
-                      <span className="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">
+                      <span className="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[0.7rem] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">
                         secret
                       </span>
                     )}

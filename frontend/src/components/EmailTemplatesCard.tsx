@@ -143,7 +143,7 @@ export function EmailTemplatesCard() {
               <legend className="px-1 text-xs font-bold text-slate-800 dark:text-slate-200">
                 {meta.title}
               </legend>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">{meta.hint}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{meta.hint}</p>
               <label className="mt-2 block text-xs font-semibold">
                 <span className="text-slate-700 dark:text-slate-300">Subject</span>
                 <input

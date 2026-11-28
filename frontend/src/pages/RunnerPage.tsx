@@ -253,20 +253,20 @@ export function RunnerPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200">Custom Dataset Fields</h4>
-                  <p className="text-[11px] text-slate-500">Define custom column names and optional CSS selectors</p>
+                  <p className="text-xs text-slate-500">Define custom column names and optional CSS selectors</p>
                 </div>
                 <button
                   type="button"
                   onClick={addField}
                   disabled={customFields.length >= 20}
-                  className="rounded-md bg-brand-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+                  className="rounded-md bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                 >
                   + Add Field ({customFields.length}/20)
                 </button>
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                <label className="block text-xs font-medium text-slate-600 mb-1">
                   Repeating Card / Item Selector (Optional)
                 </label>
                 <input
@@ -452,12 +452,12 @@ export function RunnerPage() {
                 />
                 <span>⏱️ Multi-Worker Time Gap (Rate-Limit Guard)</span>
               </label>
-              <span className="rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border dark:border-emerald-800/40 font-semibold px-2 py-0.5 text-[10px]">
+              <span className="rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border dark:border-emerald-800/40 font-semibold px-2 py-0.5 text-[0.7rem]">
                 Recommended for Multi-Page
               </span>
             </div>
 
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Introduces a randomized delay between workers so paginated requests don't hit target sites at the same time and trigger rate limits. (Page 1 starts immediately).
             </p>
 
@@ -496,14 +496,14 @@ export function RunnerPage() {
 
                 {/* Session Timeline Schedule Preview */}
                 {urlLinesCount > 1 && (
-                  <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] space-y-1.5">
+                  <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
                     <div className="flex items-center justify-between font-semibold text-slate-800 dark:text-slate-200">
                       <span>⏱️ Multi-Worker Session Timeline Preview ({urlLinesCount} Sessions):</span>
                       <span className="text-indigo-600 dark:text-indigo-400 font-mono">
                         Estimated Span: ~{Math.round((urlLinesCount - 1) * staggerMinMinutes * 10) / 10}m – {Math.round((urlLinesCount - 1) * staggerMaxMinutes * 10) / 10}m
                       </span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5 pt-1 text-[11px] font-mono text-slate-600 dark:text-slate-400">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5 pt-1 text-xs font-mono text-slate-600 dark:text-slate-400">
                       <div className="px-2 py-1 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                         <strong>Session 1:</strong> Immediate (0s)
                       </div>
@@ -545,7 +545,7 @@ export function RunnerPage() {
                   Export File Name (Optional)
                 </span>
                 {exportFilename.trim() && (
-                  <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 truncate max-w-[180px]">
+                  <span className="text-xs font-mono text-slate-400 dark:text-slate-500 truncate max-w-[180px]">
                     {exportFilename.trim().replace(/[^a-zA-Z0-9_-]/g, '-')}_...
                   </span>
                 )}
@@ -595,7 +595,7 @@ export function RunnerPage() {
                 {selectedEngine.type === 'patroy' ? '⚡ ' : selectedEngine.type === 'playtrafi' ? '🛡️ ' : '🚀 '}
                 {selectedEngine.name}
               </strong>
-              <span className="rounded bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 font-mono text-[11px] font-bold text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700">
+              <span className="rounded bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 font-mono text-xs font-bold text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700">
                 type: {selectedEngine.type}
               </span>
             </span>

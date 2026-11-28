@@ -212,14 +212,14 @@ function CreateForm({ onDone }: { onDone: () => void }) {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Path</span>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-slate-400">Quick pick:</span>
+                  <span className="text-[0.7rem] text-slate-400">Quick pick:</span>
                   <button
                     type="button"
                     onClick={() => {
                       setPath('Downloads');
                       if (!name) setName('Downloads');
                     }}
-                    className="inline-flex items-center gap-1 rounded bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-700 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-950 hover:text-indigo-600 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1 rounded bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 text-[0.7rem] font-medium text-slate-700 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-950 hover:text-indigo-600 transition-colors cursor-pointer"
                   >
                     📁 Downloads
                   </button>
@@ -229,7 +229,7 @@ function CreateForm({ onDone }: { onDone: () => void }) {
                       setPath('Documents');
                       if (!name) setName('Documents');
                     }}
-                    className="inline-flex items-center gap-1 rounded bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-700 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-950 hover:text-indigo-600 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1 rounded bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 text-[0.7rem] font-medium text-slate-700 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-950 hover:text-indigo-600 transition-colors cursor-pointer"
                   >
                     📄 Documents
                   </button>
@@ -242,8 +242,8 @@ function CreateForm({ onDone }: { onDone: () => void }) {
                 placeholder="Downloads, Documents, C:\Users\name\Downloads, or E:\projects\storage"
                 className="block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2.5 py-1.5 font-mono text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                You can use <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-[10px]">Downloads</code>, <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-[10px]">Documents</code>, Windows drive paths (e.g. <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-[10px]">E:\projects\storage</code>), or Linux paths.
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                You can use <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-[0.7rem]">Downloads</code>, <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-[0.7rem]">Documents</code>, Windows drive paths (e.g. <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-[0.7rem]">E:\projects\storage</code>), or Linux paths.
               </p>
             </div>
             <label className="text-xs font-semibold">

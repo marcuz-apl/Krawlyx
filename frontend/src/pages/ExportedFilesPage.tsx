@@ -154,7 +154,7 @@ export function ExportedFilesPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-50/80 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider text-xs border-b border-slate-200 dark:border-slate-800">
                 <tr>
                   <th className="px-4 py-3.5">Filename</th>
                   <th className="px-4 py-3.5">Format</th>
@@ -181,7 +181,7 @@ export function ExportedFilesPage() {
                         {f.job_id && (
                           <Link
                             to={`/jobs/${f.job_id}/results`}
-                            className="rounded bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-900/60 px-1.5 py-0.5 text-[10px] font-bold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition"
+                            className="rounded bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-900/60 px-1.5 py-0.5 text-[0.7rem] font-bold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition"
                             title={`View Job #${f.job_id} Results`}
                           >
                             Job #{f.job_id}
@@ -191,7 +191,7 @@ export function ExportedFilesPage() {
                     </td>
 
                     <td className="px-4 py-3">
-                      <span className="inline-flex uppercase font-bold text-[10px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                      <span className="inline-flex uppercase font-bold text-[0.7rem] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                         {f.format}
                       </span>
                     </td>

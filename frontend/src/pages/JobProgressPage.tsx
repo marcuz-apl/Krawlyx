@@ -84,7 +84,7 @@ export function JobProgressPage() {
               {data.engine_type === 'patroy' ? '⚡ ' : data.engine_type === 'playtrafi' ? '🛡️ ' : data.engine_type === 'scrapy' ? '🚀 ' : '⚙️ '}
               <span>Engine: {data.engine_name || `Engine #${data.engine_id}`}</span>
               {data.engine_type && (
-                <span className="rounded bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-700 dark:text-slate-200">
+                <span className="rounded bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 font-mono text-[0.7rem] font-bold text-slate-700 dark:text-slate-200">
                   type: {data.engine_type}
                 </span>
               )}
@@ -169,7 +169,7 @@ export function JobProgressPage() {
                 <span className="text-xs font-bold uppercase tracking-wider text-indigo-900 dark:text-indigo-300">
                   Staggered Multi-Worker Time Gap Schedule
                 </span>
-                <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800">
+                <span className="flex items-center gap-1 text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800">
                   <ShieldCheck className="w-3 h-3" />
                   Rate-Limit Protected
                 </span>
@@ -183,13 +183,13 @@ export function JobProgressPage() {
 
             <div className="flex items-center gap-3 text-xs border-t sm:border-t-0 sm:border-l border-indigo-200 dark:border-indigo-800/80 pt-2 sm:pt-0 sm:pl-4">
               <div>
-                <span className="text-slate-500 dark:text-slate-400 text-[11px] block">Session Progress</span>
+                <span className="text-slate-500 dark:text-slate-400 text-xs block">Session Progress</span>
                 <span className="font-bold text-slate-900 dark:text-white">
                   {doneTargets} done · {fetchingTargets} active · {waitingTargets} waiting
                 </span>
               </div>
               <div className="text-right">
-                <span className="text-slate-500 dark:text-slate-400 text-[11px] block">Total Sessions</span>
+                <span className="text-slate-500 dark:text-slate-400 text-xs block">Total Sessions</span>
                 <span className="font-bold text-indigo-600 dark:text-indigo-400 font-mono">{totalTargets} workers</span>
               </div>
             </div>
@@ -225,7 +225,7 @@ export function JobProgressPage() {
             Worker Session Targets ({data.targets.length})
           </h2>
           {staggerEnabled && (
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
               Each session represents one paginated worker batch
             </span>
           )}

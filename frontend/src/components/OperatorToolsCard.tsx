@@ -12,7 +12,7 @@ const OTHER_COMMANDS = [
 ];
 
 const commandClass =
-  'mt-1 block select-all whitespace-pre-wrap break-all rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-mono text-[11px] text-slate-800 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200';
+  'mt-1 block select-all whitespace-pre-wrap break-all rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-mono text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200';
 
 export function OperatorToolsCard() {
   return (

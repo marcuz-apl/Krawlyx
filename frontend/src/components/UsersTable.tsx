@@ -141,12 +141,12 @@ export function UsersTable() {
                     )}
                     <span>{u.username}</span>
                     {u.username === me?.username && (
-                      <span className="px-1.5 py-0.2 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono">
+                      <span className="px-1.5 py-0.2 rounded text-[0.7rem] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono">
                         (You)
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
+                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">
                     {u.email || '—'}
                   </td>
                   <td className="px-4 py-3">
@@ -185,7 +185,7 @@ export function UsersTable() {
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
+                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">
                     {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}
                   </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">

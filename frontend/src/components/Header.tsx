@@ -142,7 +142,7 @@ export function Header() {
                 <span className="font-extrabold text-base tracking-tight bg-gradient-to-r from-brand-600 via-indigo-600 to-sky-500 bg-clip-text text-transparent dark:from-brand-400 dark:via-indigo-300 dark:to-sky-300">
                   Krawlyx
                 </span>
-                <span title={`Build: ${rawVersion}`} className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 font-mono">
+                <span title={`Build: ${rawVersion}`} className="text-[0.7rem] font-semibold text-slate-400 dark:text-slate-500 font-mono">
                   {dynamicVersion}
                 </span>
               </div>

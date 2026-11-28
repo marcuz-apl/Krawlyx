@@ -259,7 +259,7 @@ export function JobHistoryList({ jobs }: Props) {
                       {j.engine_type === 'patroy' ? '⚡ ' : j.engine_type === 'playtrafi' ? '🛡️ ' : j.engine_type === 'scrapy' ? '🚀 ' : '⚙️ '}
                       <span>{shortEngineName(j.engine_name, j.engine_type)}</span>
                       {j.engine_type && (
-                        <span className="rounded bg-slate-200/90 dark:bg-slate-700 px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-700 dark:text-slate-200">
+                        <span className="rounded bg-slate-200/90 dark:bg-slate-700 px-1.5 py-0.5 font-mono text-[0.7rem] font-bold text-slate-700 dark:text-slate-200">
                           {j.engine_type}
                         </span>
                       )}

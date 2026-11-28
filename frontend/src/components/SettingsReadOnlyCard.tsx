@@ -99,7 +99,7 @@ export function SettingsReadOnlyCard() {
             <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
             <div className="space-y-0.5">
               <span className="font-bold">{maintenanceMsg.message}</span>
-              <div className="text-slate-600 font-mono text-[11px]">
+              <div className="text-slate-600 font-mono text-xs">
                 Storage Size: {maintenanceMsg.before} → <strong>{maintenanceMsg.after}</strong>
                 {maintenanceMsg.freed > 0 && ` (${(maintenanceMsg.freed / 1024).toFixed(1)} KB reclaimed)`}
               </div>
@@ -110,34 +110,34 @@ export function SettingsReadOnlyCard() {
         {dbStats && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
             <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50 p-4">
-              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block">Database File Size</span>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block">Database File Size</span>
               <span className="text-base font-bold text-slate-900 dark:text-white font-mono">{dbStats.db_size_formatted}</span>
-              <span className="text-[10px] text-slate-400 block truncate" title={dbStats.db_path}>
+              <span className="text-[0.7rem] text-slate-400 block truncate" title={dbStats.db_path}>
                 {dbStats.db_path}
               </span>
             </div>
             <div className="rounded-lg border border-slate-100 bg-slate-50 dark:bg-slate-800/50 p-3">
-              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block">WAL Journal Size</span>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block">WAL Journal Size</span>
               <span className="text-base font-bold text-slate-900 dark:text-white font-mono">{dbStats.wal_size_formatted}</span>
-              <span className="text-[10px] text-emerald-600 font-semibold block">
+              <span className="text-[0.7rem] text-emerald-600 font-semibold block">
                 Mode: {dbStats.journal_mode.toUpperCase()}
               </span>
             </div>
             <div className="rounded-lg border border-slate-100 bg-slate-50 dark:bg-slate-800/50 p-3">
-              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block">Page Allocation</span>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block">Page Allocation</span>
               <span className="text-base font-bold text-slate-900 dark:text-white font-mono">
                 {dbStats.page_count} pages
               </span>
-              <span className="text-[10px] text-slate-400 block">
+              <span className="text-[0.7rem] text-slate-400 block">
                 {dbStats.page_size} bytes / page
               </span>
             </div>
             <div className="rounded-lg border border-slate-100 bg-slate-50 dark:bg-slate-800/50 p-3">
-              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block">Total Stored Rows</span>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block">Total Stored Rows</span>
               <span className="text-base font-bold text-brand-600 font-mono">
                 {dbStats.total_dataset_rows} dataset rows
               </span>
-              <span className="text-[10px] text-slate-400 block">
+              <span className="text-[0.7rem] text-slate-400 block">
                 {dbStats.total_datasets} datasets · {dbStats.total_jobs} jobs
               </span>
             </div>
@@ -384,7 +384,7 @@ function EditSettingsModal({
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white"
                 required
               />
-              <span className="text-[11px] text-slate-400 block mt-1">
+              <span className="text-xs text-slate-400 block mt-1">
                 MYKRAWL_MAX_CONCURRENT_JOBS
               </span>
             </div>
@@ -402,7 +402,7 @@ function EditSettingsModal({
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white"
                 required
               />
-              <span className="text-[11px] text-slate-400 block mt-1">
+              <span className="text-xs text-slate-400 block mt-1">
                 MYKRAWL_MAX_PARALLEL_TARGETS_PER_JOB
               </span>
             </div>
@@ -420,7 +420,7 @@ function EditSettingsModal({
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white"
                 required
               />
-              <span className="text-[11px] text-slate-400 block mt-1">
+              <span className="text-xs text-slate-400 block mt-1">
                 MYKRAWL_DEFAULT_SPLIT_SIZE_MB
               </span>
             </div>
@@ -439,7 +439,7 @@ function EditSettingsModal({
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white"
                 required
               />
-              <span className="text-[11px] text-slate-400 block mt-1">
+              <span className="text-xs text-slate-400 block mt-1">
                 MYKRAWL_PER_DOMAIN_INTERVAL_S
               </span>
             </div>
@@ -457,7 +457,7 @@ function EditSettingsModal({
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white"
                 required
               />
-              <span className="text-[11px] text-slate-400 block mt-1">
+              <span className="text-xs text-slate-400 block mt-1">
                 MYKRAWL_CONTENT_SIZE_CAP_BYTES
               </span>
             </div>
@@ -473,7 +473,7 @@ function EditSettingsModal({
                 placeholder="admin@example.com"
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs text-slate-900 dark:text-white"
               />
-              <span className="text-[11px] text-slate-400 block mt-1">
+              <span className="text-xs text-slate-400 block mt-1">
                 MYKRAWL_ADMIN_CONTACT_EMAIL
               </span>
             </div>
@@ -491,7 +491,7 @@ function EditSettingsModal({
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
                   Enforce Robots.txt Compliance (RFC 9309)
                 </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
+                <span className="text-xs text-slate-500 dark:text-slate-400 block">
                   Respects crawl-delay directives and disallow rules per standard crawler etiquette.
                 </span>
               </div>
@@ -508,7 +508,7 @@ function EditSettingsModal({
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
                   Enforce SSRF Security Boundary
                 </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
+                <span className="text-xs text-slate-500 dark:text-slate-400 block">
                   Blocks crawlers from connecting to internal private networks, localhost, and cloud metadata.
                 </span>
               </div>
@@ -568,7 +568,7 @@ function SettingTipCard({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-slate-900 dark:text-white">{label}</span>
-          <code className="text-[10px] font-mono rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-slate-500 dark:text-slate-400">
+          <code className="text-[0.7rem] font-mono rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-slate-500 dark:text-slate-400">
             {envVar}
           </code>
         </div>
@@ -584,7 +584,7 @@ function SettingTipCard({
             <strong className="text-slate-900 dark:text-slate-100">{reason}</strong> — {tip}
           </span>
         </div>
-        <div className="flex items-start gap-1.5 pt-1 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-200/60 dark:border-slate-800/60">
+        <div className="flex items-start gap-1.5 pt-1 text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200/60 dark:border-slate-800/60">
           <span className="font-semibold text-indigo-600 dark:text-indigo-400 shrink-0">💡 Tip:</span>
           <span>{howToChange}</span>
         </div>

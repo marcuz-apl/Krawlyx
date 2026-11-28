@@ -118,7 +118,7 @@ export function JobResultsPage() {
                   {jobData.engine_type === 'patroy' ? '⚡ ' : jobData.engine_type === 'playtrafi' ? '🛡️ ' : jobData.engine_type === 'scrapy' ? '🚀 ' : '⚙️ '}
                   <span>Engine: {jobData.engine_name || `Engine #${jobData.engine_id}`}</span>
                   {jobData.engine_type && (
-                    <span className="rounded bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-700 dark:text-slate-200">
+                    <span className="rounded bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 font-mono text-[0.7rem] font-bold text-slate-700 dark:text-slate-200">
                       type: {jobData.engine_type}
                     </span>
                   )}
@@ -291,7 +291,7 @@ export function JobResultsPage() {
             <span>
               Showing raw HTTP responses & status codes for each scraped URL target.
             </span>
-            <span className="font-mono text-[11px]">
+            <span className="font-mono text-xs">
               Page {targetsData.page} of {totalTargetPages} ({targetsData.total} URLs total)
             </span>
           </div>

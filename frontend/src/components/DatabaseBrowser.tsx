@@ -300,27 +300,27 @@ export function DatabaseBrowser() {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mt-5 pt-4 border-t border-slate-200 dark:border-slate-800/80 text-xs">
           <div className="bg-white/90 dark:bg-slate-900/60 rounded-xl p-2.5 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <span className="text-slate-500 dark:text-slate-400 text-[11px] block">Database Size</span>
+            <span className="text-slate-500 dark:text-slate-400 text-xs block">Database Size</span>
             <span className="font-bold text-sm text-indigo-700 dark:text-indigo-300">{stats?.file_size_formatted || '0.00 MB'}</span>
           </div>
           <div className="bg-white/90 dark:bg-slate-900/60 rounded-xl p-2.5 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <span className="text-slate-500 dark:text-slate-400 text-[11px] block">WAL Journal</span>
+            <span className="text-slate-500 dark:text-slate-400 text-xs block">WAL Journal</span>
             <span className="font-bold text-sm text-blue-700 dark:text-blue-300">{stats?.wal_size_formatted || '0.00 MB'}</span>
           </div>
           <div className="bg-white/90 dark:bg-slate-900/60 rounded-xl p-2.5 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <span className="text-slate-500 dark:text-slate-400 text-[11px] block">Total Tables</span>
+            <span className="text-slate-500 dark:text-slate-400 text-xs block">Total Tables</span>
             <span className="font-bold text-sm text-slate-800 dark:text-slate-200">{tables.length} tables</span>
           </div>
           <div className="bg-white/90 dark:bg-slate-900/60 rounded-xl p-2.5 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <span className="text-slate-500 dark:text-slate-400 text-[11px] block">Page Count</span>
+            <span className="text-slate-500 dark:text-slate-400 text-xs block">Page Count</span>
             <span className="font-bold text-sm text-slate-800 dark:text-slate-200">{stats?.page_count?.toLocaleString() || 0}</span>
           </div>
           <div className="bg-white/90 dark:bg-slate-900/60 rounded-xl p-2.5 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <span className="text-slate-500 dark:text-slate-400 text-[11px] block">Page Size</span>
+            <span className="text-slate-500 dark:text-slate-400 text-xs block">Page Size</span>
             <span className="font-bold text-sm text-slate-800 dark:text-slate-200">{stats?.page_size || 4096} B</span>
           </div>
           <div className="bg-white/90 dark:bg-slate-900/60 rounded-xl p-2.5 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <span className="text-slate-500 dark:text-slate-400 text-[11px] block">Integrity</span>
+            <span className="text-slate-500 dark:text-slate-400 text-xs block">Integrity</span>
             <span className={`font-bold text-sm ${stats?.integrity_ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
               {stats?.integrity_status || 'ok'}
             </span>
@@ -396,7 +396,7 @@ export function DatabaseBrowser() {
               >
                 <Table className="w-3.5 h-3.5 opacity-70" />
                 <span>{tbl.name}</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                <span className={`px-1.5 py-0.2 rounded-full text-[0.7rem] font-mono ${
                   selectedTable === tbl.name
                     ? 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300'
                     : 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
@@ -421,7 +421,7 @@ export function DatabaseBrowser() {
                     </h3>
                     <button
                       onClick={() => setShowDdlModal(true)}
-                      className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all flex items-center gap-1 border border-slate-200 dark:border-slate-700"
+                      className="px-2 py-0.5 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all flex items-center gap-1 border border-slate-200 dark:border-slate-700"
                     >
                       <FileCode className="w-3 h-3 text-indigo-500" />
                       View DDL Schema
@@ -494,7 +494,7 @@ export function DatabaseBrowser() {
                             </span>
                           )}
                           <span className="font-semibold text-slate-900 dark:text-slate-100">{col.name}</span>
-                          <span className="text-[10px] text-slate-400 font-normal">({col.type || 'TEXT'})</span>
+                          <span className="text-[0.7rem] text-slate-400 font-normal">({col.type || 'TEXT'})</span>
                           {sortCol === col.name && (
                             <span className="text-indigo-600 dark:text-indigo-400 text-xs font-bold">
                               {sortDir === 'asc' ? '▲' : '▼'}
@@ -624,7 +624,7 @@ export function DatabaseBrowser() {
                 <Terminal className="w-3.5 h-3.5" />
                 Raw SQLite SQL Console
               </span>
-              <span className="text-[11px] text-slate-500">
+              <span className="text-xs text-slate-500">
                 Press <kbd className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-800 rounded text-slate-700 dark:text-slate-300 font-mono">Ctrl+Enter</kbd> to run
               </span>
             </div>

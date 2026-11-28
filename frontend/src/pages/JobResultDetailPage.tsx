@@ -314,7 +314,7 @@ export function JobResultDetailPage() {
                         href={link.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-brand-600 hover:underline font-mono text-[11px] truncate block"
+                        className="text-brand-600 hover:underline font-mono text-xs truncate block"
                       >
                         {link.url}
                       </a>

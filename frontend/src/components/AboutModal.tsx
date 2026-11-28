@@ -30,7 +30,7 @@ export function AboutModal({ isOpen, onClose, version }: AboutModalProps) {
         <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
           Krawlyx Workbench
         </h2>
-        <span className="mt-1 rounded-full bg-brand-50 px-3 py-0.5 font-mono text-[11px] font-semibold text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
+        <span className="mt-1 rounded-full bg-brand-50 px-3 py-0.5 font-mono text-xs font-semibold text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
           Version {displayVersion}
         </span>
 
@@ -48,12 +48,12 @@ export function AboutModal({ isOpen, onClose, version }: AboutModalProps) {
         <hr className="my-4 w-full border-slate-200 dark:border-slate-800" />
 
         {/* Copyright */}
-        <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+        <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
           © {new Date().getFullYear()} Alfazen Inc. All rights reserved
         </div>
 
         {/* Licensing Note */}
-        <div className="mt-2.5 max-w-xs text-[10px] leading-normal text-slate-500 dark:text-slate-400">
+        <div className="mt-2.5 max-w-xs text-[0.7rem] leading-normal text-slate-500 dark:text-slate-400">
           <span className="font-medium text-slate-700 dark:text-slate-300">
             Free and open-source for personal and organizational use.
           </span>

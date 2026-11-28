@@ -139,7 +139,7 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
     }
     const criterion = sortCriteria[index];
     return (
-      <span className="inline-flex items-center gap-0.5 font-mono text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 rounded px-1 py-0.2">
+      <span className="inline-flex items-center gap-0.5 font-mono text-[0.7rem] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 rounded px-1 py-0.2">
         {criterion.dir === 'asc' ? <ArrowUp className="h-3 w-3 inline" /> : <ArrowDown className="h-3 w-3 inline" />}
         {sortCriteria.length > 1 && <span>{index + 1}</span>}
       </span>
@@ -202,7 +202,7 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
             </select>
           </div>
 
-          <div className="text-slate-500 dark:text-slate-400 font-mono text-[11px]">
+          <div className="text-slate-500 dark:text-slate-400 font-mono text-xs">
             Showing <strong className="text-slate-900 dark:text-white font-bold">{totalRows === 0 ? 0 : startIndex + 1}–{endIndex}</strong> of <strong className="text-indigo-600 dark:text-indigo-400 font-bold">{totalRows.toLocaleString()}</strong> records
           </div>
         </div>
@@ -211,17 +211,17 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
       {/* Multi-Column Sorting Active Breadcrumbs */}
       {sortCriteria.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs animate-in fade-in">
-          <span className="text-slate-500 dark:text-slate-400 font-semibold px-1 text-[11px]">Multi-Column Sort Order:</span>
+          <span className="text-slate-500 dark:text-slate-400 font-semibold px-1 text-xs">Multi-Column Sort Order:</span>
           {sortCriteria.map((c, i) => (
             <div
               key={c.field}
               className="inline-flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-lg px-2.5 py-1 text-xs font-medium shadow-sm"
             >
-              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300">
+              <span className="px-1.5 py-0.2 rounded text-[0.7rem] font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300">
                 #{i + 1}
               </span>
               <span className="capitalize font-semibold">{c.field.replace(/_/g, ' ')}</span>
-              <span className="font-mono text-[11px] font-bold">
+              <span className="font-mono text-xs font-bold">
                 {c.dir === 'asc' ? '▲ ASC' : '▼ DESC'}
               </span>
               <button
@@ -235,7 +235,7 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
           ))}
           <button
             onClick={() => setSortCriteria([])}
-            className="text-[11px] text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 underline font-medium ml-1"
+            className="text-xs text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 underline font-medium ml-1"
           >
             Reset Sort
           </button>
@@ -246,7 +246,7 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
       <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         <div className="overflow-x-auto max-h-[680px]">
           <table className="w-full text-xs text-left border-collapse">
-            <thead className="bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10 uppercase tracking-wider text-[11px]">
+            <thead className="bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10 uppercase tracking-wider text-xs">
               {isVehicle ? (
                 <tr>
                   <th className="px-3 py-3 w-12 text-center">#</th>
@@ -403,7 +403,7 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
                     key={idx}
                     className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors"
                   >
-                    <td className="px-3 py-2.5 text-center text-slate-400 font-mono text-[11px]">
+                    <td className="px-3 py-2.5 text-center text-slate-400 font-mono text-xs">
                       {globalIndex}
                     </td>
 
@@ -422,7 +422,7 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
                           {row.trim || '—'}
                         </td>
                         <td className="px-3 py-2.5">
-                          <span className="inline-block rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-700 dark:text-slate-300">
+                          <span className="inline-block rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[0.7rem] font-medium text-slate-700 dark:text-slate-300">
                             {row.drivetrain || '—'}
                           </span>
                         </td>
@@ -440,7 +440,7 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
                         </td>
                         <td className="px-3 py-2.5">
                           <span
-                            className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                            className={`inline-block rounded-full px-2 py-0.5 text-[0.7rem] font-semibold ${
                               row.seller_type === 'Dealer'
                                 ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
                                 : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
@@ -449,7 +449,7 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
                             {row.seller_type || '—'}
                           </span>
                           {row.dealer_name && (
-                            <span className="block text-[10px] text-slate-400 truncate max-w-[120px]" title={row.dealer_name}>
+                            <span className="block text-[0.7rem] text-slate-400 truncate max-w-[120px]" title={row.dealer_name}>
                               {row.dealer_name}
                             </span>
                           )}
@@ -457,7 +457,7 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
                         <td className="px-3 py-2.5 text-slate-700 dark:text-slate-300">
                           {row.city || '—'} {row.province ? `, ${row.province}` : ''}
                         </td>
-                        <td className="px-3 py-2.5 font-mono text-slate-500 text-[11px]">{row.date_observed || '—'}</td>
+                        <td className="px-3 py-2.5 font-mono text-slate-500 text-xs">{row.date_observed || '—'}</td>
                         <td className="px-3 py-2.5 text-right">
                           {row.listing_url || row.source_url ? (
                             <a
@@ -495,7 +495,7 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
                             </td>
                           );
                         })}
-                        <td className="px-3 py-2.5 font-mono text-slate-400 text-[11px]">{row.date_observed || '—'}</td>
+                        <td className="px-3 py-2.5 font-mono text-slate-400 text-xs">{row.date_observed || '—'}</td>
                         <td className="px-3 py-2.5 text-right">
                           {row.source_url ? (
                             <a
@@ -518,7 +518,7 @@ export function StructuredDatasetTable({ items, totalTargets }: Props) {
                         <td className="px-3 py-2.5 text-right font-semibold text-emerald-700 dark:text-emerald-400">
                           {row.price ? `${row.currency || '$'}${row.price}` : '—'}
                         </td>
-                        <td className="px-3 py-2.5 font-mono text-slate-500 text-[11px]">{row.date_observed || '—'}</td>
+                        <td className="px-3 py-2.5 font-mono text-slate-500 text-xs">{row.date_observed || '—'}</td>
                         <td className="px-3 py-2.5 text-right">
                           {row.url ? (
                             <a
