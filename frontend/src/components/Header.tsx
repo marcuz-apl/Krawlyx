@@ -189,7 +189,16 @@ export function Header() {
                   : "Theme: Manual Dark Mode. Click for Auto Timezone mode"
               }
             >
-              {isDark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-600" />}
+              {themeMode === "auto" ? (
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4">
+                  <circle cx="12" cy="12" r="10" fill="#ffffff" stroke="#64748b" strokeWidth="2" />
+                  <path d="M12 2a10 10 0 0 1 0 20Z" fill="#0f172a" />
+                </svg>
+              ) : isDark ? (
+                <Sun className="h-4 w-4 text-amber-400" />
+              ) : (
+                <Moon className="h-4 w-4 text-slate-600" />
+              )}
             </button>
           </div>
         </div></div>
