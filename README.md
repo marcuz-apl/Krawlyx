@@ -103,7 +103,8 @@ All project documentation, architectural decision records, implementation plans,
 This repo adheres to **Alfazen Versioning (Connected Prefix Standard)**:
 - Stored directly in the tracked root `VERSION` file as `v<m.n.p>+<yymmddc>` (e.g. `v2.4.0+260916c`).
 - Complies strictly with SemVer 2.0.0 (Rule #10) build metadata (`+` delimiter).
-- Every commit subject line is automatically prefixed with the connected identifier:
+- With the hooks enabled, each commit increments the patch version. A patch of 9 rolls over to the next minor version, and 9.9 rolls over to the next major version.
+- The hooks also advance the UTC build counter and prefix the commit subject with the connected identifier:
   `v<m.n.p>+<yymmddc> <type>(<scope>): <subject>`
 - Enable repository Git hooks after cloning with:
 

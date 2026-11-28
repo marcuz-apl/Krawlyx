@@ -1,6 +1,6 @@
 #!/bin/sh
 VERSION_FILE=VERSION
-IDENT_RE='^v[0-9]+\.[0-9]+\.[0-9]+[+-][0-9]{6}[0-9a-z]$'
+IDENT_RE='^v(0|[1-9][0-9]*)\.[0-9]\.[0-9][+-][0-9]{6}[0-9a-z]$'
 
 die() { echo "alfazen-versioning: $*" >&2; exit 1; }
 utc_yymmdd() { TZ=UTC LC_ALL=C date -u +%y%m%d; }
@@ -27,6 +27,18 @@ next_identifier() {
   bdate=${build%?}
   bctr=${build#??????}
 
+  major=${ver%%.*}
+  major=${major#v}
+  rest=${ver#*.}
+  minor=${rest%.*}
+  patch=${rest#*.}
+
+  patch=$((patch + 1))
+  minor=$((minor + patch / 10))
+  major=$((major + minor / 10))
+  minor=$((minor % 10))
+  patch=$((patch % 10))
+
   if [ "$bdate" != "$today" ]; then
     nctr=1
   else
@@ -38,5 +50,5 @@ next_identifier() {
       *)     die "invalid counter '$bctr'" ;;
     esac
   fi
-  printf '%s+%s%s\n' "$ver" "$today" "$nctr"
+  printf 'v%s.%s.%s+%s%s\n' "$major" "$minor" "$patch" "$today" "$nctr"
 }
