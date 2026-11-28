@@ -39,10 +39,6 @@ export interface MfaSetupOut {
   otpauth_uri: string;
 }
 
-export interface MfaPolicyOut {
-  required: boolean;
-}
-
 export interface HealthResponse {
   status: string;
   app: string;
@@ -376,7 +372,6 @@ export interface SettingsOut {
   content_size_cap_bytes: number;
   ssrf_allow_list?: string[];
   admin_contact_email?: string;
-  mfa_required?: boolean;
 }
 
 export interface SettingsUpdateBody {
@@ -809,12 +804,6 @@ export const api = {
       request<SettingsOut>('/api/settings', {
         method: 'PATCH',
         body: JSON.stringify(body),
-      }),
-    mfaPolicy: () => request<MfaPolicyOut>('/api/settings/mfa-policy'),
-    setMfaPolicy: (required: boolean) =>
-      request<MfaPolicyOut>('/api/settings/mfa-policy', {
-        method: 'PATCH',
-        body: JSON.stringify({ required }),
       }),
     emailTemplates: () => request<EmailTemplatesOut>('/api/settings/email-templates'),
     saveEmailTemplates: (templates: Record<string, EmailTemplate> | null) =>

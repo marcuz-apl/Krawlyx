@@ -25,26 +25,6 @@ def test_totp_helpers() -> None:
     assert not verify_totp(secret, "abcdef")
 
 
-def test_mfa_policy_admin_only_and_reflected_in_settings(client: TestClient) -> None:
-    auth_as(client, "mfa-runner", "runner")
-    assert client.get("/api/settings/mfa-policy").status_code == 403
-
-    csrf = auth_as(client, "mfa-admin", "admin")
-    r = client.patch(
-        "/api/settings/mfa-policy", json={"required": True}, headers={"X-CSRF-Token": csrf}
-    )
-    assert r.status_code == 200
-    assert r.json()["required"] is True
-    assert client.get("/api/settings").json()["mfa_required"] is True
-
-    assert client.patch("/api/settings/mfa-policy", json={"required": False}).status_code == 403
-
-    r = client.patch(
-        "/api/settings/mfa-policy", json={"required": False}, headers={"X-CSRF-Token": csrf}
-    )
-    assert r.json()["required"] is False
-
-
 def test_enroll_and_login_with_mfa(client: TestClient) -> None:
     csrf = auth_as(client, "mfa-user", "runner")
 

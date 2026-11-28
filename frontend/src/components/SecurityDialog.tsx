@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, ShieldCheck, X } from 'lucide-react';
 
 import { api } from '@/lib/api/client';
@@ -13,11 +13,6 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
   const dialog = useRef<HTMLDialogElement>(null);
   const qc = useQueryClient();
   const { data: me } = useMe();
-  const { data: settings } = useQuery({
-    queryKey: ['settings'],
-    queryFn: api.settings.get,
-    staleTime: 60_000,
-  });
 
   const [mfaPassword, setMfaPassword] = useState('');
   const [code, setCode] = useState('');
@@ -88,7 +83,7 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
     changePassword.mutate();
   }
 
-  const required = Boolean(settings?.mfa_required || me?.mfa_required);
+  const required = Boolean(me?.mfa_required);
 
   function submitDisable(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

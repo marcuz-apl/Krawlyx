@@ -1151,24 +1151,6 @@ export interface paths {
         patch: operations["update_settings_route_api_settings_patch"];
         trace?: never;
     };
-    "/api/settings/mfa-policy": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Mfa Policy */
-        get: operations["get_mfa_policy_api_settings_mfa_policy_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update Mfa Policy */
-        patch: operations["update_mfa_policy_api_settings_mfa_policy_patch"];
-        trace?: never;
-    };
     "/api/settings/email-templates": {
         parameters: {
             query?: never;
@@ -1958,16 +1940,6 @@ export interface components {
             /** Code */
             code: string;
         };
-        /** MfaPolicyOut */
-        MfaPolicyOut: {
-            /** Required */
-            required: boolean;
-        };
-        /** MfaPolicyUpdate */
-        MfaPolicyUpdate: {
-            /** Required */
-            required: boolean;
-        };
         /** MfaSetupOut */
         MfaSetupOut: {
             /** Secret */
@@ -2103,11 +2075,6 @@ export interface components {
             ssrf_allow_list: string[];
             /** Admin Contact Email */
             admin_contact_email: string;
-            /**
-             * Mfa Required
-             * @default false
-             */
-            mfa_required: boolean;
         };
         /** SettingsUpdateBody */
         SettingsUpdateBody: {
@@ -4595,59 +4562,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SettingsOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_mfa_policy_api_settings_mfa_policy_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MfaPolicyOut"];
-                };
-            };
-        };
-    };
-    update_mfa_policy_api_settings_mfa_policy_patch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MfaPolicyUpdate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MfaPolicyOut"];
                 };
             };
             /** @description Validation Error */

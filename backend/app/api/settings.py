@@ -16,10 +16,8 @@ from app.core.env_writer import update_env_file
 from app.models import Dataset, DatasetRow, Job, JobResult, User
 from app.schemas import SettingsOut, SettingsUpdateBody
 from app.schemas.email_templates import EmailTemplatesOut, EmailTemplatesUpdate
-from app.schemas.mfa import MfaPolicyOut, MfaPolicyUpdate
 from app.services import email_templates as email_templates_svc
 from app.services import jobs as jobs_svc
-from app.services import mfa as mfa_svc
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 
@@ -63,7 +61,6 @@ class DbMaintenanceResult(BaseModel):
 @router.get("", response_model=SettingsOut)
 def get_settings_route(
     _user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[Session, Depends(get_db)],
 ) -> SettingsOut:
     s = get_settings()
     return SettingsOut(
@@ -76,7 +73,6 @@ def get_settings_route(
         content_size_cap_bytes=s.content_size_cap_bytes,
         ssrf_allow_list=list(s.ssrf_allow_list),
         admin_contact_email=s.admin_contact_email,
-        mfa_required=mfa_svc.is_mfa_required(db),
     )
 
 
@@ -84,7 +80,6 @@ def get_settings_route(
 def update_settings_route(
     body: SettingsUpdateBody,
     _admin: Annotated[User, Depends(require_admin)],
-    db: Annotated[Session, Depends(get_db)],
 ) -> SettingsOut:
     """Update runtime settings, resize dispatcher concurrency, and persist to .env."""
     env_path = get_env_file_path()
@@ -131,29 +126,7 @@ def update_settings_route(
         content_size_cap_bytes=reloaded.content_size_cap_bytes,
         ssrf_allow_list=list(reloaded.ssrf_allow_list),
         admin_contact_email=reloaded.admin_contact_email,
-        mfa_required=mfa_svc.is_mfa_required(db),
     )
-
-
-@router.get("/mfa-policy", response_model=MfaPolicyOut)
-def get_mfa_policy(
-    _admin: Annotated[User, Depends(require_admin)],
-    db: Annotated[Session, Depends(get_db)],
-) -> MfaPolicyOut:
-    return MfaPolicyOut(required=mfa_svc.is_mfa_required(db))
-
-
-@router.patch(
-    "/mfa-policy",
-    response_model=MfaPolicyOut,
-    dependencies=[Depends(verify_csrf)],
-)
-def update_mfa_policy(
-    body: MfaPolicyUpdate,
-    _admin: Annotated[User, Depends(require_admin)],
-    db: Annotated[Session, Depends(get_db)],
-) -> MfaPolicyOut:
-    return MfaPolicyOut(required=mfa_svc.set_mfa_required(db, body.required))
 
 
 @router.get("/email-templates", response_model=EmailTemplatesOut)

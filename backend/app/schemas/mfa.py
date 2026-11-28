@@ -28,13 +28,3 @@ class MfaDisableRequest(BaseModel):
 
     password: str = Field(min_length=1, max_length=128)
     code: str = Field(min_length=6, max_length=6)
-
-
-class MfaPolicyOut(BaseModel):
-    required: bool
-
-
-class MfaPolicyUpdate(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    required: bool

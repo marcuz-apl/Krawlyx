@@ -30,8 +30,6 @@ from app.schemas.jobs import (
 from app.schemas.mfa import (
     MfaDisableRequest,
     MfaLoginRequest,
-    MfaPolicyOut,
-    MfaPolicyUpdate,
     MfaSetupOut,
     MfaVerifyRequest,
 )
@@ -70,8 +68,6 @@ __all__ = [
     "LoginResponse",
     "MfaDisableRequest",
     "MfaLoginRequest",
-    "MfaPolicyOut",
-    "MfaPolicyUpdate",
     "MfaSetupOut",
     "MfaVerifyRequest",
     "NextFiresOut",

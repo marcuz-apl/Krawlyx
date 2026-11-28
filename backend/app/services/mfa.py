@@ -11,24 +11,7 @@ from app.core.security import (
     otpauth_uri,
     verify_totp,
 )
-from app.models import Setting, User
-
-POLICY_KEY = "mfa_required"
-
-
-def is_mfa_required(db: Session) -> bool:
-    row = db.get(Setting, POLICY_KEY)
-    return bool(row.value) if row is not None else False
-
-
-def set_mfa_required(db: Session, required: bool) -> bool:
-    row = db.get(Setting, POLICY_KEY)
-    if row is None:
-        db.add(Setting(key=POLICY_KEY, value=bool(required)))
-    else:
-        row.value = bool(required)
-    db.commit()
-    return bool(required)
+from app.models import User
 
 
 def begin_setup(db: Session, user: User) -> tuple[str, str] | None:

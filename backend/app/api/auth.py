@@ -104,7 +104,7 @@ def mfa_disable(
 ) -> None:
     if not user.mfa_enabled:
         raise HTTPException(status_code=400, detail="MFA is not enabled for this account")
-    if mfa_svc.is_mfa_required(db) or user.mfa_required:
+    if user.mfa_required:
         raise HTTPException(
             status_code=400,
             detail="MFA is required for this account; ask an administrator to clear the requirement",

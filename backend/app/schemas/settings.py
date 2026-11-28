@@ -18,7 +18,6 @@ class SettingsOut(BaseModel):
     # M6 additions
     ssrf_allow_list: list[str]
     admin_contact_email: str
-    mfa_required: bool = False
 
 
 class SettingsUpdateBody(BaseModel):
