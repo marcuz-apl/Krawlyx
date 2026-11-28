@@ -173,7 +173,7 @@ export function SettingsReadOnlyCard() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:auto-rows-fr">
           <SettingTipCard
             label="Max Concurrent Crawl Jobs"
             value={`${s.max_concurrent_jobs} active jobs`}
@@ -564,7 +564,7 @@ function SettingTipCard({
   }[badgeColor];
 
   return (
-    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-4 shadow-sm space-y-2.5 transition-all hover:border-slate-300 dark:hover:border-slate-700">
+    <div className="h-full rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-4 shadow-sm space-y-2.5 transition-all hover:border-slate-300 dark:hover:border-slate-700">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-slate-900 dark:text-white">{label}</span>
