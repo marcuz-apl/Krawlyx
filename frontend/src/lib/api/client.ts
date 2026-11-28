@@ -13,6 +13,7 @@ export interface UserOut {
   email?: string | null;
   role: Role;
   must_change_password?: boolean;
+  mfa_enabled?: boolean;
   created_at?: string | null;
 }
 
@@ -27,7 +28,18 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   user: UserOut;
-  csrf_token: string;
+  csrf_token?: string | null;
+  mfa_required?: boolean;
+  mfa_token?: string | null;
+}
+
+export interface MfaSetupOut {
+  secret: string;
+  otpauth_uri: string;
+}
+
+export interface MfaPolicyOut {
+  required: boolean;
 }
 
 export interface HealthResponse {
@@ -362,6 +374,7 @@ export interface SettingsOut {
   content_size_cap_bytes: number;
   ssrf_allow_list?: string[];
   admin_contact_email?: string;
+  mfa_required?: boolean;
 }
 
 export interface SettingsUpdateBody {
@@ -469,7 +482,22 @@ export const api = {
       setStoredCsrfToken(null);
     }
   },
+  loginMfa: async (body: { mfa_token: string; code: string }) => {
+    const res = await request<LoginResponse>('/api/auth/login/mfa', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+    if (res?.csrf_token) {
+      setStoredCsrfToken(res.csrf_token);
+    }
+    return res;
+  },
   me: () => request<UserOut>('/api/auth/me'),
+  mfa: {
+    setup: () => request<MfaSetupOut>('/api/auth/mfa/setup', { method: 'POST' }),
+    verify: (code: string) =>
+      request<void>('/api/auth/mfa/verify', { method: 'POST', body: JSON.stringify({ code }) }),
+  },
   changePassword: (body: { current_password: string; new_password: string }) =>
     request<void>('/api/auth/change-password', {
       method: 'POST',
@@ -777,6 +805,12 @@ export const api = {
       request<SettingsOut>('/api/settings', {
         method: 'PATCH',
         body: JSON.stringify(body),
+      }),
+    mfaPolicy: () => request<MfaPolicyOut>('/api/settings/mfa-policy'),
+    setMfaPolicy: (required: boolean) =>
+      request<MfaPolicyOut>('/api/settings/mfa-policy', {
+        method: 'PATCH',
+        body: JSON.stringify({ required }),
       }),
     emailTemplates: () => request<EmailTemplatesOut>('/api/settings/email-templates'),
     saveEmailTemplates: (templates: Record<string, EmailTemplate> | null) =>

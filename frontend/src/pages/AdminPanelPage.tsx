@@ -5,6 +5,7 @@ import { useMe } from '@/hooks/useAuth';
 import { AdminEnginesTable } from '@/components/AdminEnginesTable';
 import { EmailTemplatesCard } from '@/components/EmailTemplatesCard';
 import { ExportTargetsTable } from '@/components/ExportTargetsTable';
+import { MfaPolicyCard } from '@/components/MfaPolicyCard';
 import { SettingsReadOnlyCard } from '@/components/SettingsReadOnlyCard';
 import { UsersTable } from '@/components/UsersTable';
 import { DatabaseBrowser } from '@/components/DatabaseBrowser';
@@ -108,7 +109,12 @@ export function AdminPanelPage() {
 
       {tab === 'engines' && <AdminEnginesTable />}
       {tab === 'exports' && <ExportTargetsTable />}
-      {tab === 'settings' && <SettingsReadOnlyCard />}
+      {tab === 'settings' && (
+        <div className="space-y-4">
+          <MfaPolicyCard />
+          <SettingsReadOnlyCard />
+        </div>
+      )}
       {tab === 'users' && <UsersTable />}
       {tab === 'database' && isSuperAdmin && <DatabaseBrowser />}
       {tab === 'access-requests' && canReview && (

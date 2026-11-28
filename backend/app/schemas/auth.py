@@ -17,6 +17,7 @@ class UserOut(BaseModel):
     email: str | None = None
     role: str
     must_change_password: bool = False
+    mfa_enabled: bool = False
     created_at: datetime | None = None
 
     model_config = {"from_attributes": True}
@@ -29,4 +30,6 @@ class ChangePasswordRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     user: UserOut
-    csrf_token: str
+    csrf_token: str | None = None
+    mfa_required: bool = False
+    mfa_token: str | None = None

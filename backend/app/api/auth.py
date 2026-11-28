@@ -10,11 +10,22 @@ from app.core.security import (
     CSRF_COOKIE,
     SESSION_COOKIE,
     hash_password,
+    issue_mfa_token,
     issue_session,
+    read_mfa_token,
     verify_password,
 )
 from app.models import User
-from app.schemas import ChangePasswordRequest, LoginRequest, LoginResponse, UserOut
+from app.schemas import (
+    ChangePasswordRequest,
+    LoginRequest,
+    LoginResponse,
+    MfaLoginRequest,
+    MfaSetupOut,
+    MfaVerifyRequest,
+    UserOut,
+)
+from app.services import mfa as mfa_svc
 from app.services import users as users_svc
 
 router = APIRouter(tags=["auth"])
@@ -39,9 +50,49 @@ def login(
     user = users_svc.authenticate(db, payload.username, payload.password)
     if user is None:
         raise HTTPException(status_code=401, detail="Invalid username or password")
+    if user.mfa_enabled:
+        return LoginResponse(
+            user=UserOut.model_validate(user),
+            mfa_required=True,
+            mfa_token=issue_mfa_token(user.id),
+        )
     token, csrf_token = issue_session(user.id)
     _set_session_cookies(response, token, csrf_token)
     return LoginResponse(user=UserOut.model_validate(user), csrf_token=csrf_token)
+
+
+@router.post("/login/mfa", response_model=LoginResponse)
+def login_mfa(
+    payload: MfaLoginRequest, response: Response, db: Session = Depends(get_db)
+) -> LoginResponse:
+    user_id = read_mfa_token(payload.mfa_token)
+    if user_id is None:
+        raise HTTPException(status_code=401, detail="MFA challenge expired; sign in again")
+    user = db.get(User, user_id)
+    if user is None or not mfa_svc.verify_code(user, payload.code):
+        raise HTTPException(status_code=401, detail="Invalid authentication code")
+    token, csrf_token = issue_session(user.id)
+    _set_session_cookies(response, token, csrf_token)
+    return LoginResponse(user=UserOut.model_validate(user), csrf_token=csrf_token)
+
+
+@router.post("/mfa/setup", response_model=MfaSetupOut, dependencies=[Depends(verify_csrf)])
+def mfa_setup(user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> MfaSetupOut:
+    result = mfa_svc.begin_setup(db, user)
+    if result is None:
+        raise HTTPException(status_code=400, detail="MFA is already enabled for this account")
+    secret, uri = result
+    return MfaSetupOut(secret=secret, otpauth_uri=uri)
+
+
+@router.post("/mfa/verify", status_code=204, dependencies=[Depends(verify_csrf)])
+def mfa_verify(
+    payload: MfaVerifyRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    if not mfa_svc.confirm_setup(db, user, payload.code):
+        raise HTTPException(status_code=400, detail="Invalid authentication code")
 
 
 @router.get("/me", response_model=UserOut)

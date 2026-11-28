@@ -20,4 +20,6 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(128))
     role: Mapped[str] = mapped_column(String(16))
     must_change_password: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    mfa_secret_enc: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    mfa_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)

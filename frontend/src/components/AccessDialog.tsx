@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
 
-import { useLogin } from "@/hooks/useAuth";
+import { useLogin, useLoginMfa } from "@/hooks/useAuth";
 import { api } from "@/lib/api/client";
 
 interface AccessDialogProps {
@@ -23,21 +23,30 @@ const linkClass = "inline-flex min-h-11 items-center gap-2 rounded text-sm font-
 
 export function AccessDialog({ dialog, isOpen, onClose }: AccessDialogProps) {
   const [requestMode, setRequestMode] = useState(false);
+  const [mfaToken, setMfaToken] = useState<string | null>(null);
   const form = useRef<HTMLFormElement>(null);
   const firstInput = useRef<HTMLInputElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const login = useLogin();
+  const loginMfa = useLoginMfa();
   const request = useMutation({ mutationFn: api.messages.submit });
 
   useEffect(() => {
     if (isOpen) firstInput.current?.focus();
-  }, [isOpen, requestMode]);
+  }, [isOpen, requestMode, mfaToken]);
+
+  function goToDestination() {
+    const destination = (location.state as LocationState | null)?.from ?? "/";
+    navigate(destination, { replace: true });
+  }
 
   function resetForm() {
     form.current?.reset();
     login.reset();
+    loginMfa.reset();
     request.reset();
+    setMfaToken(null);
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -54,23 +63,41 @@ export function AccessDialog({ dialog, isOpen, onClose }: AccessDialogProps) {
       return;
     }
 
+    if (mfaToken) {
+      loginMfa.mutate(
+        { mfa_token: mfaToken, code: String(fields.get("code")).replace(/\D/g, "") },
+        { onSuccess: goToDestination },
+      );
+      return;
+    }
+
     login.mutate(
       { username: String(fields.get("username")).trim(), password: String(fields.get("password")) },
       {
-        onSuccess: () => {
-          const destination = (location.state as LocationState | null)?.from ?? "/";
-          navigate(destination, { replace: true });
+        onSuccess: (data) => {
+          if (data.mfa_required) {
+            setMfaToken(data.mfa_token ?? "");
+            return;
+          }
+          goToDestination();
         },
       },
     );
   }
 
-  const pending = requestMode ? request.isPending : login.isPending;
-  const submitText = requestMode ? "Send request" : "Sign in";
-  const pendingText = requestMode ? "Submitting…" : "Signing in…";
+  const pending = requestMode ? request.isPending : mfaToken ? loginMfa.isPending : login.isPending;
+  const submitText = requestMode ? "Send request" : mfaToken ? "Verify" : "Sign in";
+  const pendingText = requestMode ? "Submitting…" : mfaToken ? "Verifying…" : "Signing in…";
   const error = requestMode
     ? request.isError && "Your request could not be submitted. Please try again."
+    : mfaToken
+    ? loginMfa.isError && "That code is not valid. Check your authenticator app and try again."
     : login.isError && "Invalid username or password. Please check your credentials.";
+  const title = requestMode
+    ? "Request access"
+    : mfaToken !== null
+    ? "Two-factor authentication"
+    : "Log in to Krawlyx";
 
   return (
     <dialog
@@ -87,7 +114,7 @@ export function AccessDialog({ dialog, isOpen, onClose }: AccessDialogProps) {
       <div className="p-6 sm:p-8">
         <div className="flex items-start justify-between gap-3">
           <h2 id="access-dialog-title" className="pt-2 text-2xl font-bold tracking-tight">
-            {requestMode ? "Request access" : "Log in to Krawlyx"}
+            {title}
           </h2>
           <button
             type="button"
@@ -101,6 +128,8 @@ export function AccessDialog({ dialog, isOpen, onClose }: AccessDialogProps) {
         <p id="access-dialog-description" className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
           {requestMode
             ? "Tell us how you plan to use Krawlyx. An administrator will review your request and contact you."
+            : mfaToken !== null
+            ? "Enter the 6-digit code from your authenticator app to finish signing in."
             : "Sign in to manage your crawls, datasets, and exports."}
         </p>
 
@@ -109,7 +138,7 @@ export function AccessDialog({ dialog, isOpen, onClose }: AccessDialogProps) {
             Request submitted for administrator review.
           </p>
         ) : (
-          <form key={String(requestMode)} ref={form} onSubmit={submit} className="mt-6 space-y-4 text-sm font-medium">
+          <form key={`${requestMode}-${mfaToken !== null}`} ref={form} onSubmit={submit} className="mt-6 space-y-4 text-sm font-medium">
             {requestMode ? (
               <>
                 <label className="block">
@@ -125,6 +154,20 @@ export function AccessDialog({ dialog, isOpen, onClose }: AccessDialogProps) {
                   <textarea name="reason" required maxLength={5000} rows={3} className={fieldClass} />
                 </label>
               </>
+            ) : mfaToken !== null ? (
+              <label className="block">
+                Authenticator code
+                <input
+                  ref={firstInput}
+                  name="code"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  pattern="[0-9]{6}"
+                  maxLength={6}
+                  required
+                  className={`${fieldClass} text-center font-mono text-lg tracking-[0.4em]`}
+                />
+              </label>
             ) : (
               <>
                 <label className="block">
@@ -148,18 +191,24 @@ export function AccessDialog({ dialog, isOpen, onClose }: AccessDialogProps) {
         )}
 
         <div className="mt-4 flex flex-wrap items-center gap-x-2 border-t border-slate-200 pt-2 dark:border-slate-700">
-          {!requestMode && <span className="text-sm text-slate-600 dark:text-slate-300">Need an account?</span>}
+          {!requestMode && mfaToken === null && (
+            <span className="text-sm text-slate-600 dark:text-slate-300">Need an account?</span>
+          )}
           <button
             type="button"
             disabled={pending}
             onClick={() => {
+              if (mfaToken !== null) {
+                resetForm();
+                return;
+              }
               resetForm();
               setRequestMode(!requestMode);
             }}
             className={linkClass}
           >
-            {requestMode && <ArrowLeft aria-hidden="true" className="h-4 w-4" />}
-            {requestMode ? "Back to sign in" : "Request access"}
+            {(requestMode || mfaToken !== null) && <ArrowLeft aria-hidden="true" className="h-4 w-4" />}
+            {requestMode || mfaToken !== null ? "Back to sign in" : "Request access"}
           </button>
         </div>
       </div>

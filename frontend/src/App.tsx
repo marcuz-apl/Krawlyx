@@ -2,10 +2,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { Navigate, Outlet, createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import { ChangePasswordGate } from "@/components/ChangePasswordGate";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { RequireAuth } from "@/components/RequireAuth";
+import { SecurityGate } from "@/components/SecurityGate";
 import { useMe } from "@/hooks/useAuth";
 import { AdminPanelPage } from "@/pages/AdminPanelPage";
 import { DatasetDetailPage } from "@/pages/DatasetDetailPage";
@@ -39,11 +39,12 @@ function RootRoute() {
   const { data: user, isLoading } = useMe();
   if (isLoading) return <p className="p-6 text-slate-500">Loading…</p>;
   if (!user) return <LoginPage />;
-  if (user.must_change_password) return <ChangePasswordGate user={user} />;
   return (
-    <RootLayout>
-      <RunnerPage />
-    </RootLayout>
+    <SecurityGate user={user}>
+      <RootLayout>
+        <RunnerPage />
+      </RootLayout>
+    </SecurityGate>
   );
 }
 

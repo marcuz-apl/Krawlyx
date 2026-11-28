@@ -27,6 +27,13 @@ from app.schemas.jobs import (
     JobSubmitAck,
     TargetOut,
 )
+from app.schemas.mfa import (
+    MfaLoginRequest,
+    MfaPolicyOut,
+    MfaPolicyUpdate,
+    MfaSetupOut,
+    MfaVerifyRequest,
+)
 from app.schemas.schedules import (
     NextFiresOut,
     ScheduleCreate,
@@ -60,6 +67,11 @@ __all__ = [
     "JobSubmitAck",
     "LoginRequest",
     "LoginResponse",
+    "MfaLoginRequest",
+    "MfaPolicyOut",
+    "MfaPolicyUpdate",
+    "MfaSetupOut",
+    "MfaVerifyRequest",
     "NextFiresOut",
     "ScheduleCreate",
     "ScheduleOut",

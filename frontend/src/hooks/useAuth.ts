@@ -26,6 +26,18 @@ export function useLogin() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: LoginRequest) => api.login(body),
+    onSuccess: (data) => {
+      if (!data.mfa_required) {
+        qc.setQueryData(authKeys.me, data.user);
+      }
+    },
+  });
+}
+
+export function useLoginMfa() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { mfa_token: string; code: string }) => api.loginMfa(body),
     onSuccess: (data) => qc.setQueryData(authKeys.me, data.user),
   });
 }

@@ -216,6 +216,8 @@ IDs are stable and referenced by tests and issues.
 - **FR-USR-02** — On creation the credentials email (username + temporary password) is sent to the user's email via the configured SMTP relay. Delivery is best-effort: failures never block creation and are surfaced to the admin.
 - **FR-USR-03** — Accounts created by an admin, and accounts whose password an admin resets, carry `must_change_password`; the user must set a new password on first sign-in before using the workbench.
 - **FR-USR-04** — Subject and body of every transactional email (access-request acknowledgement and decisions, new-request admin notice, new-user welcome) are editable in **Admin Panel → Access Requests → Email templates**; overrides are stored in the `settings` table with `{placeholder}` tokens. Bodies accept basic Markdown (bold, italic, lists, links) and are sent as styled HTML with a plain-text fallback; the Krawlyx Team signature is appended automatically.
+- **FR-USR-05** — Optional TOTP two-factor authentication (RFC 6238, 6 digits, 30 s step, ±1 window) compatible with standard authenticator apps. Users enroll from a setup gate — the shared TOTP secret is shown once for manual entry, the code is verified before `mfa_enabled` is set — and sign-in becomes two-step: password, then a short-lived challenge token (5 min) plus the 6-digit code. Secrets are stored Fernet-encrypted with a key derived from `SECRET_KEY`; they are never returned by the API.
+- **FR-USR-06** — Admins can enforce MFA (default **off**) from **Admin Panel → Settings**: when required, every account without an enrolled authenticator is walked through enrollment at its next sign-in. Enforcement applies immediately to signed-in sessions as well, including the admin who enabled it.
 
 ## 7. Engine adapter contract
 
@@ -301,11 +303,14 @@ GET             /api/jobs/{id}/events           # SSE stream (fallback: client p
 GET/POST/PATCH  /api/schedules                  # admin; DELETE too
 POST            /api/schedules/{id}/run-now
 GET/POST/PATCH/DELETE /api/export-targets       # admin; POST .../{id}/test
-GET/PATCH       /api/settings                   # admin
+GET/PATCH       /api/settings                   # GET any signed-in user; PATCH admin
+GET/PATCH       /api/settings/mfa-policy        # admin; enforce authenticator-app MFA
 GET/PATCH       /api/settings/email-templates   # admin; transactional email copy
 GET/POST        /api/users                      # admin
 PATCH/DELETE    /api/users/{id}                 # admin
 POST            /api/auth/change-password       # authenticated; clears must_change_password
+POST            /api/auth/login/mfa             # code step for MFA-enabled accounts
+POST            /api/auth/mfa/setup  /verify    # enroll authenticator app (CSRF)
 ```
 
 The React SPA consumes `/api/*` exclusively. In production FastAPI serves the built

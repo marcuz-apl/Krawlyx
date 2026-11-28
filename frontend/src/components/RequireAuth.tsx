@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
-import { ChangePasswordGate } from '@/components/ChangePasswordGate';
+import { SecurityGate } from '@/components/SecurityGate';
 import { useMe } from '@/hooks/useAuth';
 
 export function RequireAuth() {
@@ -13,8 +13,9 @@ export function RequireAuth() {
   if (!user) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
-  if (user.must_change_password) {
-    return <ChangePasswordGate user={user} />;
-  }
-  return <Outlet context={user} />;
+  return (
+    <SecurityGate user={user}>
+      <Outlet context={user} />
+    </SecurityGate>
+  );
 }
