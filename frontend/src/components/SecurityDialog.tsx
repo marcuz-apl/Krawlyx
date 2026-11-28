@@ -61,7 +61,7 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
       ref={dialog}
       aria-labelledby="security-dialog-title"
       onClose={handleClose}
-      className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-2xl bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/80 dark:bg-slate-900 dark:text-white"
+      className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-4xl overflow-y-auto rounded-2xl bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/80 dark:bg-slate-900 dark:text-white"
     >
       <div className="p-6 sm:p-8">
         <div className="flex items-start justify-between gap-3">
@@ -82,22 +82,37 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
           </button>
         </div>
 
-        <div className="mt-5">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">Password</h3>
-          <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Change the password you use to sign in.
-          </p>
-          <div className="mt-3">
-            <PasswordChangeForm />
-          </div>
-        </div>
+        <div className="mt-5 grid gap-4 md:grid-cols-2 md:items-start">
+          <section
+            aria-labelledby="security-password-heading"
+            className="rounded-xl border border-slate-200 p-4 dark:border-slate-700 sm:p-5"
+          >
+            <h3
+              id="security-password-heading"
+              className="text-sm font-bold text-slate-900 dark:text-white"
+            >
+              Password
+            </h3>
+            <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+              Change the password you use to sign in.
+            </p>
+            <div className="mt-3">
+              <PasswordChangeForm />
+            </div>
+          </section>
 
-        <div className="mt-6 border-t border-slate-200 pt-5 dark:border-slate-700">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-            Two-factor authentication
-          </h3>
+          <section
+            aria-labelledby="security-mfa-heading"
+            className="rounded-xl border border-slate-200 p-4 dark:border-slate-700 sm:p-5"
+          >
+            <h3
+              id="security-mfa-heading"
+              className="text-sm font-bold text-slate-900 dark:text-white"
+            >
+              Two-factor authentication
+            </h3>
 
-          {!me ? null : me.mfa_enabled ? (
+            {!me ? null : me.mfa_enabled ? (
           <>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
               Signed in as <span className="font-mono">{me.username}</span> — an authenticator app
@@ -181,6 +196,7 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
             </div>
           </>
         )}
+          </section>
         </div>
       </div>
     </dialog>
