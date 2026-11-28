@@ -81,13 +81,10 @@ export function EmailTemplatesCard() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Email Templates</h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Subject and body for every transactional email. Plain text with {'{placeholder}'} tokens;
-            unknown tokens are sent as-is.
-          </p>
-        </div>
+        <p className="max-w-xl text-sm text-slate-600 dark:text-slate-400">
+          Subject and body for every transactional email. Plain text with {'{placeholder}'} tokens;
+          unknown tokens are sent as-is.
+        </p>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"

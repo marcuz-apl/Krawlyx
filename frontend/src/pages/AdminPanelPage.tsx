@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Database, Server, FolderUp, Inbox, Mail, Settings as SettingsIcon, Users, type LucideIcon } from 'lucide-react';
+import { Database, Server, FolderUp, Inbox, Settings as SettingsIcon, Users, type LucideIcon } from 'lucide-react';
 import { useMe } from '@/hooks/useAuth';
 import { AdminEnginesTable } from '@/components/AdminEnginesTable';
 import { EmailTemplatesCard } from '@/components/EmailTemplatesCard';
@@ -10,7 +10,7 @@ import { UsersTable } from '@/components/UsersTable';
 import { DatabaseBrowser } from '@/components/DatabaseBrowser';
 import { api } from '@/lib/api/client';
 
-type Tab = 'engines' | 'exports' | 'settings' | 'emails' | 'users' | 'database' | 'access-requests';
+type Tab = 'engines' | 'exports' | 'settings' | 'users' | 'database' | 'access-requests';
 
 const accessRequestKey = ['access-requests'] as const;
 
@@ -62,7 +62,6 @@ export function AdminPanelPage() {
     { key: 'engines', label: 'Engines', icon: Server },
     { key: 'exports', label: 'Export Targets', icon: FolderUp },
     { key: 'settings', label: 'Settings', icon: SettingsIcon },
-    { key: 'emails', label: 'Emails', icon: Mail },
     { key: 'users', label: 'Users', icon: Users },
     ...(canReview ? [{ key: 'access-requests' as const, label: 'Access Requests', icon: Inbox }] : []),
     ...(isSuperAdmin ? [{ key: 'database' as Tab, label: 'Database Browser', icon: Database, superadminOnly: true }] : []),
@@ -110,7 +109,6 @@ export function AdminPanelPage() {
       {tab === 'engines' && <AdminEnginesTable />}
       {tab === 'exports' && <ExportTargetsTable />}
       {tab === 'settings' && <SettingsReadOnlyCard />}
-      {tab === 'emails' && <EmailTemplatesCard />}
       {tab === 'users' && <UsersTable />}
       {tab === 'database' && isSuperAdmin && <DatabaseBrowser />}
       {tab === 'access-requests' && canReview && (
@@ -237,6 +235,15 @@ export function AdminPanelPage() {
               );
             })}
           </ul>
+
+          <details className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200">
+              Email templates — acknowledgement, decisions, admin notice, welcome
+            </summary>
+            <div className="border-t border-slate-200 p-4 dark:border-slate-800">
+              <EmailTemplatesCard />
+            </div>
+          </details>
         </section>
       )}
     </div>
