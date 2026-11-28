@@ -61,6 +61,17 @@ Krawlyx provides built-in crawl engines tailored for different scraping tasks, w
 - **🛡️🐴 [Playtrafi](https://github.com/marcuz-apl/playtrafi)** ([Docs](docs/0013-engines-comparison.md), PyPI: `playtrafi`): Undetected Patchright headless Chromium browser engine paired with Trafilatura for pristine Markdown extraction, full client-side JavaScript execution, Next.js/React hydration support, and automatic HTTP fallback. Best for dynamic, text-heavy editorial pages and article archives.
 - **🚀 [Scrapy](https://github.com/scrapy/scrapy)**: Ultra-fast, lightweight asynchronous HTTP engine running in an isolated subprocess. Best for large-scale bulk scraping, server-rendered HTML, and deep link crawling.
 
+## Account access requests
+
+Visitors can request access from the login dialog. SuperAdmins can find pending submissions in **Admin → Access Requests**, create approved accounts in **Users**, and mark requests reviewed.
+
+Copy the root `.env.example` to `.env` for a new installation. If you already have a `.env`, copy in the SMTP settings and enter the administrator's email address as `MYKRAWL_ACCESS_REQUEST_EMAIL`.
+
+- **Resend (default)** uses `smtp.resend.com:587` with STARTTLS. Enter your API key as `MYKRAWL_SMTP_PASSWORD` and a sender address on your verified domain as `MYKRAWL_SMTP_FROM`. [Resend SMTP setup](https://resend.com/docs/send-with-smtp)
+- **Gmail / Google Workspace** uses `smtp.gmail.com:587` with STARTTLS. Replace the Resend settings with the Gmail example and use a Google App Password. [Google App Passwords](https://support.google.com/mail/answer/185833)
+
+The Access Requests queue remains available if email delivery is unavailable.
+
 ## SuperAdmin Password Recovery
 
 If you ever forget the password for the SuperAdmin (`admin`) account:

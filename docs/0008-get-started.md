@@ -9,7 +9,7 @@ pip install -e "."
 patchright install chromium
 ```
 
-Copy `.env.example` → `.env` and fill at minimum:
+Copy the root `.env.example` to `.env` and fill at minimum:
 
 ```env
 MYKRAWL_SECRET_KEY=$(openssl rand -hex 32)
@@ -111,5 +111,5 @@ Explore interactive architectural documentation, milestone records, Docker/Synol
 
 - `data/krawlyx.db` — SQLite system of record (`.gitignore`: `data/*.db`).
 - `data/logs/app.log` and `data/logs/jobs/*.log` — runtime artifacts (`.gitignore`: `data/logs/`).
-- `.env` — secrets (`.env.example` only).
+- `.env` — local secrets (commit the example template only).
 - `frontend/dist/` — built SPA (`.gitignore`).

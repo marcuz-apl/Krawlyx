@@ -10,7 +10,7 @@
 data/*.db-wal
 data/*.db-shm
 data/*.db
-.env
+**/.env
 .tmp/
 tmp/
 *.tmp

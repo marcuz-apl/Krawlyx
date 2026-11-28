@@ -15,9 +15,12 @@ import os
 import sys
 from pathlib import Path
 
+# Windows consoles default to cp1252, which cannot encode the status emoji below.
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 # Add backend directory to python path
-root_dir = Path(__file__).resolve().parent.parent
-backend_dir = root_dir / "backend"
+backend_dir = Path(__file__).resolve().parent.parent
 if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 

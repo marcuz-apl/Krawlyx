@@ -82,6 +82,7 @@ export function UsersTable() {
           <thead className="bg-slate-50 dark:bg-slate-950 uppercase tracking-wider text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800">
             <tr>
               <th className="px-4 py-3">Username</th>
+              <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Access Tier / Role</th>
               <th className="px-4 py-3">Created</th>
               <th className="px-4 py-3 text-right">Actions</th>
@@ -90,7 +91,7 @@ export function UsersTable() {
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
             {users.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-slate-500 dark:text-slate-400">
+                <td colSpan={5} className="px-4 py-6 text-center text-slate-500 dark:text-slate-400">
                   No users found.
                 </td>
               </tr>
@@ -115,6 +116,9 @@ export function UsersTable() {
                         (You)
                       </span>
                     )}
+                  </td>
+                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
+                    {u.email || '—'}
                   </td>
                   <td className="px-4 py-3">
                     {isTargetSuper ? (
@@ -195,15 +199,48 @@ export function UsersTable() {
 
 function CreateUserForm({ isSuperAdmin, onDone }: { isSuperAdmin: boolean; onDone: () => void }) {
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'runner' | 'admin' | 'superadmin'>('runner');
   const [err, setErr] = useState<string | null>(null);
+  const [created, setCreated] = useState<{ username: string; email: string; sent: boolean } | null>(
+    null
+  );
 
   const create = useMutation({
-    mutationFn: () => api.users.create({ username, password, role }),
-    onSuccess: onDone,
+    mutationFn: () => api.users.create({ username, password, role, email: email.trim() }),
+    onSuccess: (user) =>
+      setCreated({
+        username: user.username,
+        email: user.email ?? email.trim(),
+        sent: user.welcome_email_sent,
+      }),
     onError: (e: any) => setErr(e.response?.data?.detail || e.message || 'Creation failed'),
   });
+
+  if (created) {
+    return (
+      <div className="space-y-3 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/30 p-4 shadow-sm">
+        <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+          Account created for "{created.username}" ({created.email})
+        </p>
+        <p className="text-xs text-emerald-700 dark:text-emerald-400">
+          {created.sent
+            ? 'The username and password were emailed to the user.'
+            : 'Welcome email was not sent — SMTP is not configured. Share the password with the user manually.'}
+        </p>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={onDone}
+            className="rounded-lg bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-emerald-500 shadow-md shadow-emerald-600/20"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form
@@ -214,7 +251,7 @@ function CreateUserForm({ isSuperAdmin, onDone }: { isSuperAdmin: boolean; onDon
       }}
       className="space-y-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-4 shadow-sm"
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         <label className="text-xs font-semibold">
           <span className="text-slate-700 dark:text-slate-300">Username</span>
           <input
@@ -222,6 +259,17 @@ function CreateUserForm({ isSuperAdmin, onDone }: { isSuperAdmin: boolean; onDon
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="e.g. john_doe"
+            className="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2.5 py-1.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          />
+        </label>
+        <label className="text-xs font-semibold">
+          <span className="text-slate-700 dark:text-slate-300">Email</span>
+          <input
+            required
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="e.g. requester@example.com"
             className="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2.5 py-1.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           />
         </label>

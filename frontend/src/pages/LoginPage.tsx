@@ -1,306 +1,152 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Bug,
-  Lock,
-  User,
-  ArrowRight,
-  ShieldCheck,
-  Zap,
-  Sparkles,
-  Database,
-  FolderDown,
-  Globe,
-} from "lucide-react";
-import { useLogin } from "@/hooks/useAuth";
+import { ArrowRight, Bug, Clock, Database, FolderDown, Pause, Play, Zap } from "lucide-react";
+
+import { AccessDialog } from "@/components/AccessDialog";
 import { api } from "@/lib/api/client";
 
-interface LocationState {
-  from?: { pathname: string };
-}
-
-const SLOGANS = [
+const SLIDES = [
   {
-    title: "Precision Scraping & Structured Intelligence.",
-    desc: "Self-hosted workbench powered by Patroy, Playtrafi & Scrapy spiders.",
+    title: "Turn web pages into usable datasets.",
+    description: "Run batch crawls with Patroy, Playtrafi, and Scrapy from one self-hosted workbench.",
   },
   {
-    title: "Stealth Chromium Automation & Trafilatura.",
-    desc: "Render client-side JavaScript and dynamic SPAs into clean Markdown.",
+    title: "Extract data from dynamic websites.",
+    description: "Render JavaScript with browser engines and turn pages into structured records or clean Markdown.",
   },
   {
-    title: "Subprocess Spiders & Concurrent Deep Ingestion.",
-    desc: "High-throughput Scrapy spiders streaming results in isolated processes.",
+    title: "Schedule the crawls you run often.",
+    description: "Run jobs on demand or on a recurring schedule and follow their progress in the workbench.",
   },
   {
-    title: "Universal Relational SQL Transform & Adaptive Exports.",
-    desc: "Turn web crawls into structured SQLite datasets with CSV/XLSX splitting.",
+    title: "Keep your results ready to use.",
+    description: "Explore results in SQLite, combine datasets, and export them as CSV or Excel files.",
   },
 ];
 
+const FEATURES = [
+  { icon: Zap, label: "Three crawl engines", detail: "Patroy, Playtrafi, and Scrapy" },
+  { icon: Clock, label: "Scheduled jobs", detail: "Batch crawls on demand or by cron" },
+  { icon: Database, label: "Datasets & SQL", detail: "Explore and combine results" },
+  { icon: FolderDown, label: "CSV & Excel exports", detail: "Automatic file splitting" },
+];
+
 export function LoginPage() {
-  const login = useLogin();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [sloganIndex, setSloganIndex] = useState(0);
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [slide, setSlide] = useState(0);
+  const [playing, setPlaying] = useState(
+    () => !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { data: healthData } = useQuery({
+  const { data: health } = useQuery({
     queryKey: ["health"],
-    queryFn: () => api.health(),
-    staleTime: 60000,
+    queryFn: api.health,
+    staleTime: 60_000,
   });
-  const rawVersion = healthData?.version || "v2.5.0";
-  const version = rawVersion.split("+")[0].split("-")[0] || "v2.5.0";
+  const version = health?.version.split(/[+-]/)[0];
 
   useEffect(() => {
-    setUsername("");
-    setPassword("");
-  }, [location.key]);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setSloganIndex((prev) => (prev + 1) % SLOGANS.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    login.mutate(
-      { username: username.trim(), password },
-      {
-        onSuccess: () => {
-          const state = (location.state as LocationState | null) ?? {};
-          navigate(state.from?.pathname ?? "/", { replace: true });
-        },
-      },
-    );
-  };
+    if (!playing || dialogOpen) return;
+    const timer = window.setInterval(() => setSlide((index) => (index + 1) % SLIDES.length), 6500);
+    return () => window.clearInterval(timer);
+  }, [playing, dialogOpen]);
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-slate-50 dark:bg-slate-950 transition-colors duration-150">
-      {/* ── Left: Brand Splash Panel (60%) ─────────────────────────────── */}
-      <div className="relative hidden lg:flex lg:w-[60%] flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-900 via-brand-950 to-indigo-950 text-white p-10 xl:p-14">
-        {/* Decorative glow blobs */}
-        <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-brand-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-40 -right-24 h-[28rem] w-[28rem] rounded-full bg-indigo-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute top-1/3 right-1/4 h-64 w-64 rounded-full bg-sky-500/10 blur-3xl" />
+    <div className="relative isolate flex min-h-dvh flex-col overflow-hidden bg-gradient-to-br from-slate-950 via-brand-950 to-indigo-950 text-white">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -left-40 -top-48 h-[32rem] w-[32rem] rounded-full bg-brand-500/20 blur-3xl" />
+        <div className="absolute -bottom-64 -right-48 h-[44rem] w-[44rem] rounded-full bg-indigo-500/20 blur-3xl" />
+      </div>
 
-        {/* Top: logo + wordmark */}
-        <div className="relative z-10 text-center">
-          <div className="flex items-center justify-center gap-4">
-            <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-brand-500 via-indigo-500 to-sky-400 text-white shadow-xl shadow-brand-500/30">
-              <Bug className="h-8 w-8 animate-spin-slow text-white" />
-            </div>
-            <div className="flex items-baseline gap-2.5">
-              <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-brand-300 via-indigo-200 to-sky-300 bg-clip-text text-transparent">
-                Krawlyx
+      <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-10 sm:py-8">
+        <div className="flex items-center gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-600 to-sky-500">
+            <Bug aria-hidden="true" className="h-6 w-6" />
+          </span>
+          <span className="text-xl font-bold tracking-tight">Krawlyx</span>
+        </div>
+        <Link to="/contact" className="flex min-h-11 items-center text-sm font-medium text-brand-100 hover:text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-300">
+          Contact
+        </Link>
+      </header>
+
+      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-5 py-10 text-center sm:px-10 sm:py-16">
+        <div className="grid w-full max-w-4xl">
+          {SLIDES.map(({ title, description }, index) => (
+            <div
+              key={title}
+              aria-hidden={slide !== index}
+              className={`col-start-1 row-start-1 flex flex-col items-center self-center motion-safe:transition-opacity motion-safe:duration-300 ${slide === index ? "opacity-100" : "invisible opacity-0"}`}
+            >
+              <h1 className="text-balance text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-7xl">
+                {title}
               </h1>
-              <span
-                title={rawVersion}
-                className="rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-white/80"
-              >
-                {version}
-              </span>
+              <p className="mt-5 max-w-xl text-balance text-base leading-relaxed text-brand-100 sm:text-lg">
+                {description}
+              </p>
             </div>
-          </div>
-          <p className="mt-3 text-sm font-medium uppercase tracking-[0.25em] text-brand-200/70">
-            Self-Hosted Web Scraping Workbench
-          </p>
+          ))}
         </div>
 
-        {/* Middle: animated slogans */}
-        <div className="relative z-10 mx-auto max-w-xl text-center">
-          <div key={sloganIndex} className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <Sparkles className="mb-4 h-6 w-6 text-amber-300/90 mx-auto" />
-            <p className="text-2xl xl:text-3xl font-bold leading-snug tracking-tight text-white text-balance">
-              {SLOGANS[sloganIndex].title}
-            </p>
-            <p className="mt-3 text-sm xl:text-base leading-relaxed text-slate-300/90 text-balance">
-              {SLOGANS[sloganIndex].desc}
-            </p>
-          </div>
-
-          {/* Dots Carousel Indicator */}
-          <div className="flex items-center justify-center gap-2 mt-6">
-            {SLOGANS.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setSloganIndex(idx)}
-                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                  sloganIndex === idx
-                    ? "w-6 bg-brand-400"
-                    : "w-2 bg-white/25 hover:bg-white/40"
-                }`}
-                aria-label={`Go to slogan ${idx + 1}`}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom: feature highlights */}
-        <div className="relative z-10 mx-auto grid grid-cols-2 gap-3 max-w-xl">
-          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
-            <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-300" />
-            <div>
-              <p className="text-xs font-bold text-white">Playtrafi Browser Engine</p>
-              <p className="text-[11px] text-slate-300/80">Undetected Chromium + Markdown</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
-            <Zap className="h-5 w-5 shrink-0 text-amber-300" />
-            <div>
-              <p className="text-xs font-bold text-white">Scrapy High-Speed Spiders</p>
-              <p className="text-[11px] text-slate-300/80">Isolated subprocess workers</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
-            <Database className="h-5 w-5 shrink-0 text-sky-300" />
-            <div>
-              <p className="text-xs font-bold text-white">Universal Datasets &amp; SQL</p>
-              <p className="text-[11px] text-slate-300/80">Structured extraction at scale</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
-            <FolderDown className="h-5 w-5 shrink-0 text-indigo-300" />
-            <div>
-              <p className="text-xs font-bold text-white">Streaming CSV / XLSX</p>
-              <p className="text-[11px] text-slate-300/80">Auto-splitting export files</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Right: Sign-in Column (40%) ────────────────────────────────── */}
-      <div className="relative flex flex-1 flex-col items-center justify-center p-6 sm:p-10">
-        {/* Mobile-only compact brand header */}
-        <div className="lg:hidden mb-8 flex flex-col items-center text-center">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-600 to-sky-500 text-white shadow-xl shadow-brand-500/25">
-            <Bug className="h-6 w-6 animate-spin-slow text-white" />
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-brand-600 via-indigo-600 to-sky-500 bg-clip-text text-transparent dark:from-brand-400 dark:via-indigo-300 dark:to-sky-300">
-              Krawlyx
-            </h1>
-            <span
-              title={rawVersion}
-              className="rounded-full font-mono text-[10px] font-semibold text-slate-400 dark:text-slate-500"
-            >
-              {version}
-            </span>
-          </div>
-          <p className="mt-1 text-xs font-medium uppercase tracking-widest text-slate-400 dark:text-slate-500">
-            Self-Hosted Web Scraping Workbench
-          </p>
-        </div>
-
-        <div className="w-full max-w-md">
-          {/* Desktop welcome heading */}
-          <div className="hidden lg:block mb-8">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Welcome back
-            </h2>
-            <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
-              Sign in to your workbench to manage crawls, datasets and exports.
-            </p>
-          </div>
-
-          {/* Login Form */}
-          <form
-            onSubmit={onSubmit}
-            autoComplete="off"
-            className="rounded-3xl border border-slate-200 bg-white p-7 sm:p-9 shadow-2xl dark:border-slate-800 dark:bg-slate-900 space-y-5"
-          >
-            <div>
-              <label className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 mb-2">
-                Username
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <User className="h-5 w-5" />
-                </div>
-                <input
-                  type="text"
-                  name="krawlyx-user"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  autoComplete="off"
-                  placeholder="admin"
-                  className="block w-full rounded-2xl border border-slate-300 bg-slate-50/50 pl-11 pr-4 py-3 text-base text-slate-900 placeholder-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800/60 dark:text-white dark:placeholder-slate-500 dark:focus:border-brand-400 dark:focus:bg-slate-800 transition"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="h-5 w-5" />
-                </div>
-                <input
-                  type="password"
-                  name="krawlyx-pass"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="new-password"
-                  placeholder="••••••••••••"
-                  className="block w-full rounded-2xl border border-slate-300 bg-slate-50/50 pl-11 pr-4 py-3 text-base text-slate-900 placeholder-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800/60 dark:text-white dark:placeholder-slate-500 dark:focus:border-brand-400 dark:focus:bg-slate-800 transition"
-                />
-              </div>
-            </div>
-
-            {login.isError && (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-3.5 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
-                Invalid username or password. Please verify credentials.
-              </div>
-            )}
-
+        <div className="mt-4 flex items-center" role="group" aria-label="Landing page highlights">
+          {SLIDES.map(({ title }, index) => (
             <button
-              type="submit"
-              disabled={login.isPending}
-              className="w-full flex items-center justify-center gap-2.5 rounded-2xl bg-brand-600 py-3.5 text-base font-bold text-white shadow-lg shadow-brand-500/25 hover:bg-brand-500 transition active:scale-[0.99] disabled:opacity-60 cursor-pointer"
+              key={title}
+              type="button"
+              aria-label={title}
+              aria-pressed={index === slide}
+              onClick={() => {
+                setSlide(index);
+                setPlaying(false);
+              }}
+              className="grid h-11 w-11 place-items-center rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-300"
             >
-              <span>{login.isPending ? "Signing in…" : "Sign In"}</span>
-              <ArrowRight className="h-5 w-5" />
+              <span className={`h-2 rounded-full ${index === slide ? "w-5 bg-brand-300" : "w-2 bg-brand-200/45"}`} />
             </button>
-          </form>
-
-          {/* Contact hint */}
-          <div className="mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
-            <Globe className="h-3.5 w-3.5" />
-            <span>Need help? Reach out via the </span>
-            <a
-              href="mailto:info@alfazen.org"
-              className="font-medium text-brand-600 hover:underline dark:text-brand-400"
-            >
-              contact
-            </a>
-            <span> page.</span>
-          </div>
-
-          {/* Footer branding */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm text-slate-400 dark:text-slate-500 font-medium">
-            <span>Krawlyx Workbench</span>
-            <span className="text-slate-300 dark:text-slate-700">·</span>
-            <span
-              title={rawVersion}
-              className="inline-flex items-center px-2.5 py-0.5 rounded-full font-mono text-xs font-semibold bg-slate-200/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-300/70 dark:border-slate-700/70 shadow-xs"
-            >
-              {version}
-            </span>
-            <span className="text-slate-300 dark:text-slate-700">·</span>
-            <span>© {new Date().getFullYear()} Alfazen Inc.</span>
-          </div>
+          ))}
+          <button
+            type="button"
+            aria-label={playing ? "Pause highlights" : "Play highlights"}
+            onClick={() => setPlaying(!playing)}
+            className="grid h-11 w-11 place-items-center rounded-md text-brand-100 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-300"
+          >
+            {playing ? <Pause aria-hidden="true" className="h-4 w-4" /> : <Play aria-hidden="true" className="h-4 w-4" />}
+          </button>
         </div>
-      </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            dialog.current?.showModal();
+            setDialogOpen(true);
+          }}
+          className="mt-8 inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-white px-7 py-3 text-base font-bold text-brand-900 shadow-lg shadow-slate-950/30 transition hover:bg-brand-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-300"
+        >
+          Log in <ArrowRight aria-hidden="true" className="h-5 w-5" />
+        </button>
+      </main>
+
+      <footer className="mx-auto w-full max-w-7xl px-5 sm:px-10">
+        <ul className="grid grid-cols-2 gap-x-5 gap-y-5 border-y border-white/15 py-5 sm:gap-6 sm:py-7 lg:grid-cols-4">
+          {FEATURES.map(({ icon: Icon, label, detail }) => (
+            <li key={label} className="flex items-start gap-2.5">
+              <Icon aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-brand-300 sm:h-5 sm:w-5" />
+              <div>
+                <p className="text-sm font-semibold">{label}</p>
+                <p className="mt-1 text-sm leading-snug text-brand-200">{detail}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="flex items-center justify-between gap-4 py-4 text-xs text-brand-200">
+          <span>© {new Date().getFullYear()} Alfazen Inc.</span>
+          {version && <span title={health?.version}>{version}</span>}
+        </div>
+      </footer>
+
+      <AccessDialog dialog={dialog} isOpen={dialogOpen} onClose={() => setDialogOpen(false)} />
     </div>
   );
 }

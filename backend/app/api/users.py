@@ -21,8 +21,8 @@ from app.core.db import get_db
 from app.core.security import hash_password
 from app.models import User
 from app.models.user import User as UserRow
-from app.schemas import UserCreate, UserOut, UserUpdate
-from app.services.users import create_user
+from app.schemas import UserCreate, UserCreateOut, UserOut, UserUpdate
+from app.services.users import create_user, send_welcome_email
 
 logger = logging.getLogger("mykrawl.api.users")
 
@@ -51,7 +51,7 @@ def list_users(
 
 @router.post(
     "",
-    response_model=UserOut,
+    response_model=UserCreateOut,
     status_code=201,
     dependencies=[Depends(verify_csrf)],
 )
@@ -59,19 +59,32 @@ def create_user_route(
     body: UserCreate,
     current_admin: Annotated[User, Depends(require_admin)],
     db: Annotated[Session, Depends(get_db)],
-) -> UserOut:
+) -> UserCreateOut:
     if body.role == "superadmin" and not _is_superadmin(current_admin):
         raise HTTPException(
             status_code=403, detail="Only SuperAdmin can create SuperAdmin accounts"
         )
+    email = body.email.strip()
+    if db.scalar(select(UserRow.id).where(UserRow.email == email)):
+        raise HTTPException(
+            status_code=400, detail=f"email {email!r} is already attached to another user"
+        )
     try:
-        row = create_user(db, body.username, body.password, body.role)
+        row = create_user(
+            db,
+            body.username,
+            body.password,
+            body.role,
+            email=email,
+            must_change_password=True,
+        )
     except IntegrityError as exc:
         db.rollback()
         raise HTTPException(
             status_code=400, detail=f"username {body.username!r} is already taken"
         ) from exc
-    return UserOut.model_validate(row)
+    sent = send_welcome_email(email, row.username, body.password)
+    return UserCreateOut(**UserOut.model_validate(row).model_dump(), welcome_email_sent=sent)
 
 
 @router.patch(
@@ -102,6 +115,16 @@ def patch_user_route(
 
     if body.password is not None:
         row.password_hash = hash_password(body.password)
+        row.must_change_password = True
+    if body.email is not None:
+        email = body.email.strip() or None
+        if email and db.scalar(
+            select(UserRow.id).where(UserRow.email == email, UserRow.id != row.id)
+        ):
+            raise HTTPException(
+                status_code=400, detail=f"email {email!r} is already attached to another user"
+            )
+        row.email = email
     if body.role is not None and body.role != row.role:
         if (
             row.role in ("admin", "superadmin")

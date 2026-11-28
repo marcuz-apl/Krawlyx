@@ -6,9 +6,15 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, verify_csrf
 from app.core.config import get_settings
 from app.core.db import get_db
-from app.core.security import CSRF_COOKIE, SESSION_COOKIE, issue_session
+from app.core.security import (
+    CSRF_COOKIE,
+    SESSION_COOKIE,
+    hash_password,
+    issue_session,
+    verify_password,
+)
 from app.models import User
-from app.schemas import LoginRequest, LoginResponse, UserOut
+from app.schemas import ChangePasswordRequest, LoginRequest, LoginResponse, UserOut
 from app.services import users as users_svc
 
 router = APIRouter(tags=["auth"])
@@ -41,6 +47,19 @@ def login(
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(get_current_user)) -> UserOut:
     return UserOut.model_validate(user)
+
+
+@router.post("/change-password", status_code=204, dependencies=[Depends(verify_csrf)])
+def change_password(
+    payload: ChangePasswordRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    if not verify_password(payload.current_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    user.password_hash = hash_password(payload.new_password)
+    user.must_change_password = False
+    db.commit()
 
 
 @router.post("/logout", status_code=204, dependencies=[Depends(verify_csrf)])

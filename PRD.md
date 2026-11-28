@@ -153,7 +153,9 @@ released under Apache-2.0.
 | Manage users | ❌ | ✅ |
 
 Local account store (SQLite), bcrypt-hashed passwords, signed session cookies.
-v1 ships with a bootstrap admin created on first run.
+v1 ships with a bootstrap admin created on first run. Accounts created in the
+Admin Panel require a unique email (used to deliver initial credentials) and
+must change the password on first sign-in (FR-USR-01..03).
 
 ## 6. Functional requirements
 
@@ -208,6 +210,12 @@ IDs are stable and referenced by tests and issues.
 - **FR-SET-03** — SSRF guard toggle (default **on**): blocks loopback/private/link-local/metadata IP ranges resolved at fetch time; admin may disable for intranet crawling and manage an allow-list.
 - **FR-SET-04** — Content size cap per target (default 5 MB extracted text) to protect the DB and files.
 
+### 6.6 Users & access (admin)
+
+- **FR-USR-01** — Admin creates accounts with {username, password, email, role}. **Email is mandatory and unique** at creation; the bootstrap admin seeded from env is exempt.
+- **FR-USR-02** — On creation the credentials email (username + temporary password) is sent to the user's email via the configured SMTP relay. Delivery is best-effort: failures never block creation and are surfaced to the admin.
+- **FR-USR-03** — Accounts created by an admin, and accounts whose password an admin resets, carry `must_change_password`; the user must set a new password on first sign-in before using the workbench.
+
 ## 7. Engine adapter contract
 
 All engines implement (Python `Protocol` in `app/engines/base.py`):
@@ -251,7 +259,9 @@ class CrawlEngine(Protocol):
 ## 8. Data model (SQLite sketch)
 
 ```sql
-users         (id, username UNIQUE, password_hash, role CHECK(role IN ('runner','admin')), created_at)
+users         (id, username UNIQUE, email UNIQUE NULLABLE /*required for admin-created*/,
+               password_hash, role CHECK(role IN ('runner','admin','superadmin')),
+               must_change_password INTEGER DEFAULT 0, created_at)
 engines       (id, name, type, config_enc, pooled INTEGER DEFAULT 0, created_at, disabled_at)
 jobs          (id, created_by FK users, engine_id FK engines, options JSON, notes,
                status CHECK(status IN ('queued','running','completed','failed','cancelled','export_degraded')),
@@ -292,6 +302,8 @@ POST            /api/schedules/{id}/run-now
 GET/POST/PATCH/DELETE /api/export-targets       # admin; POST .../{id}/test
 GET/PATCH       /api/settings                   # admin
 GET/POST        /api/users                      # admin
+PATCH/DELETE    /api/users/{id}                 # admin
+POST            /api/auth/change-password       # authenticated; clears must_change_password
 ```
 
 The React SPA consumes `/api/*` exclusively. In production FastAPI serves the built

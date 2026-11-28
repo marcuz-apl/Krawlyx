@@ -3,13 +3,21 @@
 // openapi-typescript. The stub here keeps the app buildable before the API
 // exists; the production path is fully typed via OpenAPI codegen.
 
+import type { components } from './schema';
+
 export type Role = 'runner' | 'admin' | 'superadmin';
 
 export interface UserOut {
   id: number;
   username: string;
+  email?: string | null;
   role: Role;
+  must_change_password?: boolean;
   created_at?: string | null;
+}
+
+export interface UserCreateOut extends UserOut {
+  welcome_email_sent: boolean;
 }
 
 export interface LoginRequest {
@@ -282,11 +290,13 @@ export interface UserCreateBody {
   username: string;
   password: string;
   role?: Role;
+  email: string;
 }
 
 export interface UserUpdateBody {
   password?: string;
   role?: Role;
+  email?: string | null;
 }
 
 // ---- datasets & merge ----
@@ -374,6 +384,9 @@ export interface ContactMessageOut {
   created_at: string;
 }
 
+export type AccessRequestOut = components['schemas']['AccessRequestOut'];
+export type AccessRequestDecisionOut = components['schemas']['AccessRequestDecisionOut'];
+
 const BASE = '';
 
 let inMemoryCsrf: string | null = null;
@@ -447,6 +460,11 @@ export const api = {
     }
   },
   me: () => request<UserOut>('/api/auth/me'),
+  changePassword: (body: { current_password: string; new_password: string }) =>
+    request<void>('/api/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
 
   messages: {
     submit: (body: ContactMessageBody) =>
@@ -455,6 +473,12 @@ export const api = {
         body: JSON.stringify(body),
       }),
     list: () => request<ContactMessageOut[]>('/api/messages'),
+    accessRequests: () => request<AccessRequestOut[]>('/api/messages/access-requests'),
+    reviewAccessRequest: (id: number, status: 'pending' | 'granted' | 'rejected', note?: string) =>
+      request<AccessRequestDecisionOut>(`/api/messages/access-requests/${id}/review`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status, note }),
+      }),
   },
 
   engines: {
@@ -634,7 +658,7 @@ export const api = {
   users: {
     list: () => request<UserOut[]>('/api/users'),
     create: (body: UserCreateBody) =>
-      request<UserOut>('/api/users', { method: 'POST', body: JSON.stringify(body) }),
+      request<UserCreateOut>('/api/users', { method: 'POST', body: JSON.stringify(body) }),
     patch: (id: number, body: UserUpdateBody) =>
       request<UserOut>(`/api/users/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
     delete: (id: number) => request<void>(`/api/users/${id}`, { method: 'DELETE' }),

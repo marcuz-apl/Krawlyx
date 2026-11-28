@@ -1,8 +1,11 @@
 """Contact message schemas (public contact form)."""
 
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+AccessRequestStatus = Literal["pending", "granted", "rejected"]
 
 
 class ContactMessageCreate(BaseModel):
@@ -23,3 +26,19 @@ class ContactMessageOut(BaseModel):
     subject: str
     message: str
     created_at: datetime
+
+
+class AccessRequestOut(ContactMessageOut):
+    status: AccessRequestStatus
+    reviewed_at: datetime | None
+
+
+class AccessRequestDecisionOut(AccessRequestOut):
+    requester_notified: bool = False
+
+
+class AccessRequestDecision(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: AccessRequestStatus
+    note: str | None = Field(default=None, max_length=2000)

@@ -3,7 +3,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import field_validator
+from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # repo root (backend/app/core/config.py -> parents[3]); ./data lives there per PRD §4.2
@@ -26,6 +26,12 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     admin_user: str | None = None
     admin_password: str | None = None
+    access_request_email: str = ""
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_from: str = ""
+    smtp_username: str = ""
+    smtp_password: SecretStr = SecretStr("")
 
     # M3 worker pool (NFR-01: ≥ 2 concurrent jobs, ≥ 10 concurrent targets).
     max_concurrent_jobs: int = 2

@@ -25,13 +25,17 @@ def require_admin(user: User = Depends(get_current_user)) -> User:
     return user
 
 
-def require_superadmin(user: User = Depends(get_current_user)) -> User:
-    # Bootstrap user "admin" or role "superadmin" is superadmin
-    if user.role != "superadmin" and not (
-        user.username == "admin" and user.role in ("admin", "superadmin")
-    ):
+def require_superadmin_role(user: User = Depends(get_current_user)) -> User:
+    if user.role != "superadmin":
         raise HTTPException(status_code=403, detail="SuperAdmin role required")
     return user
+
+
+def require_superadmin(user: User = Depends(get_current_user)) -> User:
+    # Preserve access for the legacy bootstrap administrator.
+    if user.username == "admin" and user.role == "admin":
+        return user
+    return require_superadmin_role(user)
 
 
 def verify_csrf(request: Request, _user: User = Depends(get_current_user)) -> None:

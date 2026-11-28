@@ -55,6 +55,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Change Password */
+        post: operations["change_password_api_auth_change_password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/logout": {
         parameters: {
             query?: never;
@@ -725,6 +742,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/exports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Export Files
+         * @description List all exported CSV/XLSX/JSON files saved across export folders.
+         */
+        get: operations["list_export_files_api_exports_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exports/{filename}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download Export File
+         * @description Download an exported file directly to client computer (Windows, macOS, Linux).
+         */
+        get: operations["download_export_file_api_exports__filename__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Export File
+         * @description Delete an export file from the server storage (Admin only).
+         */
+        delete: operations["delete_export_file_api_exports__filename__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/schedules": {
         parameters: {
             query?: never;
@@ -830,6 +891,75 @@ export interface paths {
         head?: never;
         /** Patch User Route */
         patch: operations["patch_user_route_api_users__user_id__patch"];
+        trace?: never;
+    };
+    "/api/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Messages */
+        get: operations["list_messages_api_messages_get"];
+        put?: never;
+        /** Submit Message */
+        post: operations["submit_message_api_messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/messages/access-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Access Requests */
+        get: operations["list_access_requests_api_messages_access_requests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/messages/access-requests/{request_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Review Access Request */
+        patch: operations["review_access_request_api_messages_access_requests__request_id__review_patch"];
+        trace?: never;
+    };
+    "/api/messages/{message_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Message */
+        get: operations["get_message_api_messages__message_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/database/tables": {
@@ -946,7 +1076,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Update Settings Route
+         * @description Update runtime settings, resize dispatcher concurrency, and persist to .env.
+         */
+        patch: operations["update_settings_route_api_settings_patch"];
         trace?: never;
     };
     "/api/settings/db/stats": {
@@ -1030,6 +1164,71 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AccessRequestDecision */
+        AccessRequestDecision: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "granted" | "rejected";
+            /** Note */
+            note?: string | null;
+        };
+        /** AccessRequestDecisionOut */
+        AccessRequestDecisionOut: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Email */
+            email: string;
+            /** Subject */
+            subject: string;
+            /** Message */
+            message: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "granted" | "rejected";
+            /** Reviewed At */
+            reviewed_at: string | null;
+            /**
+             * Requester Notified
+             * @default false
+             */
+            requester_notified: boolean;
+        };
+        /** AccessRequestOut */
+        AccessRequestOut: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Email */
+            email: string;
+            /** Subject */
+            subject: string;
+            /** Message */
+            message: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "granted" | "rejected";
+            /** Reviewed At */
+            reviewed_at: string | null;
+        };
         /** BulkDeleteJobsIn */
         BulkDeleteJobsIn: {
             /** Job Ids */
@@ -1070,6 +1269,42 @@ export interface components {
         CapabilityList: {
             /** Types */
             types: components["schemas"]["EngineCapabilities"][];
+        };
+        /** ChangePasswordRequest */
+        ChangePasswordRequest: {
+            /** Current Password */
+            current_password: string;
+            /** New Password */
+            new_password: string;
+        };
+        /** ContactMessageCreate */
+        ContactMessageCreate: {
+            /** Name */
+            name: string;
+            /** Email */
+            email: string;
+            /** Subject */
+            subject: string;
+            /** Message */
+            message: string;
+        };
+        /** ContactMessageOut */
+        ContactMessageOut: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Email */
+            email: string;
+            /** Subject */
+            subject: string;
+            /** Message */
+            message: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** CreateDatasetIn */
         CreateDatasetIn: {
@@ -1235,6 +1470,23 @@ export interface components {
             /** Disabled */
             disabled?: boolean | null;
         };
+        /** ExportFileInfo */
+        ExportFileInfo: {
+            /** Filename */
+            filename: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Size Human */
+            size_human: string;
+            /** Modified At */
+            modified_at: string;
+            /** Format */
+            format: string;
+            /** Job Id */
+            job_id?: number | null;
+            /** Row Count */
+            row_count?: number | null;
+        };
         /** ExportTargetCreate */
         ExportTargetCreate: {
             /** Name */
@@ -1371,6 +1623,10 @@ export interface components {
             id: number;
             /** Engine Id */
             engine_id: number;
+            /** Engine Name */
+            engine_name?: string | null;
+            /** Engine Type */
+            engine_type?: string | null;
             /** Status */
             status: string;
             counts: components["schemas"]["JobCounts"];
@@ -1676,6 +1932,27 @@ export interface components {
             /** Admin Contact Email */
             admin_contact_email: string;
         };
+        /** SettingsUpdateBody */
+        SettingsUpdateBody: {
+            /** Max Concurrent Jobs */
+            max_concurrent_jobs?: number | null;
+            /** Max Parallel Targets Per Job */
+            max_parallel_targets_per_job?: number | null;
+            /** Default Split Size Mb */
+            default_split_size_mb?: number | null;
+            /** Robots Txt Enabled */
+            robots_txt_enabled?: boolean | null;
+            /** Per Domain Interval S */
+            per_domain_interval_s?: number | null;
+            /** Ssrf Guard Enabled */
+            ssrf_guard_enabled?: boolean | null;
+            /** Content Size Cap Bytes */
+            content_size_cap_bytes?: number | null;
+            /** Ssrf Allow List */
+            ssrf_allow_list?: string[] | null;
+            /** Admin Contact Email */
+            admin_contact_email?: string | null;
+        };
         /** SplitDatasetIn */
         SplitDatasetIn: {
             /**
@@ -1780,6 +2057,31 @@ export interface components {
              * @enum {string}
              */
             role: "runner" | "admin" | "superadmin";
+            /** Email */
+            email: string;
+        };
+        /** UserCreateOut */
+        UserCreateOut: {
+            /** Id */
+            id: number;
+            /** Username */
+            username: string;
+            /** Email */
+            email?: string | null;
+            /** Role */
+            role: string;
+            /**
+             * Must Change Password
+             * @default false
+             */
+            must_change_password: boolean;
+            /** Created At */
+            created_at?: string | null;
+            /**
+             * Welcome Email Sent
+             * @default false
+             */
+            welcome_email_sent: boolean;
         };
         /** UserOut */
         UserOut: {
@@ -1787,8 +2089,15 @@ export interface components {
             id: number;
             /** Username */
             username: string;
+            /** Email */
+            email?: string | null;
             /** Role */
             role: string;
+            /**
+             * Must Change Password
+             * @default false
+             */
+            must_change_password: boolean;
             /** Created At */
             created_at?: string | null;
         };
@@ -1798,6 +2107,8 @@ export interface components {
             password?: string | null;
             /** Role */
             role?: ("runner" | "admin" | "superadmin") | null;
+            /** Email */
+            email?: string | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -1892,6 +2203,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserOut"];
+                };
+            };
+        };
+    };
+    change_password_api_auth_change_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -3200,6 +3542,86 @@ export interface operations {
             };
         };
     };
+    list_export_files_api_exports_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportFileInfo"][];
+                };
+            };
+        };
+    };
+    download_export_file_api_exports__filename__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                filename: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_export_file_api_exports__filename__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                filename: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_schedules_api_schedules_get: {
         parameters: {
             query?: never;
@@ -3449,7 +3871,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserOut"];
+                    "application/json": components["schemas"]["UserCreateOut"];
                 };
             };
             /** @description Validation Error */
@@ -3514,6 +3936,145 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_messages_api_messages_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactMessageOut"][];
+                };
+            };
+        };
+    };
+    submit_message_api_messages_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactMessageCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactMessageOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_access_requests_api_messages_access_requests_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessRequestOut"][];
+                };
+            };
+        };
+    };
+    review_access_request_api_messages_access_requests__request_id__review_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccessRequestDecision"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessRequestDecisionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_message_api_messages__message_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactMessageOut"];
                 };
             };
             /** @description Validation Error */
@@ -3696,6 +4257,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SettingsOut"];
+                };
+            };
+        };
+    };
+    update_settings_route_api_settings_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SettingsUpdateBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
