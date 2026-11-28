@@ -61,7 +61,7 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
       ref={dialog}
       aria-labelledby="security-dialog-title"
       onClose={handleClose}
-      className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-4xl overflow-y-auto rounded-2xl bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/80 dark:bg-slate-900 dark:text-white"
+      className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-3xl overflow-y-auto rounded-2xl bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/80 dark:bg-slate-900 dark:text-white"
     >
       <div className="p-6 sm:p-8">
         <div className="flex items-start justify-between gap-3">
