@@ -10,11 +10,13 @@ from pydantic import BaseModel
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, require_admin
+from app.api.deps import get_current_user, get_db, require_admin, verify_csrf
 from app.core.config import get_env_file_path, get_settings, reload_settings
 from app.core.env_writer import update_env_file
 from app.models import Dataset, DatasetRow, Job, JobResult, User
 from app.schemas import SettingsOut, SettingsUpdateBody
+from app.schemas.email_templates import EmailTemplatesOut, EmailTemplatesUpdate
+from app.services import email_templates as email_templates_svc
 from app.services import jobs as jobs_svc
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
@@ -127,6 +129,39 @@ def update_settings_route(
     )
 
 
+@router.get("/email-templates", response_model=EmailTemplatesOut)
+def get_email_templates(
+    _admin: Annotated[User, Depends(require_admin)],
+    db: Annotated[Session, Depends(get_db)],
+) -> EmailTemplatesOut:
+    return EmailTemplatesOut(
+        templates=email_templates_svc.get_templates(db),
+        defaults=email_templates_svc.DEFAULTS,
+    )
+
+
+@router.patch(
+    "/email-templates",
+    response_model=EmailTemplatesOut,
+    dependencies=[Depends(verify_csrf)],
+)
+def update_email_templates(
+    body: EmailTemplatesUpdate,
+    _admin: Annotated[User, Depends(require_admin)],
+    db: Annotated[Session, Depends(get_db)],
+) -> EmailTemplatesOut:
+    payload = (
+        {key: template.model_dump() for key, template in body.templates.items()}
+        if body.templates is not None
+        else None
+    )
+    try:
+        templates = email_templates_svc.save_templates(db, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return EmailTemplatesOut(templates=templates, defaults=email_templates_svc.DEFAULTS)
+
+
 @router.get("/db/stats", response_model=DbStatsOut)
 def get_db_stats(
     _admin: Annotated[User, Depends(require_admin)],
@@ -182,7 +217,7 @@ def run_db_checkpoint(
     try:
         db.execute(text("PRAGMA wal_checkpoint(TRUNCATE)"))
         db.commit()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - surface any SQLite failure as HTTP 500
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Checkpoint failed: {e}",
@@ -222,7 +257,7 @@ def run_db_vacuum(
     try:
         db.execute(text("VACUUM"))
         db.commit()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - surface any SQLite failure as HTTP 500
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"VACUUM failed: {e}",

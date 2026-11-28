@@ -83,7 +83,7 @@ def create_user_route(
         raise HTTPException(
             status_code=400, detail=f"username {body.username!r} is already taken"
         ) from exc
-    sent = send_welcome_email(email, row.username, body.password)
+    sent = send_welcome_email(db, email, row.username, body.password)
     return UserCreateOut(**UserOut.model_validate(row).model_dump(), welcome_email_sent=sent)
 
 

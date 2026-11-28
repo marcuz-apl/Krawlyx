@@ -342,6 +342,16 @@ export interface MergeJobsResult {
 
 // ---- settings ----
 
+export interface EmailTemplate {
+  subject: string;
+  body: string;
+}
+
+export interface EmailTemplatesOut {
+  templates: Record<string, EmailTemplate>;
+  defaults: Record<string, EmailTemplate>;
+}
+
 export interface SettingsOut {
   max_concurrent_jobs: number;
   max_parallel_targets_per_job: number;
@@ -767,6 +777,12 @@ export const api = {
       request<SettingsOut>('/api/settings', {
         method: 'PATCH',
         body: JSON.stringify(body),
+      }),
+    emailTemplates: () => request<EmailTemplatesOut>('/api/settings/email-templates'),
+    saveEmailTemplates: (templates: Record<string, EmailTemplate> | null) =>
+      request<EmailTemplatesOut>('/api/settings/email-templates', {
+        method: 'PATCH',
+        body: JSON.stringify({ templates }),
       }),
     getDbStats: () =>
       request<{

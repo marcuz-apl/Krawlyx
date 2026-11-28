@@ -48,8 +48,8 @@ def submit_message(
     logger.info("contact message submitted (id=%s)", row.id)
     saved = ContactMessageOut.model_validate(row)
     if saved.subject == access_requests.ACCOUNT_ACCESS_SUBJECT:
-        access_requests.notify_admin(saved)
-        access_requests.notify_requester_received(saved)
+        access_requests.notify_admin(db, saved)
+        access_requests.notify_requester_received(db, saved)
     return saved
 
 

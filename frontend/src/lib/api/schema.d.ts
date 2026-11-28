@@ -1083,6 +1083,24 @@ export interface paths {
         patch: operations["update_settings_route_api_settings_patch"];
         trace?: never;
     };
+    "/api/settings/email-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Email Templates */
+        get: operations["get_email_templates_api_settings_email_templates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Email Templates */
+        patch: operations["update_email_templates_api_settings_email_templates_patch"];
+        trace?: never;
+    };
     "/api/settings/db/stats": {
         parameters: {
             query?: never;
@@ -1400,6 +1418,31 @@ export interface components {
             total_jobs: number;
             /** Total Job Results */
             total_job_results: number;
+        };
+        /** EmailTemplate */
+        EmailTemplate: {
+            /** Subject */
+            subject: string;
+            /** Body */
+            body: string;
+        };
+        /** EmailTemplatesOut */
+        EmailTemplatesOut: {
+            /** Templates */
+            templates: {
+                [key: string]: components["schemas"]["EmailTemplate"];
+            };
+            /** Defaults */
+            defaults: {
+                [key: string]: components["schemas"]["EmailTemplate"];
+            };
+        };
+        /** EmailTemplatesUpdate */
+        EmailTemplatesUpdate: {
+            /** Templates */
+            templates?: {
+                [key: string]: components["schemas"]["EmailTemplate"];
+            } | null;
         };
         /**
          * EngineCapabilities
@@ -4281,6 +4324,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_email_templates_api_settings_email_templates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailTemplatesOut"];
+                };
+            };
+        };
+    };
+    update_email_templates_api_settings_email_templates_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailTemplatesUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailTemplatesOut"];
                 };
             };
             /** @description Validation Error */

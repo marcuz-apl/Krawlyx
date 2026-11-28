@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.core.security import hash_password, verify_password
 from app.models import User
-from app.services import mailer
+from app.services import email_templates, mailer
 
 logger = logging.getLogger("mykrawl.users")
 
@@ -50,18 +50,12 @@ def authenticate(db: Session, username: str, password: str) -> User | None:
     return user
 
 
-def send_welcome_email(email: str, username: str, password: str) -> bool:
+def send_welcome_email(db: Session, email: str, username: str, password: str) -> bool:
     """Best-effort delivery of initial credentials; False when skipped or failed."""
-    return mailer.send_email(
-        to=email,
-        subject="Your Krawlyx account",
-        body=(
-            "An account has been created for you on Krawlyx.\n\n"
-            f"Username: {username}\n"
-            f"Password: {password}\n\n"
-            "You will be asked to set a new password on your first sign-in."
-        ),
+    subject, body = email_templates.render_template(
+        db, "welcome", email=email, username=username, password=password
     )
+    return mailer.send_email(to=email, subject=subject, body=body)
 
 
 def bootstrap_admin(db: Session) -> bool:
