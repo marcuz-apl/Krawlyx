@@ -18,6 +18,7 @@ class UserOut(BaseModel):
     role: str
     must_change_password: bool = False
     mfa_enabled: bool = False
+    mfa_required: bool = False
     created_at: datetime | None = None
 
     model_config = {"from_attributes": True}

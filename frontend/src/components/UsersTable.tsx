@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck, User as UserIcon, Crown, KeyRound, Trash2, UserPlus, AlertCircle } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, ShieldOff, User as UserIcon, Crown, KeyRound, Trash2, UserPlus, AlertCircle } from 'lucide-react';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { api, type UserOut } from '@/lib/api/client';
 import { useMe } from '@/hooks/useAuth';
@@ -16,6 +16,14 @@ export function UsersTable() {
   const remove = useMutation({
     mutationFn: (id: number) => api.users.delete(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['users'] }),
+  });
+  const [mfaErr, setMfaErr] = useState<string | null>(null);
+  const enforceMfa = useMutation({
+    mutationFn: ({ id, required }: { id: number; required: boolean }) =>
+      api.users.patch(id, { mfa_required: required }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['users'] }),
+    onError: (e: any) =>
+      setMfaErr(e.response?.data?.detail || e.message || 'Could not update the MFA requirement'),
   });
 
   const [creating, setCreating] = useState(false);
@@ -47,6 +55,16 @@ export function UsersTable() {
           {creating ? 'Cancel' : 'New User'}
         </button>
       </div>
+
+      {mfaErr && (
+        <div
+          role="alert"
+          className="flex items-center gap-1.5 rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/50 p-2.5 text-xs text-rose-700 dark:text-rose-300"
+        >
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{mfaErr}</span>
+        </div>
+      )}
 
       {creating && (
         <CreateUserForm
@@ -84,6 +102,7 @@ export function UsersTable() {
               <th className="px-4 py-3">Username</th>
               <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Access Tier / Role</th>
+              <th className="px-4 py-3">MFA</th>
               <th className="px-4 py-3">Created</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
@@ -91,7 +110,7 @@ export function UsersTable() {
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
             {users.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-slate-500 dark:text-slate-400">
+                <td colSpan={6} className="px-4 py-6 text-center text-slate-500 dark:text-slate-400">
                   No users found.
                 </td>
               </tr>
@@ -138,6 +157,24 @@ export function UsersTable() {
                       </span>
                     )}
                   </td>
+                  <td className="px-4 py-3">
+                    {u.mfa_enabled ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                        <ShieldCheck className="w-3 h-3" />
+                        MFA enabled
+                      </span>
+                    ) : u.mfa_required ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                        <ShieldAlert className="w-3 h-3" />
+                        Enrollment pending
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                        <ShieldOff className="w-3 h-3" />
+                        MFA off
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
                     {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}
                   </td>
@@ -145,6 +182,31 @@ export function UsersTable() {
                     <div className="flex items-center justify-end gap-1.5">
                       {canModify && (
                         <>
+                          {!u.mfa_enabled && (
+                            <button
+                              onClick={() => {
+                                setMfaErr(null);
+                                enforceMfa.mutate({ id: u.id, required: !u.mfa_required });
+                              }}
+                              disabled={enforceMfa.isPending && enforceMfa.variables?.id === u.id}
+                              className={`rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all disabled:opacity-60 ${
+                                u.mfa_required
+                                  ? 'border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40'
+                                  : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                              }`}
+                              title={
+                                u.mfa_required
+                                  ? 'Clear the MFA enrollment requirement for this user'
+                                  : 'Require this user to set up authenticator-app MFA at next sign-in'
+                              }
+                            >
+                              {enforceMfa.isPending && enforceMfa.variables?.id === u.id
+                                ? 'Saving…'
+                                : u.mfa_required
+                                ? 'Clear Requirement'
+                                : 'Enforce MFA'}
+                            </button>
+                          )}
                           <button
                             onClick={() => setRoleEditFor(u)}
                             className="rounded-lg border border-slate-200 dark:border-slate-700 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"

@@ -90,6 +90,43 @@ def test_enroll_and_login_with_mfa(client: TestClient) -> None:
     assert client.get("/api/auth/me").json()["username"] == "mfa-user"
 
 
+def test_per_user_mfa_enforcement(client: TestClient) -> None:
+    runner_csrf = auth_as(client, "force-target", "runner")
+    runner_id = client.get("/api/auth/me").json()["id"]
+
+    r = client.patch(
+        f"/api/users/{runner_id}",
+        json={"mfa_required": True},
+        headers={"X-CSRF-Token": runner_csrf},
+    )
+    assert r.status_code == 403
+
+    admin_csrf = auth_as(client, "force-admin", "admin")
+    r = client.patch(
+        f"/api/users/{runner_id}",
+        json={"mfa_required": True},
+        headers={"X-CSRF-Token": admin_csrf},
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["mfa_required"] is True
+
+    # Requirement alone does not challenge login until the user enrolls.
+    login = client.post("/api/auth/login", json={"username": "force-target", "password": "pw"})
+    assert login.status_code == 200
+    assert login.json()["mfa_required"] is False
+    me = client.get("/api/auth/me").json()
+    assert me["mfa_required"] is True and me["mfa_enabled"] is False
+
+    relogin = client.post("/api/auth/login", json={"username": "force-admin", "password": "pw"})
+    admin_csrf = relogin.json()["csrf_token"]
+    r = client.patch(
+        f"/api/users/{runner_id}",
+        json={"mfa_required": False},
+        headers={"X-CSRF-Token": admin_csrf},
+    )
+    assert r.json()["mfa_required"] is False
+
+
 def test_mfa_login_rejects_bad_token(client: TestClient) -> None:
     r = client.post("/api/auth/login/mfa", json={"mfa_token": "bogus", "code": "123456"})
     assert r.status_code == 401

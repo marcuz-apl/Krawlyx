@@ -14,6 +14,7 @@ export interface UserOut {
   role: Role;
   must_change_password?: boolean;
   mfa_enabled?: boolean;
+  mfa_required?: boolean;
   created_at?: string | null;
 }
 
@@ -309,6 +310,7 @@ export interface UserUpdateBody {
   password?: string;
   role?: Role;
   email?: string | null;
+  mfa_required?: boolean;
 }
 
 // ---- datasets & merge ----

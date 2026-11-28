@@ -19,7 +19,7 @@ export function SecurityGate({ user, children }: { user: UserOut; children: Reac
   if (isLoading) {
     return <p className="p-6 text-slate-500">Loading…</p>;
   }
-  if (settings?.mfa_required && !user.mfa_enabled) {
+  if ((settings?.mfa_required || user.mfa_required) && !user.mfa_enabled) {
     return <MfaSetupGate user={user} />;
   }
   return <>{children}</>;

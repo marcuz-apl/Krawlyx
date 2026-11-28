@@ -125,6 +125,8 @@ def patch_user_route(
                 status_code=400, detail=f"email {email!r} is already attached to another user"
             )
         row.email = email
+    if body.mfa_required is not None:
+        row.mfa_required = body.mfa_required
     if body.role is not None and body.role != row.role:
         if (
             row.role in ("admin", "superadmin")

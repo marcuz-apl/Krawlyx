@@ -33,3 +33,5 @@ class UserUpdate(BaseModel):
     email: str | None = Field(
         default=None, max_length=200, pattern=r"^(?:[^@\s]+@[^@\s]+\.[^@\s]+)?$"
     )
+    # Per-user MFA enforcement; None leaves it unchanged.
+    mfa_required: bool | None = None

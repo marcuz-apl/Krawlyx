@@ -2233,6 +2233,11 @@ export interface components {
              * @default false
              */
             mfa_enabled: boolean;
+            /**
+             * Mfa Required
+             * @default false
+             */
+            mfa_required: boolean;
             /** Created At */
             created_at?: string | null;
             /**
@@ -2261,6 +2266,11 @@ export interface components {
              * @default false
              */
             mfa_enabled: boolean;
+            /**
+             * Mfa Required
+             * @default false
+             */
+            mfa_required: boolean;
             /** Created At */
             created_at?: string | null;
         };
@@ -2272,6 +2282,8 @@ export interface components {
             role?: ("runner" | "admin" | "superadmin") | null;
             /** Email */
             email?: string | null;
+            /** Mfa Required */
+            mfa_required?: boolean | null;
         };
         /** ValidationError */
         ValidationError: {
