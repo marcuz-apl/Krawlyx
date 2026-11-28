@@ -12,6 +12,7 @@ Usage:
 import argparse
 import getpass
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -25,6 +26,23 @@ if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
 os.chdir(backend_dir)
+
+
+def _reexec_in_venv() -> None:
+    """Re-run with backend/.venv so the script works without prior activation."""
+    if sys.prefix != sys.base_prefix:
+        return
+    venv_pythons = (
+        backend_dir / ".venv" / "Scripts" / "python.exe",
+        backend_dir / ".venv" / "bin" / "python",
+    )
+    for candidate in venv_pythons:
+        if candidate.exists():
+            completed = subprocess.run([str(candidate), *sys.argv], check=False, cwd=backend_dir)
+            sys.exit(completed.returncode)
+
+
+_reexec_in_venv()
 
 
 def reset_password(username: str, new_password: str | None = None) -> None:

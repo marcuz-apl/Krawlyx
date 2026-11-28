@@ -19,22 +19,42 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
     staleTime: 60_000,
   });
 
-  const [password, setPassword] = useState('');
+  const [mfaPassword, setMfaPassword] = useState('');
   const [code, setCode] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
+  const [currentPw, setCurrentPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [pwErr, setPwErr] = useState<string | null>(null);
+  const [pwDone, setPwDone] = useState(false);
+
   const disable = useMutation({
-    mutationFn: () => api.mfa.disable({ password, code }),
+    mutationFn: () => api.mfa.disable({ password: mfaPassword, code }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: authKeys.me });
       setDone(true);
-      setPassword('');
+      setMfaPassword('');
       setCode('');
       setErr(null);
     },
     onError: (e: any) =>
       setErr(e.response?.data?.detail || e.message || 'Could not disable MFA'),
+  });
+
+  const changePassword = useMutation({
+    mutationFn: () =>
+      api.changePassword({ current_password: currentPw, new_password: newPw }),
+    onSuccess: () => {
+      setPwDone(true);
+      setPwErr(null);
+      setCurrentPw('');
+      setNewPw('');
+      setConfirmPw('');
+    },
+    onError: (e: any) =>
+      setPwErr(e.response?.data?.detail || e.message || 'Could not change password'),
   });
 
   useEffect(() => {
@@ -47,9 +67,25 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
   function handleClose() {
     setErr(null);
     setDone(false);
-    setPassword('');
+    setMfaPassword('');
     setCode('');
+    setPwErr(null);
+    setPwDone(false);
+    setCurrentPw('');
+    setNewPw('');
+    setConfirmPw('');
     onClose();
+  }
+
+  function submitPassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPwErr(null);
+    setPwDone(false);
+    if (newPw !== confirmPw) {
+      setPwErr('The new passwords do not match.');
+      return;
+    }
+    changePassword.mutate();
   }
 
   const required = Boolean(settings?.mfa_required || me?.mfa_required);
@@ -114,8 +150,8 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
                     required
                     type="password"
                     autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={mfaPassword}
+                    onChange={(e) => setMfaPassword(e.target.value)}
                     className={fieldClass}
                   />
                 </label>
@@ -170,6 +206,73 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
             </div>
           </>
         )}
+
+        <div className="mt-6 border-t border-slate-200 pt-5 dark:border-slate-700">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white">Password</h3>
+          <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+            Change the password you use to sign in.
+          </p>
+          {pwDone && (
+            <p role="status" className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
+              Password updated.
+            </p>
+          )}
+          <form onSubmit={submitPassword} className="mt-3 space-y-3 text-sm font-medium">
+            <label className="block text-xs font-semibold">
+              <span className="text-slate-700 dark:text-slate-300">Current password</span>
+              <input
+                required
+                type="password"
+                autoComplete="current-password"
+                value={currentPw}
+                onChange={(e) => setCurrentPw(e.target.value)}
+                className={fieldClass}
+              />
+            </label>
+            <label className="block text-xs font-semibold">
+              <span className="text-slate-700 dark:text-slate-300">
+                New password (min 8 characters)
+              </span>
+              <input
+                required
+                type="password"
+                minLength={8}
+                autoComplete="new-password"
+                value={newPw}
+                onChange={(e) => setNewPw(e.target.value)}
+                className={fieldClass}
+              />
+            </label>
+            <label className="block text-xs font-semibold">
+              <span className="text-slate-700 dark:text-slate-300">Confirm new password</span>
+              <input
+                required
+                type="password"
+                minLength={8}
+                autoComplete="new-password"
+                value={confirmPw}
+                onChange={(e) => setConfirmPw(e.target.value)}
+                className={fieldClass}
+              />
+            </label>
+            {pwErr && (
+              <div
+                role="alert"
+                className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 p-2.5 text-xs text-rose-700 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-300"
+              >
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{pwErr}</span>
+              </div>
+            )}
+            <button
+              type="submit"
+              disabled={changePassword.isPending}
+              className="w-full rounded-lg bg-slate-800 px-4 py-2 text-sm font-bold text-white hover:bg-slate-700 disabled:opacity-50 dark:bg-slate-200 dark:text-slate-900 dark:hover:bg-slate-300"
+            >
+              {changePassword.isPending ? 'Updating…' : 'Update password'}
+            </button>
+          </form>
+        </div>
       </div>
     </dialog>
   );
