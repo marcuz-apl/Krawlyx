@@ -110,12 +110,23 @@ export function AdminPanelPage() {
       {tab === 'engines' && <AdminEnginesTable />}
       {tab === 'exports' && <ExportTargetsTable />}
       {tab === 'settings' && (
+        <SettingsReadOnlyCard />
+      )}
+      {tab === 'users' && (
         <div className="space-y-4">
-          {isSuperAdmin && <OperatorToolsCard />}
-          <SettingsReadOnlyCard />
+          <UsersTable />
+          {isSuperAdmin && (
+            <details>
+              <summary className="cursor-pointer text-sm font-semibold text-slate-800 dark:text-slate-200">
+                Operator scripts — password reset, MFA recovery
+              </summary>
+              <div className="mt-3">
+                <OperatorToolsCard />
+              </div>
+            </details>
+          )}
         </div>
       )}
-      {tab === 'users' && <UsersTable />}
       {tab === 'database' && isSuperAdmin && <DatabaseBrowser />}
       {tab === 'access-requests' && canReview && (
         <section aria-labelledby="access-requests-heading" className="space-y-4">
