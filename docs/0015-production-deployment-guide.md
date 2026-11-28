@@ -27,6 +27,26 @@ This guide details how to deploy **Krawlyx** in production environments, includi
    ```
 4. Access the web workbench at **`http://localhost:4040`** (or your server's local/public IP).
 
+### Environment variables inside the container (`env_file`)
+
+`docker-compose.yml` only forwards the variables it lists. To pass everything defined in the project `.env` — SMTP credentials, access-request email, and any other `MYKRAWL_*` key — without duplicating each one under `environment:`, add an `env_file` entry to the service:
+
+```yaml
+services:
+  krawlyx:
+    env_file:
+      - .env
+    environment:
+      - MYKRAWL_SECRET_KEY=replace-with-a-secure-random-key  # environment: still wins
+```
+
+- `.env` must sit next to `docker-compose.yml` (or give a relative/absolute path).
+- Keys declared under `environment:` override the same keys from `env_file`.
+- `env_file` does not expand `${…}` — values containing `$` (e.g. SMTP passwords) are passed literally. If the same `.env` is also read for `${…}` interpolation, escape `$` as `$$` in the compose file only.
+- Environment changes require recreating the container: `docker compose up -d --force-recreate krawlyx` (a `restart` does not reload env).
+- Verify what the container actually received: `docker compose exec krawlyx env | grep MYKRAWL_SMTP`.
+- Transactional email (access-request acknowledgements and decisions, welcome mail) uses STARTTLS on `MYKRAWL_SMTP_PORT` (587); if it fails, confirm host/port/username/from and outbound port 587 from the container.
+
 ### Inspecting Logs & Health
 ```bash
 # View live application logs
@@ -67,6 +87,8 @@ services:
       - "4040:4040"
     volumes:
       - ./data:/app/data
+    env_file:
+      - .env
     environment:
       - MYKRAWL_SECRET_KEY=replace-with-a-secure-random-key
       - MYKRAWL_ADMIN_USER=admin
