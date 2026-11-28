@@ -18,10 +18,11 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import require_admin, verify_csrf
 from app.core.db import get_db
-from app.core.security import hash_password
+from app.core.security import hash_password, verify_password
 from app.models import User
 from app.models.user import User as UserRow
-from app.schemas import UserCreate, UserCreateOut, UserOut, UserUpdate
+from app.schemas import UserCreate, UserCreateOut, UserMfaResetRequest, UserOut, UserUpdate
+from app.services import mfa as mfa_svc
 from app.services.users import create_user, send_welcome_email
 
 logger = logging.getLogger("mykrawl.api.users")
@@ -138,6 +139,42 @@ def patch_user_route(
     db.commit()
     db.refresh(row)
     return UserOut.model_validate(row)
+
+
+@router.post(
+    "/{user_id}/reset-mfa",
+    status_code=204,
+    dependencies=[Depends(verify_csrf)],
+)
+def reset_user_mfa(
+    user_id: int,
+    body: UserMfaResetRequest,
+    current_admin: Annotated[User, Depends(require_admin)],
+    db: Annotated[Session, Depends(get_db)],
+) -> None:
+    row = db.get(UserRow, user_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="user not found")
+    if row.id == current_admin.id:
+        raise HTTPException(
+            status_code=400,
+            detail="Disable MFA on your own account from the Security dialog",
+        )
+    if not row.mfa_enabled:
+        raise HTTPException(status_code=400, detail="MFA is not enabled for this account")
+    if row.role in ("admin", "superadmin") or row.username == "admin":
+        if not _is_superadmin(current_admin):
+            raise HTTPException(
+                status_code=403, detail="Only SuperAdmin can reset MFA for administrators"
+            )
+        if row.role == "superadmin" or row.username == "admin":
+            raise HTTPException(
+                status_code=403,
+                detail="SuperAdmin accounts are recovered with the operator script",
+            )
+    if not verify_password(body.password, current_admin.password_hash):
+        raise HTTPException(status_code=400, detail="Your password is incorrect")
+    mfa_svc.disable(db, row)
 
 
 @router.delete(

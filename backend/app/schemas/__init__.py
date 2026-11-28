@@ -40,7 +40,7 @@ from app.schemas.schedules import (
     ScheduleUpdate,
 )
 from app.schemas.settings import SettingsOut, SettingsUpdateBody
-from app.schemas.users import UserCreate, UserCreateOut, UserUpdate
+from app.schemas.users import UserCreate, UserCreateOut, UserMfaResetRequest, UserUpdate
 
 __all__ = [
     "CapabilityList",
@@ -79,6 +79,7 @@ __all__ = [
     "TargetOut",
     "UserCreate",
     "UserCreateOut",
+    "UserMfaResetRequest",
     "UserOut",
     "UserUpdate",
 ]

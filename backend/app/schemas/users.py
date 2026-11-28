@@ -24,6 +24,12 @@ class UserCreateOut(UserOut):
     welcome_email_sent: bool = False
 
 
+class UserMfaResetRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    password: str = Field(min_length=1, max_length=128)
+
+
 class UserUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

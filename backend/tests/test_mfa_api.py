@@ -187,6 +187,83 @@ def test_per_user_mfa_enforcement(client: TestClient) -> None:
     assert r.json()["mfa_required"] is False
 
 
+def test_admin_reset_user_mfa_requires_own_password(client: TestClient) -> None:
+    csrf = auth_as(client, "reset-target", "runner")
+    target_id = client.get("/api/auth/me").json()["id"]
+    secret = client.post("/api/auth/mfa/setup", headers={"X-CSRF-Token": csrf}).json()["secret"]
+    client.post(
+        "/api/auth/mfa/verify", json={"code": totp_now(secret)}, headers={"X-CSRF-Token": csrf}
+    )
+
+    admin_csrf = auth_as(client, "reset-admin", "admin")
+    wrong = client.post(
+        f"/api/users/{target_id}/reset-mfa",
+        json={"password": "wrong"},
+        headers={"X-CSRF-Token": admin_csrf},
+    )
+    assert wrong.status_code == 400
+    assert client.get("/api/users").json()
+
+    ok = client.post(
+        f"/api/users/{target_id}/reset-mfa",
+        json={"password": "pw"},
+        headers={"X-CSRF-Token": admin_csrf},
+    )
+    assert ok.status_code == 204, ok.text
+
+    login = client.post("/api/auth/login", json={"username": "reset-target", "password": "pw"})
+    assert login.status_code == 200
+    assert login.json()["mfa_required"] is False
+    assert client.get("/api/auth/me").json()["mfa_enabled"] is False
+
+
+def test_admin_reset_mfa_self_and_hierarchy(client: TestClient) -> None:
+    admin_csrf = auth_as(client, "hier-admin", "admin")
+    my_id = client.get("/api/auth/me").json()["id"]
+    r = client.post(
+        f"/api/users/{my_id}/reset-mfa",
+        json={"password": "pw"},
+        headers={"X-CSRF-Token": admin_csrf},
+    )
+    assert r.status_code == 400
+
+    admin2_csrf = auth_as(client, "hier-admin2", "admin")
+    admin2_id = client.get("/api/auth/me").json()["id"]
+    secret = client.post("/api/auth/mfa/setup", headers={"X-CSRF-Token": admin2_csrf}).json()[
+        "secret"
+    ]
+    client.post(
+        "/api/auth/mfa/verify",
+        json={"code": totp_now(secret)},
+        headers={"X-CSRF-Token": admin2_csrf},
+    )
+
+    relogin = client.post("/api/auth/login", json={"username": "hier-admin", "password": "pw"})
+    admin_csrf = relogin.json()["csrf_token"]
+    r = client.post(
+        f"/api/users/{admin2_id}/reset-mfa",
+        json={"password": "pw"},
+        headers={"X-CSRF-Token": admin_csrf},
+    )
+    assert r.status_code == 403
+
+    runner_csrf = auth_as(client, "hier-runner", "runner")
+    r = client.post(
+        f"/api/users/{admin2_id}/reset-mfa",
+        json={"password": "pw"},
+        headers={"X-CSRF-Token": runner_csrf},
+    )
+    assert r.status_code == 403
+
+    super_csrf = auth_as(client, "hier-super", "superadmin")
+    r = client.post(
+        f"/api/users/{admin2_id}/reset-mfa",
+        json={"password": "pw"},
+        headers={"X-CSRF-Token": super_csrf},
+    )
+    assert r.status_code == 204, r.text
+
+
 def test_mfa_login_rejects_bad_token(client: TestClient) -> None:
     r = client.post("/api/auth/login/mfa", json={"mfa_token": "bogus", "code": "123456"})
     assert r.status_code == 401

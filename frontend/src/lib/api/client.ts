@@ -698,6 +698,11 @@ export const api = {
       request<UserCreateOut>('/api/users', { method: 'POST', body: JSON.stringify(body) }),
     patch: (id: number, body: UserUpdateBody) =>
       request<UserOut>(`/api/users/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+    resetMfa: (id: number, password: string) =>
+      request<void>(`/api/users/${id}/reset-mfa`, {
+        method: 'POST',
+        body: JSON.stringify({ password }),
+      }),
     delete: (id: number) => request<void>(`/api/users/${id}`, { method: 'DELETE' }),
   },
 

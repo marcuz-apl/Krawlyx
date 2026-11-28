@@ -961,6 +961,23 @@ export interface paths {
         patch: operations["patch_user_route_api_users__user_id__patch"];
         trace?: never;
     };
+    "/api/users/{user_id}/reset-mfa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset User Mfa */
+        post: operations["reset_user_mfa_api_users__user_id__reset_mfa_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/messages": {
         parameters: {
             query?: never;
@@ -2236,6 +2253,11 @@ export interface components {
              * @default false
              */
             welcome_email_sent: boolean;
+        };
+        /** UserMfaResetRequest */
+        UserMfaResetRequest: {
+            /** Password */
+            password: string;
         };
         /** UserOut */
         UserOut: {
@@ -4218,6 +4240,39 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["UserOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reset_user_mfa_api_users__user_id__reset_mfa_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserMfaResetRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

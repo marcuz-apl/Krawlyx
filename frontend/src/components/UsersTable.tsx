@@ -29,6 +29,7 @@ export function UsersTable() {
   const [creating, setCreating] = useState(false);
   const [pwFor, setPwFor] = useState<UserOut | null>(null);
   const [roleEditFor, setRoleEditFor] = useState<UserOut | null>(null);
+  const [resetMfaFor, setResetMfaFor] = useState<UserOut | null>(null);
   const [deleteUser, setDeleteUser] = useState<UserOut | null>(null);
 
   if (isLoading) return <p className="text-slate-500 dark:text-slate-400">Loading users…</p>;
@@ -80,6 +81,15 @@ export function UsersTable() {
           user={pwFor}
           onDone={() => {
             setPwFor(null);
+            qc.invalidateQueries({ queryKey: ['users'] });
+          }}
+        />
+      )}
+      {resetMfaFor && (
+        <ResetMfaForm
+          user={resetMfaFor}
+          onDone={() => {
+            setResetMfaFor(null);
             qc.invalidateQueries({ queryKey: ['users'] });
           }}
         />
@@ -182,6 +192,15 @@ export function UsersTable() {
                     <div className="flex items-center justify-end gap-1.5">
                       {canModify && (
                         <>
+                          {u.mfa_enabled && u.id !== me?.id && (
+                            <button
+                              onClick={() => setResetMfaFor(u)}
+                              className="rounded-lg border border-amber-300 px-2.5 py-1 text-xs font-semibold text-amber-700 transition-all hover:bg-amber-50 dark:border-amber-800 dark:text-amber-300 dark:hover:bg-amber-950/40"
+                              title="Clear this user's enrolled authenticator (requires your password)"
+                            >
+                              Reset MFA
+                            </button>
+                          )}
                           {!u.mfa_enabled && (
                             <button
                               onClick={() => {
@@ -382,6 +401,72 @@ function CreateUserForm({ isSuperAdmin, onDone }: { isSuperAdmin: boolean; onDon
           className="rounded-lg bg-indigo-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-indigo-500 shadow-md shadow-indigo-600/20 disabled:opacity-50"
         >
           {create.isPending ? 'Creating…' : 'Create User'}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function ResetMfaForm({ user, onDone }: { user: UserOut; onDone: () => void }) {
+  const [password, setPassword] = useState('');
+  const [err, setErr] = useState<string | null>(null);
+
+  const reset = useMutation({
+    mutationFn: () => api.users.resetMfa(user.id, password),
+    onSuccess: onDone,
+    onError: (e: any) => setErr(e.response?.data?.detail || e.message || 'Reset failed'),
+  });
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        setErr(null);
+        reset.mutate();
+      }}
+      className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-900/60 dark:bg-amber-950/20"
+    >
+      <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
+        Reset MFA for: <span className="font-mono">{user.username}</span>
+      </p>
+      <p className="text-xs leading-relaxed text-amber-800 dark:text-amber-300">
+        This removes their authenticator. If MFA is required for the account, they will be asked to
+        enroll again at the next sign-in.
+      </p>
+      <label className="block text-xs font-semibold">
+        <span className="text-slate-700 dark:text-slate-300">Your admin password</span>
+        <input
+          required
+          autoFocus
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2.5 py-1.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+        />
+      </label>
+
+      {err && (
+        <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-1.5">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{err}</span>
+        </div>
+      )}
+
+      <div className="flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={onDone}
+          className="rounded-lg border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={reset.isPending}
+          className="rounded-lg bg-amber-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-amber-500 shadow-md shadow-amber-600/20 disabled:opacity-50"
+        >
+          {reset.isPending ? 'Resetting…' : 'Reset MFA'}
         </button>
       </div>
     </form>
