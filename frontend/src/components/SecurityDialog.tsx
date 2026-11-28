@@ -82,11 +82,22 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
           </button>
         </div>
 
-        <h3 className="mt-4 text-sm font-bold text-slate-900 dark:text-white">
-          Two-factor authentication
-        </h3>
+        <div className="mt-5">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white">Password</h3>
+          <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+            Change the password you use to sign in.
+          </p>
+          <div className="mt-3">
+            <PasswordChangeForm />
+          </div>
+        </div>
 
-        {!me ? null : me.mfa_enabled ? (
+        <div className="mt-6 border-t border-slate-200 pt-5 dark:border-slate-700">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+            Two-factor authentication
+          </h3>
+
+          {!me ? null : me.mfa_enabled ? (
           <>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
               Signed in as <span className="font-mono">{me.username}</span> — an authenticator app
@@ -170,15 +181,6 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
             </div>
           </>
         )}
-
-        <div className="mt-6 border-t border-slate-200 pt-5 dark:border-slate-700">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">Password</h3>
-          <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Change the password you use to sign in.
-          </p>
-          <div className="mt-3">
-            <PasswordChangeForm />
-          </div>
         </div>
       </div>
     </dialog>
