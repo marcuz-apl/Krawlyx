@@ -6,6 +6,7 @@ import { AdminEnginesTable } from '@/components/AdminEnginesTable';
 import { EmailTemplatesCard } from '@/components/EmailTemplatesCard';
 import { ExportTargetsTable } from '@/components/ExportTargetsTable';
 import { MfaPolicyCard } from '@/components/MfaPolicyCard';
+import { OperatorToolsCard } from '@/components/OperatorToolsCard';
 import { SettingsReadOnlyCard } from '@/components/SettingsReadOnlyCard';
 import { UsersTable } from '@/components/UsersTable';
 import { DatabaseBrowser } from '@/components/DatabaseBrowser';
@@ -112,6 +113,7 @@ export function AdminPanelPage() {
       {tab === 'settings' && (
         <div className="space-y-4">
           <MfaPolicyCard />
+          {isSuperAdmin && <OperatorToolsCard />}
           <SettingsReadOnlyCard />
         </div>
       )}

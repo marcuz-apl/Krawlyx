@@ -15,11 +15,13 @@ import {
   Database,
   FolderDown,
   Calendar,
-  Shield
+  Shield,
+  ShieldCheck
 } from "lucide-react";
 import { useLogout, useMe } from "@/hooks/useAuth";
 import { getTimezoneThemeInfo } from "@/lib/themeHelper";
 import { DocsModal } from "./DocsModal";
+import { SecurityDialog } from "./SecurityDialog";
 
 export function Header() {
   const { data: healthData } = useQuery({
@@ -37,6 +39,7 @@ export function Header() {
   const [themeMode, setThemeMode] = useState<"auto" | "light" | "dark">("auto");
   const [tzInfo, setTzInfo] = useState("");
   const [showDocsModal, setShowDocsModal] = useState(false);
+  const [showSecurityDialog, setShowSecurityDialog] = useState(false);
 
   // Sync theme based on stored preference or browser timezone solar calculation
   const syncTheme = () => {
@@ -160,6 +163,21 @@ export function Header() {
                   </span>
                 </div>
                 <button
+                  onClick={() => setShowSecurityDialog(true)}
+                  className={`rounded-lg p-1.5 transition ${
+                    me.data.mfa_enabled
+                      ? "text-emerald-500 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+                      : "text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  }`}
+                  title={
+                    me.data.mfa_enabled
+                      ? "Two-factor authentication: enabled"
+                      : "Two-factor authentication: set up"
+                  }
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                </button>
+                <button
                   onClick={() => logout.mutate()}
                   className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400 transition"
                   title="Sign Out"
@@ -222,6 +240,10 @@ export function Header() {
       <DocsModal
         isOpen={showDocsModal}
         onClose={() => setShowDocsModal(false)}
+      />
+      <SecurityDialog
+        isOpen={showSecurityDialog}
+        onClose={() => setShowSecurityDialog(false)}
       />
     </>
   );

@@ -499,6 +499,8 @@ export const api = {
     setup: () => request<MfaSetupOut>('/api/auth/mfa/setup', { method: 'POST' }),
     verify: (code: string) =>
       request<void>('/api/auth/mfa/verify', { method: 'POST', body: JSON.stringify({ code }) }),
+    disable: (body: { password: string; code: string }) =>
+      request<void>('/api/auth/mfa/disable', { method: 'POST', body: JSON.stringify(body) }),
   },
   changePassword: (body: { current_password: string; new_password: string }) =>
     request<void>('/api/auth/change-password', {

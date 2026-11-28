@@ -53,3 +53,10 @@ def confirm_setup(db: Session, user: User, code: str) -> bool:
 def verify_code(user: User, code: str) -> bool:
     secret = decrypt_mfa_secret(user.mfa_secret_enc)
     return bool(secret and user.mfa_enabled and verify_totp(secret, code))
+
+
+def disable(db: Session, user: User) -> None:
+    """Remove enrollment after the caller has re-authenticated password + code."""
+    user.mfa_secret_enc = None
+    user.mfa_enabled = False
+    db.commit()

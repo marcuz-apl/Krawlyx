@@ -90,6 +90,86 @@ def test_enroll_and_login_with_mfa(client: TestClient) -> None:
     assert client.get("/api/auth/me").json()["username"] == "mfa-user"
 
 
+def test_self_service_disable_requires_password_and_code(client: TestClient) -> None:
+    csrf = auth_as(client, "unmfa-user", "runner")
+    assert (
+        client.post(
+            "/api/auth/mfa/disable",
+            json={"password": "pw", "code": "123456"},
+            headers={"X-CSRF-Token": csrf},
+        ).status_code
+        == 400
+    )
+
+    secret = client.post("/api/auth/mfa/setup", headers={"X-CSRF-Token": csrf}).json()["secret"]
+    assert (
+        client.post(
+            "/api/auth/mfa/verify",
+            json={"code": totp_now(secret)},
+            headers={"X-CSRF-Token": csrf},
+        ).status_code
+        == 204
+    )
+
+    assert (
+        client.post(
+            "/api/auth/mfa/disable",
+            json={"password": "wrong", "code": totp_now(secret)},
+            headers={"X-CSRF-Token": csrf},
+        ).status_code
+        == 400
+    )
+    bad_code = "000000" if totp_now(secret) != "000000" else "111111"
+    assert (
+        client.post(
+            "/api/auth/mfa/disable",
+            json={"password": "pw", "code": bad_code},
+            headers={"X-CSRF-Token": csrf},
+        ).status_code
+        == 400
+    )
+
+    assert (
+        client.post(
+            "/api/auth/mfa/disable",
+            json={"password": "pw", "code": totp_now(secret)},
+            headers={"X-CSRF-Token": csrf},
+        ).status_code
+        == 204
+    )
+    assert client.get("/api/auth/me").json()["mfa_enabled"] is False
+
+
+def test_disable_blocked_while_mfa_required(client: TestClient) -> None:
+    csrf = auth_as(client, "kept-mfa", "runner")
+    user_id = client.get("/api/auth/me").json()["id"]
+    secret = client.post("/api/auth/mfa/setup", headers={"X-CSRF-Token": csrf}).json()["secret"]
+    client.post(
+        "/api/auth/mfa/verify", json={"code": totp_now(secret)}, headers={"X-CSRF-Token": csrf}
+    )
+
+    admin_csrf = auth_as(client, "keep-admin", "admin")
+    client.patch(
+        f"/api/users/{user_id}",
+        json={"mfa_required": True},
+        headers={"X-CSRF-Token": admin_csrf},
+    )
+
+    relogin = client.post("/api/auth/login", json={"username": "kept-mfa", "password": "pw"})
+    mfa = client.post(
+        "/api/auth/login/mfa",
+        json={"mfa_token": relogin.json()["mfa_token"], "code": totp_now(secret)},
+    )
+    csrf = mfa.json()["csrf_token"]
+    r = client.post(
+        "/api/auth/mfa/disable",
+        json={"password": "pw", "code": totp_now(secret)},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert r.status_code == 400
+    assert "required" in r.json()["detail"]
+
+
 def test_per_user_mfa_enforcement(client: TestClient) -> None:
     runner_csrf = auth_as(client, "force-target", "runner")
     runner_id = client.get("/api/auth/me").json()["id"]

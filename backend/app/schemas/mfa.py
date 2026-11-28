@@ -23,6 +23,13 @@ class MfaVerifyRequest(BaseModel):
     code: str = Field(min_length=6, max_length=6)
 
 
+class MfaDisableRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    password: str = Field(min_length=1, max_length=128)
+    code: str = Field(min_length=6, max_length=6)
+
+
 class MfaPolicyOut(BaseModel):
     required: bool
 

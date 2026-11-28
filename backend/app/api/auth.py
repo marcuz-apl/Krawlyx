@@ -20,6 +20,7 @@ from app.schemas import (
     ChangePasswordRequest,
     LoginRequest,
     LoginResponse,
+    MfaDisableRequest,
     MfaLoginRequest,
     MfaSetupOut,
     MfaVerifyRequest,
@@ -93,6 +94,26 @@ def mfa_verify(
 ) -> None:
     if not mfa_svc.confirm_setup(db, user, payload.code):
         raise HTTPException(status_code=400, detail="Invalid authentication code")
+
+
+@router.post("/mfa/disable", status_code=204, dependencies=[Depends(verify_csrf)])
+def mfa_disable(
+    payload: MfaDisableRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    if not user.mfa_enabled:
+        raise HTTPException(status_code=400, detail="MFA is not enabled for this account")
+    if mfa_svc.is_mfa_required(db) or user.mfa_required:
+        raise HTTPException(
+            status_code=400,
+            detail="MFA is required for this account; ask an administrator to clear the requirement",
+        )
+    if not verify_password(payload.password, user.password_hash):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if not mfa_svc.verify_code(user, payload.code):
+        raise HTTPException(status_code=400, detail="Invalid authentication code")
+    mfa_svc.disable(db, user)
 
 
 @router.get("/me", response_model=UserOut)
