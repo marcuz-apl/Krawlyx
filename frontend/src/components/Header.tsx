@@ -153,7 +153,7 @@ export function Header() {
           <div className="flex items-center gap-2 sm:gap-3">
             {/* User Details */}
             {me.data?.username ? (
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1.5 sm:gap-2.5">
                 <div className="hidden text-right md:flex md:flex-col">
                   <span className="text-xs font-medium text-slate-700 dark:text-slate-200">
                     {me.data.username}
@@ -164,18 +164,15 @@ export function Header() {
                 </div>
                 <button
                   onClick={() => setShowSecurityDialog(true)}
-                  className={`rounded-lg p-1.5 transition ${
-                    me.data.mfa_enabled
-                      ? "text-emerald-500 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
-                      : "text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                  }`}
-                  title={
-                    me.data.mfa_enabled
-                      ? "Two-factor authentication: enabled"
-                      : "Two-factor authentication: set up"
-                  }
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  title="Security — change password and two-factor authentication"
                 >
-                  <ShieldCheck className="h-4 w-4" />
+                  <ShieldCheck
+                    className={`h-3.5 w-3.5 ${
+                      me.data.mfa_enabled ? "text-emerald-500 dark:text-emerald-400" : "text-slate-400"
+                    }`}
+                  />
+                  <span className="hidden sm:inline">Security</span>
                 </button>
                 <button
                   onClick={() => logout.mutate()}

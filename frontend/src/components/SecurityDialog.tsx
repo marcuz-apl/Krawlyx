@@ -105,7 +105,7 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
             className="flex items-center gap-2 pt-2 text-xl font-bold tracking-tight"
           >
             <ShieldCheck className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-            Two-factor authentication
+            Account security
           </h2>
           <button
             type="button"
@@ -116,6 +116,10 @@ export function SecurityDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
             <X aria-hidden="true" className="h-5 w-5" />
           </button>
         </div>
+
+        <h3 className="mt-4 text-sm font-bold text-slate-900 dark:text-white">
+          Two-factor authentication
+        </h3>
 
         {!me ? null : me.mfa_enabled ? (
           <>
