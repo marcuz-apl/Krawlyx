@@ -6,6 +6,7 @@ import ssl
 from email.message import EmailMessage
 
 from app.core.config import get_settings
+from app.services import email_render
 
 logger = logging.getLogger("mykrawl.mailer")
 
@@ -27,7 +28,8 @@ def send_email(to: str, subject: str, body: str, reply_to: str | None = None) ->
         message["Subject"] = subject
         if reply_to:
             message["Reply-To"] = reply_to
-        message.set_content(body)
+        message.set_content(email_render.plain_with_signature(body))
+        message.add_alternative(email_render.html_email(body), subtype="html")
         with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=5) as relay:
             relay.starttls(context=ssl.create_default_context())
             if settings.smtp_username:

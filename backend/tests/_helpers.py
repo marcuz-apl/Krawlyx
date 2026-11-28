@@ -25,3 +25,12 @@ def auth_as(client: TestClient, username: str, role: str = "runner") -> str:
     r = client.post("/api/auth/login", json={"username": username, "password": "pw"})
     assert r.status_code == 200, r.text
     return r.json()["csrf_token"]
+
+
+def email_plain(message) -> str:
+    """Return the text/plain part of a (possibly multipart) email message."""
+    if message.is_multipart():
+        for part in message.iter_parts():
+            if part.get_content_type() == "text/plain":
+                return part.get_content()
+    return message.get_content()

@@ -11,7 +11,7 @@ from app.core.config import Settings
 from app.core.db import SessionLocal
 from app.main import create_app
 from app.models import User as UserRow
-from tests._helpers import auth_as
+from tests._helpers import auth_as, email_plain
 
 
 @pytest.fixture()
@@ -250,7 +250,7 @@ def test_welcome_email_sends_credentials_when_smtp_configured(
     sent = smtp.return_value.__enter__.return_value.send_message.call_args.args[0]
     assert sent["To"] == "welcome@example.com"
     assert sent["From"] == "noreply@example.com"
-    body = sent.get_content()
+    body = email_plain(sent)
     assert "welcome" in body
     assert "welcome-pw1" in body
 

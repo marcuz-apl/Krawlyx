@@ -215,7 +215,7 @@ IDs are stable and referenced by tests and issues.
 - **FR-USR-01** — Admin creates accounts with {username, password, email, role}. **Email is mandatory and unique** at creation; the bootstrap admin seeded from env is exempt.
 - **FR-USR-02** — On creation the credentials email (username + temporary password) is sent to the user's email via the configured SMTP relay. Delivery is best-effort: failures never block creation and are surfaced to the admin.
 - **FR-USR-03** — Accounts created by an admin, and accounts whose password an admin resets, carry `must_change_password`; the user must set a new password on first sign-in before using the workbench.
-- **FR-USR-04** — Subject and body of every transactional email (access-request acknowledgement and decisions, new-request admin notice, new-user welcome) are editable in **Admin Panel → Access Requests → Email templates**; overrides are stored in the `settings` table as plain text with `{placeholder}` tokens and apply immediately.
+- **FR-USR-04** — Subject and body of every transactional email (access-request acknowledgement and decisions, new-request admin notice, new-user welcome) are editable in **Admin Panel → Access Requests → Email templates**; overrides are stored in the `settings` table with `{placeholder}` tokens. Bodies accept basic Markdown (bold, italic, lists, links) and are sent as styled HTML with a plain-text fallback; the Krawlyx Team signature is appended automatically.
 
 ## 7. Engine adapter contract
 

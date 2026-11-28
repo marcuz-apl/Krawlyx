@@ -81,9 +81,11 @@ export function EmailTemplatesCard() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-xl text-sm text-slate-600 dark:text-slate-400">
-          Subject and body for every transactional email. Plain text with {'{placeholder}'} tokens;
-          unknown tokens are sent as-is.
+        <p className="max-w-2xl text-sm text-slate-600 dark:text-slate-400">
+          Subject and body for every transactional email. Bodies support basic Markdown —
+          **bold**, *italic*, `code`, &quot;- &quot; lists, [links](https://example.com) — and are sent
+          as styled HTML with a plain-text fallback. The Krawlyx Team signature (email + web) is
+          appended automatically.
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <button

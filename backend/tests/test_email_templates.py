@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 
 from app.core.config import Settings
 from app.main import create_app
-from tests._helpers import auth_as
+from tests._helpers import auth_as, email_plain
 
 URL = "/api/settings/email-templates"
 
@@ -56,6 +56,42 @@ def test_unknown_template_key_rejected(client: TestClient) -> None:
     assert r.status_code == 422
 
 
+def test_mailer_sends_multipart_with_signature(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.services import mailer
+
+    monkeypatch.setenv("MYKRAWL_SMTP_HOST", "smtp.example.com")
+    monkeypatch.setenv("MYKRAWL_SMTP_FROM", "noreply@example.com")
+    with (
+        patch("app.services.mailer.get_settings", return_value=Settings()),
+        patch("smtplib.SMTP") as smtp,
+    ):
+        ok = mailer.send_email(
+            "user@example.com",
+            "Subject",
+            "Hello **bold**\n\n- one\n- two\n\n[site](https://example.com)",
+        )
+    assert ok is True
+    msg = smtp.return_value.__enter__.return_value.send_message.call_args.args[0]
+    parts = {part.get_content_type(): part.get_content() for part in msg.iter_parts()}
+    assert "text/plain" in parts and "text/html" in parts
+    html = parts["text/html"]
+    assert "<strong>bold</strong>" in html
+    assert "<li" in html and "one" in html
+    assert 'href="https://example.com"' in html
+    for marker in ("Krawlyx Team", "info@alfazen.org", "www.alfazen.org"):
+        assert marker in html
+        assert marker in parts["text/plain"]
+
+
+def test_markdown_escapes_html() -> None:
+    from app.services.email_render import markdown_to_html
+
+    out = markdown_to_html("Hi <script>alert(1)</script> and **ok**")
+    assert "<script>" not in out
+    assert "&lt;script&gt;" in out
+    assert "<strong>ok</strong>" in out
+
+
 def test_welcome_email_uses_override(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("MYKRAWL_SMTP_HOST", "smtp.example.com")
     monkeypatch.setenv("MYKRAWL_SMTP_FROM", "noreply@example.com")
@@ -90,4 +126,4 @@ def test_welcome_email_uses_override(client: TestClient, monkeypatch: pytest.Mon
     assert r.status_code == 201, r.text
     msg = smtp.return_value.__enter__.return_value.send_message.call_args.args[0]
     assert msg["Subject"] == "Welcome aboard tpluser"
-    assert "Your password is tplpass-12" in msg.get_content()
+    assert "Your password is tplpass-12" in email_plain(msg)

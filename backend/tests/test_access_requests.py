@@ -9,6 +9,7 @@ from app.core.config import Settings
 from app.core.security import CSRF_COOKIE, SESSION_COOKIE, issue_session
 from app.main import app
 from app.models import ContactMessage, User
+from tests._helpers import email_plain
 
 REQUEST = {
     "name": "Example Applicant",
@@ -42,10 +43,10 @@ async def test_access_request_notifies_admin_and_requester(
     assert len(messages) == 2
     admin_email, ack_email = messages
     assert admin_email["To"] == "admin@example.com"
-    assert "applicant@example.com" in admin_email.get_content()
-    assert REQUEST["message"] in admin_email.get_content()
+    assert "applicant@example.com" in email_plain(admin_email)
+    assert REQUEST["message"] in email_plain(admin_email)
     assert ack_email["To"] == "applicant@example.com"
-    assert "pending" in ack_email.get_content().lower()
+    assert "pending" in email_plain(ack_email).lower()
     assert db.scalar(select(func.count()).select_from(ContactMessage)) == 1
     assert db.scalar(select(func.count()).select_from(User)) == 0
 
@@ -189,7 +190,7 @@ async def test_status_transitions_email_requester(
             assert msg["To"] == REQUEST["email"]
             assert msg["From"] == "noreply@example.com"
             assert "granted" in msg["Subject"].lower()
-            assert "Welcome aboard" in msg.get_content()
+            assert "Welcome aboard" in email_plain(msg)
 
             calls = relay.send_message.call_count
             again = await client.patch(
@@ -213,5 +214,5 @@ async def test_status_transitions_email_requester(
             assert reopened.json()["requester_notified"] is True
             msg = relay.send_message.call_args.args[0]
             assert "more detail" in msg["Subject"].lower()
-            assert "pending" in msg.get_content().lower()
-            assert "Tell us more about your use case" in msg.get_content()
+            assert "pending" in email_plain(msg).lower()
+            assert "Tell us more about your use case" in email_plain(msg)
