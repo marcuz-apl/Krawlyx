@@ -1,7 +1,7 @@
 """add playtrafi engine type to engines check constraint
 
 Revision ID: 7b8c9d0e1f2a
-Revises: f6a7b8c9d0e1
+Revises: 26b6110f2c02
 Create Date: 2026-09-04 08:00:00.000000
 """
 
@@ -10,7 +10,7 @@ from collections.abc import Sequence
 from alembic import op
 
 revision: str = "7b8c9d0e1f2a"
-down_revision: str | None = "f6a7b8c9d0e1"
+down_revision: str | None = "26b6110f2c02"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

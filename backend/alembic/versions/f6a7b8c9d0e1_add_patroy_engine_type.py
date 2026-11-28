@@ -1,7 +1,7 @@
 """add patroy engine type to engines check constraint
 
 Revision ID: f6a7b8c9d0e1
-Revises: e5f6a7b8c9d0
+Revises: 26b6110f2c01
 Create Date: 2026-09-03 12:00:00.000000
 """
 
@@ -10,7 +10,7 @@ from collections.abc import Sequence
 from alembic import op
 
 revision: str = "f6a7b8c9d0e1"
-down_revision: str | None = "e5f6a7b8c9d0"
+down_revision: str | None = "26b6110f2c01"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
